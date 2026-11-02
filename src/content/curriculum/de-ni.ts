@@ -86,6 +86,12 @@ const list: Competency[] = [
   { id: 'ni.su2.mensch', source: SU, until: 'grade2', subject: 'knowledge', text: 'Körperteile benennen, Sinne und ihre Leistungen' },
   { id: 'ni.su2.lebensraeume', source: SU, until: 'grade2', subject: 'knowledge', text: 'Lebensräume erkunden, typische Tiere bestimmen' },
   { id: 'ni.su2.lineare-zeit', source: SU, until: 'grade2', subject: 'knowledge', text: 'Lineare Prozesse in der Zeit darstellen (Kindheit, Wachsen)' },
+  { id: 'ni.su2.wertstoffe', source: SU, until: 'grade2', subject: 'knowledge', text: 'Wertstoffe unterscheiden, Recycling beschreiben' },
+  { id: 'ni.su2.arbeit', source: SU, until: 'grade2', subject: 'knowledge', text: 'Typische Arbeitsstätten erkunden und beschreiben' },
+  { id: 'ni.su2.stoffe', source: SU, until: 'grade2', subject: 'knowledge', text: 'Eigenschaften von Stoffen erkunden (schwimmen und sinken)' },
+  { id: 'ni.su2.schulweg', source: SU, until: 'grade2', subject: 'knowledge', text: 'Wege in der Lebenswelt erkunden (Schulweg, Mobilität)' },
+  { id: 'ni.su2.gefuehle', source: SU, until: 'grade2', subject: 'knowledge', text: 'Gefühle benennen und beschreiben' },
+  { id: 'ni.su2.zeiteinteilung', source: SU, until: 'grade2', subject: 'knowledge', text: 'Formen der Zeiteinteilung benennen (Tag, Woche, Monat)' },
   { id: 'ni.su2.natur', source: SU, until: 'grade2', subject: 'knowledge', text: 'Einfache Naturphänomene (Wind, Wetter)' },
 ];
 

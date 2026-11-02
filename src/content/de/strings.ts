@@ -364,6 +364,12 @@ export const de = {
     'german.sentence-end': 'Satzzeichen',
     'german.abc': 'Das ABC',
     'german.compound': 'Wörter zusammensetzen',
+    'knowledge.recycling': 'Müll trennen',
+    'knowledge.jobs': 'Berufe',
+    'knowledge.float': 'Schwimmt oder sinkt?',
+    'knowledge.traffic': 'Sicher unterwegs',
+    'knowledge.feelings': 'Gefühle',
+    'knowledge.calendar': 'Tage und Monate',
   } as Record<string, string>,
   challenge: {
     /** Shown (with a jingle and confetti) after a correct answer; picked at random. */

@@ -70,4 +70,11 @@ export const challengeViews: Record<string, ChallengeViewEntry> = {
   'german.sentence-end': { View: KnowledgeView as ChallengeView, ownsChoices: true },
   'german.abc': { View: KnowledgeView as ChallengeView, ownsChoices: true },
   'german.compound': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  // Wissen pack (M13e)
+  'knowledge.recycling': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'knowledge.jobs': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'knowledge.float': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'knowledge.traffic': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'knowledge.feelings': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'knowledge.calendar': { View: KnowledgeView as ChallengeView, ownsChoices: true },
 };

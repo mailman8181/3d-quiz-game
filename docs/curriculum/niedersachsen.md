@@ -228,4 +228,4 @@ the competency ids live in `src/content/curriculum/de-ni.ts`.
 | KC Ma Raum und Form, Daten und Zufall | position, symmetry, chance | Körper (cube, cuboid, sphere, cylinder), tally charts |
 | KC De Lesen | read-word, riddle, fill-word | |
 | KC De Rechtschreiben, Sprache untersuchen | missing-letters, article, plural, word-type, sentence-end, abc, compound | d/t (Auslautverhärtung), capital or small letter |
-| KC SU | animal-name, animal-baby, seasons, habitat, body, sequence | Müll trennen, Berufe, Schwimmen/Sinken, Gefühle (owner review), Verkehr |
+| KC SU | animal-name, animal-baby, seasons, habitat, body, sequence, recycling, jobs, float, traffic, feelings, calendar (M13e) | healthy food (left out on purpose), simple plans/maps, past–present–future |

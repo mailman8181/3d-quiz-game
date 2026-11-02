@@ -18,6 +18,14 @@ import { mathPattern } from './math-pattern';
 import { mathSubtraction } from './math-subtraction';
 import { mathDice } from './math-dice';
 import {
+  knowledgeCalendar,
+  knowledgeFeelings,
+  knowledgeFloat,
+  knowledgeJobs,
+  knowledgeRecycling,
+  knowledgeTraffic,
+} from './wissen';
+import {
   germanAbc,
   germanArticle,
   germanCompound,
@@ -99,6 +107,12 @@ export const challengeTypes: readonly ChallengeType[] = [
   knowledgeHabitat,
   knowledgeBody,
   knowledgeSequence,
+  knowledgeRecycling,
+  knowledgeJobs,
+  knowledgeFloat,
+  knowledgeTraffic,
+  knowledgeFeelings,
+  knowledgeCalendar,
 ] as ChallengeType[];
 
 export function getChallengeType(id: string): ChallengeType {

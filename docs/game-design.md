@@ -155,6 +155,20 @@ instruction is spoken.
 | Das ABC | "Welcher Buchstabe kommt nach P?" · which word comes first? | 1. → 2. Kl. |
 | Wörter zusammensetzen | 🔥 + 🛡️ "Feuer + Wehr" → 🚒 | 1. → 2. Kl. |
 
+**Wissen pack (M13e)** (KC Sachunterricht, Ende Jg. 2; Orientierungsplan Natur und Lebenswelt)
+
+| Type | Example | Stages |
+|---|---|---|
+| Müll trennen | 🍌 → Biotonne / Papiertonne / Gelbe Tonne (+ Glas, Restmüll later) | Vorschule → 2. Kl. |
+| Berufe | 🩺 "Wer braucht das bei der Arbeit?" → Ärztin oder Arzt … (both forms) | Kita → 2. Kl. |
+| Schwimmt oder sinkt? | "Tippe auf das, was im Wasser schwimmt!" 🦆 / 🪨 / 🔑 | Kita → 2. Kl. |
+| Sicher unterwegs | "Die Fußgängerampel ist rot. Was machst du?" · helmet, look left and right, Warnweste | Vorschule → 2. Kl. |
+| Gefühle | 😢 → traurig / fröhlich / wütend · "Mia hat ihr Eis fallen lassen." → faces | Kita → 2. Kl. |
+| Tage und Monate | "Welcher Tag kommt nach Freitag?" → months | Vorschule → 2. Kl. |
+
+Feelings: every explanation adds "Alle Gefühle sind in Ordnung" / "Das ist in Ordnung"; situations
+are everyday and blame-free. Healthy food is left out on purpose (no good/bad food judgements).
+
 Plus/Minus above 20 is spoken generically ("Rechne aus! Wie viel ist das?" / "Das Ergebnis ist 39.")
 with the equation on screen: one clip per sentence (ADR-0007) would need thousands of clips for every
 pair up to 100. Reading two-digit numbers is itself a grade-2 goal.
@@ -200,6 +214,7 @@ German challenges (planned next), more worlds/scenarios, multiplayer, teacher mo
 cloud sync, other languages, speech-recognition answers.
 
 ## Changelog
+- v1.24 (2026-11-02): M13e — Wissen pack, 6 new types following the KC Sachunterricht (§6.5).
 - v1.23 (2026-11-01): M13d — grade 1–2 German pack: 9 new types (§6.5); word bank gets genders and plurals.
 - v1.22 (2026-11-01): M13c — grade 1–2 math pack: 9 new types and Plus/Minus up to 100 (§6.5).
 - v1.21 (2026-11-01): M13b — preschool pack, 10 new challenge types (§6.5), picture- and sound-based, tagged for Kita/Vorschule (ADR-0009).
