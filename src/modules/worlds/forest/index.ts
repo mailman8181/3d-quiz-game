@@ -56,6 +56,13 @@ export const forestWorld: WorldTheme = {
       'german.sentence-end',
       'german.abc',
       'german.compound',
+      // Wissen pack (M13e)
+      'knowledge.recycling',
+      'knowledge.jobs',
+      'knowledge.float',
+      'knowledge.traffic',
+      'knowledge.feelings',
+      'knowledge.calendar',
     ],
   },
   colors: {

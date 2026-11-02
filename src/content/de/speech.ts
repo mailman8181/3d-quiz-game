@@ -46,6 +46,7 @@ import {
   ADJECTIVES,
   withArticle,
 } from './grammar';
+import { BINS, FEELING_SITUATIONS, FEELINGS, FLOAT_ITEMS, JOBS, MONTHS, TRAFFIC_QUESTIONS, WASTE_ITEMS, WEEKDAYS } from './wissen';
 import { ALL_CLOCK_TIMES, clockSpoken, type ClockMinute } from './clock';
 import { timesPairs } from '../../modules/challenges/math-times';
 
@@ -125,6 +126,18 @@ const WORD_TYPE_NAMES: Record<string, string> = {
   adjective: 'ein Adjektiv, ein Wiewort',
 };
 const abcLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+// Wissen pack helpers (M13e).
+const wasteSentence = (id: string | number | undefined) => {
+  const item = WASTE_ITEMS.find((w) => w.id === id);
+  const bin = BINS.find((b) => b.id === item?.bin);
+  return item && bin ? `${item.name} gehört ${bin.phrase}.` : '';
+};
+const floatItem = (id: string | number | undefined) => FLOAT_ITEMS.find((i) => i.id === id);
+const feelingWord = (id: string | number | undefined) => FEELINGS.find((f) => f.id === id)?.word ?? '';
+const situation = (id: string | number | undefined) => FEELING_SITUATIONS.find((s) => s.id === id);
+const cyclicVariants = (list: readonly string[], ask: 'after' | 'before') =>
+  list.map((name, i) => ({ name, answer: list[(i + (ask === 'after' ? 1 : -1) + list.length) % list.length]! }));
 
 const colorShapePairs = () => COLORS.filter((c) => c.adj).flatMap((c) => SHAPES.map((s) => ({ color: c.id, shape: s.id })));
 
@@ -491,6 +504,60 @@ export const speechTemplates: Record<string, Template> = {
     },
     variants: () => COMPOUNDS.map((c) => ({ compound: c.id })),
   },
+  // ── Wissen pack (M13e) ──
+  'knowledge.recycling.prompt': {
+    render: (p) => `In welche Tonne gehört ${WASTE_ITEMS.find((w) => w.id === p.item)?.name.replace(/^./, (c) => c.toLowerCase()) ?? ''}?`,
+    variants: () => WASTE_ITEMS.map((w) => ({ item: w.id })),
+  },
+  'knowledge.recycling.explain': { render: (p) => wasteSentence(p.item), variants: () => WASTE_ITEMS.map((w) => ({ item: w.id })) },
+  'knowledge.jobs.prompt': { render: () => 'Wer braucht das bei der Arbeit?', variants: none },
+  'knowledge.jobs.explain': {
+    render: (p) => JOBS.find((j) => j.id === p.job)?.explain ?? '',
+    variants: () => JOBS.map((j) => ({ job: j.id })),
+  },
+  'knowledge.float.prompt-floats': { render: () => 'Tippe auf das, was im Wasser schwimmt!', variants: none },
+  'knowledge.float.prompt-sinks': { render: () => 'Tippe auf das, was im Wasser untergeht!', variants: none },
+  'knowledge.float.explain-floats': {
+    render: (p) => `${capitalize(floatItem(p.item)?.name ?? '')} schwimmt oben.`,
+    variants: () => FLOAT_ITEMS.filter((i) => i.floats).map((i) => ({ item: i.id })),
+  },
+  'knowledge.float.explain-sinks': {
+    render: (p) => `${capitalize(floatItem(p.item)?.name ?? '')} geht unter.`,
+    variants: () => FLOAT_ITEMS.filter((i) => !i.floats).map((i) => ({ item: i.id })),
+  },
+  'knowledge.traffic.prompt': {
+    render: (p) => TRAFFIC_QUESTIONS.find((q) => q.id === p.q)?.question ?? '',
+    variants: () => TRAFFIC_QUESTIONS.map((q) => ({ q: q.id })),
+  },
+  'knowledge.traffic.explain': {
+    render: (p) => TRAFFIC_QUESTIONS.find((q) => q.id === p.q)?.explain ?? '',
+    variants: () => TRAFFIC_QUESTIONS.map((q) => ({ q: q.id })),
+  },
+  'knowledge.feelings.prompt-face': { render: () => 'Wie fühlt sich das Kind?', variants: none },
+  'knowledge.feelings.explain-face': {
+    render: (p) => `Das Kind ist ${feelingWord(p.feeling)}. Alle Gefühle sind in Ordnung.`,
+    variants: () => FEELINGS.map((f) => ({ feeling: f.id })),
+  },
+  'knowledge.feelings.prompt-situation': {
+    render: (p) => `${situation(p.situation)?.text ?? ''} Wie fühlt sich das Kind wohl?`,
+    variants: () => FEELING_SITUATIONS.map((s) => ({ situation: s.id })),
+  },
+  'knowledge.feelings.explain-situation': {
+    render: (p) => `Das Kind ist vielleicht ${feelingWord(situation(p.situation)?.feeling)}. Das ist in Ordnung.`,
+    variants: () => FEELING_SITUATIONS.map((s) => ({ situation: s.id })),
+  },
+  'knowledge.calendar.prompt-day-after': { render: (p) => `Welcher Tag kommt nach ${p.name}?`, variants: () => WEEKDAYS.map((name) => ({ name })) },
+  'knowledge.calendar.prompt-day-before': { render: (p) => `Welcher Tag kommt vor ${p.name}?`, variants: () => WEEKDAYS.map((name) => ({ name })) },
+  'knowledge.calendar.prompt-month-after': { render: (p) => `Welcher Monat kommt nach ${p.name}?`, variants: () => MONTHS.map((name) => ({ name })) },
+  'knowledge.calendar.prompt-month-before': { render: (p) => `Welcher Monat kommt vor ${p.name}?`, variants: () => MONTHS.map((name) => ({ name })) },
+  'knowledge.calendar.explain-after': {
+    render: (p) => `Nach ${p.name} kommt ${p.answer}.`,
+    variants: () => [...cyclicVariants(WEEKDAYS, 'after'), ...cyclicVariants(MONTHS, 'after')],
+  },
+  'knowledge.calendar.explain-before': {
+    render: (p) => `Vor ${p.name} kommt ${p.answer}.`,
+    variants: () => [...cyclicVariants(WEEKDAYS, 'before'), ...cyclicVariants(MONTHS, 'before')],
+  },
   'feedback.tryAgain': { render: () => 'Fast! Versuch es nochmal.', variants: none },
   'feedback.hint': { render: () => 'Ich helfe dir. Schau genau hin!', variants: none },
   'feedback.skipQuestion': { render: () => 'Möchtest du diese Aufgabe wirklich überspringen?', variants: none },
@@ -545,6 +612,14 @@ export const staticSpokenTexts: readonly string[] = [
   ...ADJECTIVES,
   ...GAP_SENTENCES.flatMap((s) => s.options),
   ...COMPOUNDS.map((c) => c.word),
+  // Wissen pack: speaker buttons on answer cards.
+  ...BINS.map((b) => b.name),
+  ...JOBS.map((j) => j.name),
+  ...FLOAT_ITEMS.map((i) => i.name),
+  ...TRAFFIC_QUESTIONS.flatMap((q) => [q.answer.label, ...q.distractors.map((d) => d.label)]),
+  ...FEELINGS.map((f) => f.word),
+  ...WEEKDAYS,
+  ...MONTHS,
 ];
 
 /** Every sentence the game can speak; input for the audio clip generator. */
