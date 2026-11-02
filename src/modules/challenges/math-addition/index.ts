@@ -1,5 +1,5 @@
 import { numberChoices } from '../../../core/challenges/choices';
-import { type ChallengeType, lv } from '../../../core/challenges/types';
+import { type ChallengeInstance, type ChallengeType, lv } from '../../../core/challenges/types';
 import type { Rng } from '../../../core/rng';
 import { COUNT_OBJECTS, type CountObject } from '../objects';
 
@@ -49,7 +49,41 @@ const LEVELS: readonly Level[] = [
     choices: 4,
     max: 20,
   },
+  // 6–8 (M13c, KC Ma Ende Jg. 2 "bis 100"): ZE + E without carry (34 + 5), ZE + Z (34 + 20),
+  // ZE + E with carry (37 + 5). Spoken generically; the equation is shown (see speech).
+  {
+    pick: (rng) => {
+      const tens = rng.int(2, 8) * 10;
+      const ones = rng.int(1, 7);
+      return [tens + ones, rng.int(1, 9 - ones)];
+    },
+    pictures: false,
+    choices: 4,
+    max: 99,
+  },
+  {
+    pick: (rng) => {
+      const a = rng.int(2, 7) * 10 + rng.int(1, 9);
+      return [a, rng.int(1, Math.floor((99 - a) / 10)) * 10];
+    },
+    pictures: false,
+    choices: 4,
+    max: 99,
+  },
+  {
+    pick: (rng) => {
+      const ones = rng.int(2, 9);
+      const a = rng.int(2, 8) * 10 + ones;
+      return [a, rng.int(10 - ones, 9)];
+    },
+    pictures: false,
+    choices: 4,
+    max: 99,
+  },
 ];
+
+/** Levels from here on use the generic "up to 100" sentences (ADR-0007 clip budget). */
+export const HUNDRED_FROM_LEVEL = 6;
 
 /** Two positive numbers whose sum is in [minSum, maxSum]. */
 function pair(rng: Rng, minSum: number, maxSum: number): [number, number] {
@@ -69,8 +103,11 @@ export const mathAddition: ChallengeType<AdditionData> = {
     lv('grade1', 'grade1', 'ni.ma2.addition', 'ni.ma2.einspluseins'),
     lv('grade1', 'grade2', 'ni.ma2.einspluseins'),
     lv('grade1', 'grade2', 'ni.ma2.einspluseins'),
+    lv('grade2', 'grade2', 'ni.ma2.addition-100'),
+    lv('grade2', undefined, 'ni.ma2.addition-100'),
+    lv('grade2', undefined, 'ni.ma2.addition-100'),
   ],
-  generate({ rng, level }) {
+  generate({ rng, level }): ChallengeInstance<AdditionData> {
     const cfg = LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1]!;
     const [a, b] = cfg.pick(rng);
     const sum = a + b;
@@ -82,8 +119,12 @@ export const mathAddition: ChallengeType<AdditionData> = {
       data: { a, b, sum, object, showPictures: cfg.pictures },
       choices,
       correctChoiceId,
-      prompt: { key: 'math.addition.prompt', params: { a, b } },
-      explanation: { key: 'math.addition.explain', params: { a, b, sum } },
+      ...(level >= HUNDRED_FROM_LEVEL
+        ? { prompt: { key: 'math.calc100.prompt' }, explanation: { key: 'math.calc100.explain', params: { n: sum } } }
+        : {
+            prompt: { key: 'math.addition.prompt', params: { a, b } },
+            explanation: { key: 'math.addition.explain', params: { a, b, sum } },
+          }),
     };
   },
 };

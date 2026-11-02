@@ -211,3 +211,21 @@ this matches the Jg. 1–2 topics at a simpler level.
 - Pflanzenteile
 - Verkehrssicherheit
 
+
+## 7. Coverage after M13 (2026-11-01)
+
+What the game covers after the content packs. Every level is tagged in code (`levelInfo`), and
+the competency ids live in `src/content/curriculum/de-ni.ts`.
+
+| Area | Covered by | Still open |
+|---|---|---|
+| OP Mengen, Zählen, Muster, Formen, Größen, Raumlage | math.count, compare, dice, neighbors, pattern, sizes, position, colors (shapes) | Verteilen (fair share) |
+| A2 phonologische Bewusstheit | german.rhyme, syllables, syllable-blend, same-start, initial-sound | single sounds: Lautsynthese, Endlaut (needs the M12 voice) |
+| OP Wortschatz | german.opposites, knowledge.odd-one-out | Oberbegriffe as their own type |
+| KC Ma Zahlen bis 100, Stellenwert, Zerlegen, Doppelt/Hälfte, gerade/ungerade | find-number, neighbors, place-value, number-bonds, double-half, even-odd | |
+| KC Ma Rechnen | addition/subtraction (to 20, then to 100), times (Kernaufgaben) | Division as sharing out ("Aufteilen und Verteilen") |
+| KC Ma Größen | money, clock, sizes | lengths (cm, m) |
+| KC Ma Raum und Form, Daten und Zufall | position, symmetry, chance | Körper (cube, cuboid, sphere, cylinder), tally charts |
+| KC De Lesen | read-word, riddle, fill-word | |
+| KC De Rechtschreiben, Sprache untersuchen | missing-letters, article, plural, word-type, sentence-end, abc, compound | d/t (Auslautverhärtung), capital or small letter |
+| KC SU | animal-name, animal-baby, seasons, habitat, body, sequence | Müll trennen, Berufe, Schwimmen/Sinken, Gefühle (owner review), Verkehr |

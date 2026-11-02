@@ -1,5 +1,4 @@
 import { type ChallengeInstance, type ChallengeType, lv } from '../../../core/challenges/types';
-import type { Rng } from '../../../core/rng';
 import {
   ANIMALS,
   BABIES,
@@ -11,15 +10,8 @@ import {
   WEATHER_ITEMS,
   WEATHER_QUESTIONS,
 } from '../../../content/de/knowledge';
-import { quizChoices, type QuizData, type QuizOption } from './common';
+import { arrange, clampLevel, quizChoices, type QuizData, type QuizOption } from './common';
 
-const clampLevel = (level: number, max: number) => Math.min(Math.max(level, 1), max);
-
-/** Puts the correct option among distractors at a random position. */
-function arrange<T>(rng: Rng, correct: T, distractors: readonly T[]): { options: T[]; correctIndex: number } {
-  const options = rng.shuffle([correct, ...distractors]);
-  return { options, correctIndex: options.indexOf(correct) };
-}
 
 /** "Wie heißt dieses Tier?" — picture → tap the name (names are read out by 🔊). */
 export const knowledgeAnimalName: ChallengeType<QuizData> = {

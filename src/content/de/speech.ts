@@ -16,6 +16,38 @@ import {
   WEATHER_ITEMS,
   WEATHER_QUESTIONS,
 } from './knowledge';
+import {
+  BODY_PARTS,
+  bodyAccusative,
+  bodyNominative,
+  HABITAT_ANIMALS,
+  HABITATS,
+  OPPOSITE_WORDS,
+  POSITION_OBJECTS,
+  POSITION_PHRASES,
+  POSITIONS,
+  SENSES,
+  SEQUENCES,
+  SIZE_ITEMS,
+  sizeAccusative,
+  sizeNominative,
+  type Position,
+} from './preschool';
+import {
+  COMPOUNDS,
+  END_SENTENCES,
+  GAP_SENTENCES,
+  gapSentence,
+  GAP_WORDS,
+  NOUNS,
+  PLURAL_NOUNS,
+  RIDDLES,
+  VERBS,
+  ADJECTIVES,
+  withArticle,
+} from './grammar';
+import { ALL_CLOCK_TIMES, clockSpoken, type ClockMinute } from './clock';
+import { timesPairs } from '../../modules/challenges/math-times';
 
 /** German names of countable objects: [singular, plural]. */
 export const objectNames: Record<CountObject, readonly [string, string]> = {
@@ -50,6 +82,50 @@ const additionPairs = () => range(1, 19).flatMap((a) => range(1, 20 - a).map((b)
 const color = (id: string | number | undefined) => COLORS.find((c) => c.id === id)!;
 const shape = (id: string | number | undefined) => SHAPES.find((s) => s.id === id)!;
 const colorName = (id: string | number | undefined) => color(id)?.name ?? '';
+// Preschool pack helpers (M13b).
+const soundWords = () => WORDS.filter((w) => w.initial && WORDS.some((o) => o.id !== w.id && o.initial === w.initial));
+const syllableWords = () => WORDS.filter((w) => w.syllables.length >= 2);
+/** Spoken syllables where written hyphenation sounds wrong ("Schne-cke" is spoken "Schnek-ke"). */
+const SPOKEN_SYLLABLES: Record<string, string> = { Schnecke: 'Schnek, ke' };
+const syllablesOf = (word: string | number | undefined) =>
+  SPOKEN_SYLLABLES[String(word)] ?? WORDS.find((w) => w.word === word)?.syllables.join(', ') ?? '';
+const sizeItem = (id: string | number | undefined) => SIZE_ITEMS.find((i) => i.id === id)!;
+const bigSmall = (ask: string | number | undefined) => (ask === 'small' ? 'small' : 'big');
+const sizeVariants = () => SIZE_ITEMS.flatMap((i) => ['big', 'small'].map((ask) => ({ item: i.id, ask })));
+const bodyPart = (id: string | number | undefined) => BODY_PARTS.find((b) => b.id === id)!;
+const habitatSentence = (id: string | number | undefined) => {
+  const animal = HABITAT_ANIMALS.find((a) => a.id === id);
+  const home = HABITATS.find((h) => h.id === animal?.habitat);
+  return animal && home ? `${capitalize(animal.name)} lebt ${home.phrase}.` : '';
+};
+const positionSentence = (p: Params) => {
+  const object = POSITION_OBJECTS.find((o) => o.id === p.object);
+  return `${object?.name ?? ''} ist ${POSITION_PHRASES[p.position as Position] ?? ''}.`;
+};
+const positionVariants = () => POSITION_OBJECTS.flatMap((o) => POSITIONS.map((position) => ({ object: o.id, position })));
+
+// Grade 1–2 math pack helpers (M13c).
+const bondVariants = () => [
+  ...range(3, 10).flatMap((total) => range(1, total - 1).map((known) => ({ total, known, answer: total - known }))),
+  ...range(1, 9).map((t) => ({ total: 100, known: t * 10, answer: 100 - t * 10 })),
+];
+const doubleNs = () => [...range(1, 10), 20, 30, 40, 50];
+const halfNs = () => [...range(1, 10).map((n) => n * 2), 40, 60, 80, 100];
+const onesPhrase = (ones: number) => (ones === 0 ? 'keine Einer' : ones === 1 ? 'ein Einer' : `${ones} Einer`);
+const tensPhrase = (tens: number) => (tens === 1 ? 'ein Zehner' : `${tens} Zehner`);
+const chanceColours = () => Object.keys(de.chance.colours).map((colour) => ({ colour }));
+const colourWord = (c: string | number | undefined) => de.chance.colours[String(c)] ?? '';
+
+// Grade 1–2 German pack helpers (M13d).
+const noun = (word: string | number | undefined) => NOUNS.find((n) => n.word === word)!;
+const pluralNouns = () => PLURAL_NOUNS;
+const WORD_TYPE_NAMES: Record<string, string> = {
+  noun: 'ein Nomen, ein Namenwort',
+  verb: 'ein Verb, ein Tunwort',
+  adjective: 'ein Adjektiv, ein Wiewort',
+};
+const abcLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
 const colorShapePairs = () => COLORS.filter((c) => c.adj).flatMap((c) => SHAPES.map((s) => ({ color: c.id, shape: s.id })));
 
 /** Speech templates referenced by `SpeechLine.key`. */
@@ -173,6 +249,248 @@ export const speechTemplates: Record<string, Template> = {
         ODD_CATEGORIES.filter((o) => o.id !== cat.id).flatMap((o) => o.items.map((i) => ({ odd: i.id, category: cat.id }))),
       ),
   },
+  // ── Preschool pack (M13b) ──
+  'german.same-start.prompt': {
+    render: (p) => `Was fängt genauso an wie ${p.word}?`,
+    variants: () => soundWords().map((w) => ({ word: w.word })),
+  },
+  'german.same-start.explain': {
+    render: (p) => `${p.word} und ${p.match} fangen gleich an.`,
+    variants: () =>
+      soundWords().flatMap((a) =>
+        WORDS.filter((b) => b.initial === a.initial && b.id !== a.id).map((b) => ({ word: a.word, match: b.word })),
+      ),
+  },
+  'german.syllable-blend.prompt': {
+    render: (p) => `Hör gut zu: ${syllablesOf(p.word)}. Welches Bild ist das?`,
+    variants: () => syllableWords().map((w) => ({ word: w.word })),
+  },
+  'german.syllable-blend.explain': {
+    render: (p) => `${syllablesOf(p.word)}: ${p.word}.`,
+    variants: () => syllableWords().map((w) => ({ word: w.word })),
+  },
+  'german.opposites.prompt': {
+    render: (p) => `Was ist das Gegenteil von ${p.word}?`,
+    variants: () => OPPOSITE_WORDS.map((w) => ({ word: w.word })),
+  },
+  'german.opposites.explain': {
+    render: (p) => `Das Gegenteil von ${p.word} ist ${p.opposite}.`,
+    variants: () => OPPOSITE_WORDS.map((w) => ({ word: w.word, opposite: w.partner.word })),
+  },
+  'math.sizes.prompt': {
+    render: (p) => `Tippe auf ${sizeAccusative(sizeItem(p.item), bigSmall(p.ask))}!`,
+    variants: sizeVariants,
+  },
+  'math.sizes.explain': {
+    render: (p) => `Schau, das ist ${sizeNominative(sizeItem(p.item), bigSmall(p.ask))}.`,
+    variants: sizeVariants,
+  },
+  'knowledge.habitat.prompt': { render: () => 'Wo lebt das Tier?', variants: none },
+  'knowledge.habitat.explain': {
+    render: (p) => habitatSentence(p.animal),
+    variants: () => HABITAT_ANIMALS.map((a) => ({ animal: a.id })),
+  },
+  'knowledge.body.prompt': {
+    render: (p) => `Tippe auf ${bodyAccusative(bodyPart(p.part))}!`,
+    variants: () => BODY_PARTS.map((b) => ({ part: b.id })),
+  },
+  'knowledge.body.explain': {
+    render: (p) => `Schau, das ist ${bodyNominative(bodyPart(p.part))}.`,
+    variants: () => BODY_PARTS.map((b) => ({ part: b.id })),
+  },
+  'knowledge.sense.prompt': {
+    render: (p) => SENSES.find((s) => s.id === p.sense)?.question ?? '',
+    variants: () => SENSES.map((s) => ({ sense: s.id })),
+  },
+  'knowledge.sense.explain': {
+    render: (p) => SENSES.find((s) => s.id === p.sense)?.answer ?? '',
+    variants: () => SENSES.map((s) => ({ sense: s.id })),
+  },
+  'knowledge.sequence.prompt': {
+    render: (p) => (p.ask === 'last' ? 'Was kommt zuletzt?' : p.ask === 'middle' ? 'Was kommt in der Mitte?' : 'Was kommt zuerst?'),
+    variants: () => ['first', 'last', 'middle'].map((ask) => ({ ask })),
+  },
+  'knowledge.sequence.explain': {
+    render: (p) => {
+      const steps = SEQUENCES.find((q) => q.id === p.sequence)?.steps;
+      return steps ? `Zuerst ${steps[0].name}, dann ${steps[1].name}, dann ${steps[2].name}.` : '';
+    },
+    variants: () => SEQUENCES.map((q) => ({ sequence: q.id })),
+  },
+  'math.dice.prompt': { render: () => 'Wie viele Punkte siehst du?', variants: none },
+  'math.dice.explain': {
+    render: (p) => (p.n === 1 ? 'Das ist ein Punkt.' : `Das sind ${p.n} Punkte.`),
+    variants: () => range(1, 20).map((n) => ({ n })),
+  },
+  'math.neighbors.prompt-after': { render: (p) => `Welche Zahl kommt nach ${p.n}?`, variants: () => range(1, 99).map((n) => ({ n })) },
+  'math.neighbors.prompt-before': { render: (p) => `Welche Zahl kommt vor ${p.n}?`, variants: () => range(2, 100).map((n) => ({ n })) },
+  'math.neighbors.explain-after': {
+    render: (p) => `Nach ${p.n} kommt ${p.m}.`,
+    variants: () => range(1, 99).map((n) => ({ n, m: n + 1 })),
+  },
+  'math.neighbors.explain-before': {
+    render: (p) => `Vor ${p.n} kommt ${p.m}.`,
+    variants: () => range(2, 100).map((n) => ({ n, m: n - 1 })),
+  },
+  'math.position.prompt': { render: (p) => `Tippe auf das Bild: ${positionSentence(p)}`, variants: positionVariants },
+  'math.position.explain': { render: (p) => `Schau: ${positionSentence(p)}`, variants: positionVariants },
+  // ── Grade 1–2 math pack (M13c) ──
+  'math.calc100.prompt': { render: () => 'Rechne aus! Wie viel ist das?', variants: none },
+  'math.calc100.explain': { render: (p) => `Das Ergebnis ist ${p.n}.`, variants: () => range(1, 99).map((n) => ({ n })) },
+  'math.number-bonds.prompt': {
+    render: (p) => `${p.total} ist ${p.known} und wie viel?`,
+    variants: () => bondVariants().map(({ total, known }) => ({ total, known })),
+  },
+  'math.number-bonds.explain': { render: (p) => `${p.total} ist ${p.known} und ${p.answer}.`, variants: bondVariants },
+  'math.double-half.prompt-double': { render: (p) => `Was ist das Doppelte von ${p.n}?`, variants: () => doubleNs().map((n) => ({ n })) },
+  'math.double-half.explain-double': {
+    render: (p) => `Das Doppelte von ${p.n} ist ${p.m}.`,
+    variants: () => doubleNs().map((n) => ({ n, m: n * 2 })),
+  },
+  'math.double-half.prompt-half': { render: (p) => `Was ist die Hälfte von ${p.n}?`, variants: () => halfNs().map((n) => ({ n })) },
+  'math.double-half.explain-half': {
+    render: (p) => `Die Hälfte von ${p.n} ist ${p.m}.`,
+    variants: () => halfNs().map((n) => ({ n, m: n / 2 })),
+  },
+  'math.place-value.prompt': { render: () => 'Welche Zahl ist das? Zähle die Zehner und die Einer.', variants: none },
+  'math.place-value.prompt-tens': { render: (p) => `Wie viele Zehner hat die Zahl ${p.n}?`, variants: () => range(21, 99).map((n) => ({ n })) },
+  'math.place-value.explain': {
+    render: (p) => {
+      const n = Number(p.n);
+      return `Das ist die ${n}: ${tensPhrase(Math.floor(n / 10))} und ${onesPhrase(n % 10)}.`;
+    },
+    variants: () => range(11, 99).map((n) => ({ n })),
+  },
+  'math.even-odd.prompt-even': { render: () => 'Tippe auf die gerade Zahl!', variants: none },
+  'math.even-odd.prompt-odd': { render: () => 'Tippe auf die ungerade Zahl!', variants: none },
+  'math.even-odd.explain-even': { render: (p) => `${p.n} ist gerade.`, variants: () => range(1, 50).map((n) => ({ n: n * 2 })) },
+  'math.even-odd.explain-odd': { render: (p) => `${p.n} ist ungerade.`, variants: () => range(0, 49).map((n) => ({ n: n * 2 + 1 })) },
+  'math.times.prompt': { render: (p) => `Was ist ${p.a} mal ${p.b}?`, variants: timesPairs },
+  'math.times.explain': {
+    render: (p) => `${p.a} mal ${p.b} ist ${p.p}.`,
+    variants: () => timesPairs().map(({ a, b }) => ({ a, b, p: a * b })),
+  },
+  'math.money.prompt': { render: () => 'Wie viel Geld ist das?', variants: none },
+  'math.money.explain-euro': {
+    render: (p) => (p.n === 1 ? 'Das ist ein Euro.' : `Das sind ${p.n} Euro.`),
+    variants: () => range(1, 20).map((n) => ({ n })),
+  },
+  'math.money.explain-cent': {
+    render: (p) => (p.n === 100 ? 'Das sind 100 Cent, also ein Euro.' : `Das sind ${p.n} Cent.`),
+    variants: () => range(1, 10).map((n) => ({ n: n * 10 })),
+  },
+  'math.clock.prompt': { render: () => 'Wie spät ist es?', variants: none },
+  'math.clock.explain': {
+    render: (p) => `Es ist ${clockSpoken(Number(p.hour), Number(p.minute) as ClockMinute)}.`,
+    variants: () => ALL_CLOCK_TIMES,
+  },
+  'math.symmetry.prompt': { render: () => 'Welche Hälfte passt? Das Bild soll aussehen wie im Spiegel.', variants: none },
+  'math.symmetry.explain': { render: () => 'So sieht es aus wie im Spiegel.', variants: none },
+  'math.chance.prompt': {
+    render: (p) => `Du ziehst ohne hinzusehen eine Kugel. Ist es sicher, möglich oder unmöglich, dass sie ${colourWord(p.colour)} ist?`,
+    variants: chanceColours,
+  },
+  'math.chance.explain-certain': { render: (p) => `Es ist sicher, denn alle Kugeln sind ${colourWord(p.colour)}.`, variants: chanceColours },
+  'math.chance.explain-possible': { render: (p) => `Es ist möglich, denn manche Kugeln sind ${colourWord(p.colour)}.`, variants: chanceColours },
+  'math.chance.explain-impossible': { render: (p) => `Es ist unmöglich, denn keine Kugel ist ${colourWord(p.colour)}.`, variants: chanceColours },
+  // ── Grade 1–2 German pack (M13d) ──
+  'german.article.prompt': {
+    render: (p) => `Der, die oder das? Welcher Begleiter passt zu ${p.word}?`,
+    variants: () => NOUNS.map((n) => ({ word: n.word })),
+  },
+  'german.article.explain': {
+    render: (p) => `Es heißt ${withArticle(noun(p.word))}.`,
+    variants: () => NOUNS.map((n) => ({ word: n.word })),
+  },
+  'german.plural.prompt': {
+    render: (p) => `Wie heißt die Mehrzahl von ${p.word}?`,
+    variants: () => pluralNouns().map((n) => ({ word: n.word })),
+  },
+  'german.plural.explain': {
+    render: (p) => `Es heißt ${withArticle(noun(p.word))} und die ${noun(p.word).plural}.`,
+    variants: () => pluralNouns().map((n) => ({ word: n.word })),
+  },
+  'german.word-type.prompt': {
+    render: (p) => `Welches Wort ist ${WORD_TYPE_NAMES[String(p.type)] ?? ''}?`,
+    variants: () => Object.keys(WORD_TYPE_NAMES).map((type) => ({ type })),
+  },
+  'german.word-type.explain': {
+    render: (p) => `${p.word} ist ${WORD_TYPE_NAMES[String(p.type)] ?? ''}.`,
+    variants: () => [
+      ...NOUNS.map((n) => ({ type: 'noun', word: n.word })),
+      ...VERBS.map((word) => ({ type: 'verb', word })),
+      ...ADJECTIVES.map((word) => ({ type: 'adjective', word })),
+    ],
+  },
+  'german.missing-letters.prompt': {
+    render: (p) => `Welche Buchstaben fehlen? Hör genau: ${p.word}.`,
+    variants: () => [...new Set(GAP_WORDS.map((g) => g.word.word))].map((word) => ({ word })),
+  },
+  'german.missing-letters.explain': {
+    render: (p) => `So schreibt man ${p.word}.`,
+    variants: () => [...new Set(GAP_WORDS.map((g) => g.word.word))].map((word) => ({ word })),
+  },
+  'german.riddle.prompt': { render: () => 'Lies das Rätsel. Was ist das?', variants: none },
+  'german.riddle.explain': {
+    render: (p) => {
+      const r = RIDDLES.find((x) => x.id === p.riddle);
+      return r ? `Die Lösung ist: ${withArticle(noun(r.answer))}.` : '';
+    },
+    variants: () => RIDDLES.map((r) => ({ riddle: r.id })),
+  },
+  'german.fill-word.prompt': { render: () => 'Lies den Satz. Welches Wort passt in die Lücke?', variants: none },
+  'german.fill-word.explain': {
+    render: (p) => {
+      const s = GAP_SENTENCES.find((x) => x.id === p.sentence);
+      return s ? gapSentence(s) : '';
+    },
+    variants: () => GAP_SENTENCES.map((s) => ({ sentence: s.id })),
+  },
+  'german.sentence-end.prompt': { render: () => 'Lies den Satz. Welches Zeichen gehört an das Ende?', variants: none },
+  'german.sentence-end.explain': {
+    render: (p) => {
+      const s = END_SENTENCES.find((x) => x.id === p.sentence);
+      if (!s) return '';
+      const name = s.mark === '?' ? 'ein Fragezeichen' : s.mark === '!' ? 'ein Ausrufezeichen' : 'ein Punkt';
+      return `${s.text}${s.mark} Hier gehört ${name} hin.`;
+    },
+    variants: () => END_SENTENCES.map((s) => ({ sentence: s.id })),
+  },
+  'german.abc.prompt-after': {
+    render: (p) => `Welcher Buchstabe kommt im ABC nach ${p.letter}?`,
+    variants: () => abcLetters.slice(0, 25).map((letter) => ({ letter })),
+  },
+  'german.abc.prompt-before': {
+    render: (p) => `Welcher Buchstabe kommt im ABC vor ${p.letter}?`,
+    variants: () => abcLetters.slice(1).map((letter) => ({ letter })),
+  },
+  'german.abc.explain-after': {
+    render: (p) => `Nach ${p.letter} kommt ${p.answer}.`,
+    variants: () => abcLetters.slice(0, 25).map((letter, i) => ({ letter, answer: abcLetters[i + 1]! })),
+  },
+  'german.abc.explain-before': {
+    render: (p) => `Vor ${p.letter} kommt ${p.answer}.`,
+    variants: () => abcLetters.slice(1).map((letter, i) => ({ letter, answer: abcLetters[i]! })),
+  },
+  'german.abc.prompt-words': { render: () => 'Welches Wort kommt im ABC zuerst?', variants: none },
+  'german.abc.explain-words': {
+    render: (p) => `${p.word} kommt im ABC zuerst.`,
+    variants: () => NOUNS.map((n) => ({ word: n.word })),
+  },
+  'german.compound.prompt': {
+    render: (p) => {
+      const c = COMPOUNDS.find((x) => x.id === p.compound);
+      return c ? `${c.a.word} und ${c.b.word}. Welches Wort entsteht?` : '';
+    },
+    variants: () => COMPOUNDS.map((c) => ({ compound: c.id })),
+  },
+  'german.compound.explain': {
+    render: (p) => {
+      const c = COMPOUNDS.find((x) => x.id === p.compound);
+      return c ? `${c.a.word} und ${c.b.word}: ${c.word}.` : '';
+    },
+    variants: () => COMPOUNDS.map((c) => ({ compound: c.id })),
+  },
   'feedback.tryAgain': { render: () => 'Fast! Versuch es nochmal.', variants: none },
   'feedback.hint': { render: () => 'Ich helfe dir. Schau genau hin!', variants: none },
   'feedback.skipQuestion': { render: () => 'Möchtest du diese Aufgabe wirklich überspringen?', variants: none },
@@ -215,6 +533,18 @@ export const staticSpokenTexts: readonly string[] = [
   ...SEASONS.map((s) => s.name),
   ...WEATHER_ITEMS.map((i) => i.name),
   ...ODD_CATEGORIES.flatMap((c) => c.items.map((i) => i.name)),
+  // Preschool pack: speaker buttons on answer cards.
+  ...OPPOSITE_WORDS.map((w) => w.word),
+  ...HABITATS.map((h) => h.name),
+  ...SEQUENCES.flatMap((q) => q.steps.map((s) => s.name)),
+  ...BODY_PARTS.map((b) => b.word),
+  // Grade 1–2 math pack: clock answer cards.
+  ...ALL_CLOCK_TIMES.map((t) => clockSpoken(t.hour, t.minute)),
+  // Grade 1–2 German pack: speaker buttons on word cards.
+  ...VERBS,
+  ...ADJECTIVES,
+  ...GAP_SENTENCES.flatMap((s) => s.options),
+  ...COMPOUNDS.map((c) => c.word),
 ];
 
 /** Every sentence the game can speak; input for the audio clip generator. */

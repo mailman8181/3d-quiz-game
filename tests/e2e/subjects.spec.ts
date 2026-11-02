@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { challengeTypes } from '../../src/modules/challenges';
 import { profileFixture, seedSave, SAVE_VERSION } from './helpers';
 
 const KEYS: Record<string, string> = { U: 'ArrowUp', R: 'ArrowRight', D: 'ArrowDown', L: 'ArrowLeft' };
@@ -42,7 +43,7 @@ test('subjects the parents switched off completely are not offered', async ({ pa
     profiles: [
       profileFixture({
         pendingRewards: 0,
-        disabledChallenges: ['german.initial-sound', 'german.syllables', 'german.rhyme', 'german.read-word'],
+        disabledChallenges: challengeTypes.filter((t) => t.subject === 'german').map((t) => t.id),
       }),
     ],
   });

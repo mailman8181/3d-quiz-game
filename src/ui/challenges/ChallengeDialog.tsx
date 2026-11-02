@@ -88,7 +88,8 @@ export function ChallengeDialog({ chest, onSolved, onSkip }: Props) {
               return (
                 <button
                   key={c.id}
-                  className={`number-button ${wrong ? 'wrong' : ''}`}
+                  // Labels longer than a number ("3 €", "sicher") get a wider button.
+                  className={`number-button ${String(c.label ?? c.value).length > 2 ? 'wide' : ''} ${wrong ? 'wrong' : ''}`}
                   disabled={wrong}
                   onClick={() => choose(c.id)}
                 >

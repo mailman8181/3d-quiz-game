@@ -1,6 +1,7 @@
 import { numberChoices } from '../../../core/challenges/choices';
-import { type ChallengeType, lv } from '../../../core/challenges/types';
+import { type ChallengeInstance, type ChallengeType, lv } from '../../../core/challenges/types';
 import type { Rng } from '../../../core/rng';
+import { HUNDRED_FROM_LEVEL } from '../math-addition';
 import { COUNT_OBJECTS, type CountObject } from '../objects';
 
 /** "Was ist 7 minus 3?" — with crossed-out pictures on low levels. */
@@ -46,6 +47,35 @@ const LEVELS: readonly Level[] = [
     choices: 4,
     max: 20,
   },
+  // 6–8 (M13c, up to 100): ZE − E without borrowing (37 − 5), ZE − Z (57 − 20),
+  // ZE − E with borrowing (42 − 5).
+  {
+    pick: (rng) => {
+      const ones = rng.int(2, 9);
+      return [rng.int(2, 9) * 10 + ones, rng.int(1, ones - 1)];
+    },
+    pictures: false,
+    choices: 4,
+    max: 99,
+  },
+  {
+    pick: (rng) => {
+      const a = rng.int(3, 9) * 10 + rng.int(1, 9);
+      return [a, rng.int(1, Math.floor(a / 10) - 1) * 10];
+    },
+    pictures: false,
+    choices: 4,
+    max: 99,
+  },
+  {
+    pick: (rng) => {
+      const ones = rng.int(1, 8);
+      return [rng.int(2, 9) * 10 + ones, rng.int(ones + 1, 9)];
+    },
+    pictures: false,
+    choices: 4,
+    max: 99,
+  },
 ];
 
 function minuend(rng: Rng, min: number, max: number): [number, number] {
@@ -64,8 +94,11 @@ export const mathSubtraction: ChallengeType<SubtractionData> = {
     lv('grade1', 'grade1', 'ni.ma2.subtraktion', 'ni.ma2.einspluseins'),
     lv('grade1', 'grade2', 'ni.ma2.einspluseins'),
     lv('grade1', 'grade2', 'ni.ma2.einspluseins'),
+    lv('grade2', 'grade2', 'ni.ma2.subtraktion-100'),
+    lv('grade2', undefined, 'ni.ma2.subtraktion-100'),
+    lv('grade2', undefined, 'ni.ma2.subtraktion-100'),
   ],
-  generate({ rng, level }) {
+  generate({ rng, level }): ChallengeInstance<SubtractionData> {
     const cfg = LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1]!;
     const [a, b] = cfg.pick(rng);
     const difference = a - b;
@@ -77,8 +110,12 @@ export const mathSubtraction: ChallengeType<SubtractionData> = {
       data: { a, b, difference, object, showPictures: cfg.pictures },
       choices,
       correctChoiceId,
-      prompt: { key: 'math.subtraction.prompt', params: { a, b } },
-      explanation: { key: 'math.subtraction.explain', params: { a, b, difference } },
+      ...(level >= HUNDRED_FROM_LEVEL
+        ? { prompt: { key: 'math.calc100.prompt' }, explanation: { key: 'math.calc100.explain', params: { n: difference } } }
+        : {
+            prompt: { key: 'math.subtraction.prompt', params: { a, b } },
+            explanation: { key: 'math.subtraction.explain', params: { a, b, difference } },
+          }),
     };
   },
 };

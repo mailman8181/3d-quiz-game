@@ -4,7 +4,8 @@ import type { ChallengeViewProps } from './types';
 
 /** a − b = ?; pictures show a objects with the last b crossed out. */
 export function SubtractionView({ data, hint, solved }: ChallengeViewProps<SubtractionData>) {
-  const pictures = data.showPictures || hint || solved;
+  // Objects only up to 20; beyond that the equation alone (counting 80 apples helps nobody).
+  const pictures = (data.showPictures || hint || solved) && data.a <= 20;
   const size = data.a <= 10 ? 30 : 22;
   return (
     <div className="task-area addition-area" data-testid="task-area">

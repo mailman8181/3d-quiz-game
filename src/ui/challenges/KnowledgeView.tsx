@@ -26,10 +26,12 @@ export function KnowledgeView({ data, hint, solved, answers }: ChallengeViewProp
   return (
     <div className="rhyme-wrap" data-testid="task-area">
       {data.picture && (
-        <div className="task-area quiz-picture" aria-hidden>
+        // Several emoji (🌹🌹🌹, 🔥 + 🛡️) are drawn smaller so they fit on one line.
+        <div className={`task-area quiz-picture ${[...data.picture].length > 2 ? 'multi' : ''}`} aria-hidden>
           {data.picture}
         </div>
       )}
+      {data.text && <p className="quiz-text">{data.text}</p>}
       <div className={`picture-choices ${wordCards ? 'word-cards' : ''}`}>
         {data.options.map((o, i) => {
           const choiceId = `c${i}`;
@@ -43,7 +45,22 @@ export function KnowledgeView({ data, hint, solved, answers }: ChallengeViewProp
                 aria-label={o.label}
                 onClick={() => answers?.onChoose(choiceId)}
               >
-                {o.color && o.shape ? <Shape color={o.color} shape={o.shape} /> : o.emoji ? <span aria-hidden>{o.emoji}</span> : o.label}
+                {o.color && o.shape ? <Shape color={o.color} shape={o.shape} /> : o.emoji ? (
+                  <span aria-hidden style={o.size ? { fontSize: `${o.size * 1.15}em`, lineHeight: 1 } : undefined}>
+                    {o.emoji}
+                  </span>
+                ) : (
+                  <>
+                    {o.label}
+                    {o.dots !== undefined && (
+                      <span className="pair-dots" aria-hidden>
+                        {Array.from({ length: o.dots }, (_, d) => (
+                          <span key={d} className="pair-dot" />
+                        ))}
+                      </span>
+                    )}
+                  </>
+                )}
               </button>
               {data.speakOptions && (
                 <button

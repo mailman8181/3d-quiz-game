@@ -3,7 +3,8 @@ import { objectIcons } from './objectIcons';
 import type { ChallengeViewProps } from './types';
 
 export function AdditionView({ data, hint, solved }: ChallengeViewProps<AdditionData>) {
-  const pictures = data.showPictures || hint || solved;
+  // Objects only up to 20; beyond that the equation alone (counting 80 apples helps nobody).
+  const pictures = (data.showPictures || hint || solved) && data.a <= 20;
   const icon = objectIcons[data.object];
   const size = data.sum <= 10 ? 30 : 22;
   const group = (n: number, offset: number) => (
