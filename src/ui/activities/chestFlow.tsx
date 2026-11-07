@@ -27,6 +27,13 @@ export interface ChestFlowOptions {
   seed: number;
   /** Practice topics (challenge type ids), ADR-0011. */
   topics?: readonly string[];
+  /** World whose challenge list is used (the maze passes its world; default: forest). */
+  worldId?: string;
+  /** Keep the reward picker back while the activity shows its own dialog (maze goal, wardrobe). */
+  holdPicker?: boolean;
+  /** Told when a chest was solved or skipped (the maze updates its chest models). */
+  onChestSolved?: (index: number, stars: number) => void;
+  onChestSkipped?: (index: number) => void;
   onStars: (stars: number) => void;
   onChallengeResult: (typeId: string, level: number, outcome: ChallengeOutcome) => void;
   onChooseReward: (itemId: string | null) => void;
@@ -49,7 +56,7 @@ export interface ChestFlow {
 function planRound(o: ChestFlowOptions): ChestContent[] {
   const only = new URLSearchParams(window.location.search).get('challenge');
   const selected = selectChallengeTypes({
-    types: getWorld('forest').chests.challenges.map(getChallengeType),
+    types: getWorld(o.worldId ?? 'forest').chests.challenges.map(getChallengeType),
     disabled: o.profile.disabledChallenges,
     subjects: o.subjects,
     stage: o.stage,
@@ -79,7 +86,7 @@ export function useChestFlow(o: ChestFlowOptions): ChestFlow {
     () => rewardOffer(rewardCatalog, o.profile.inventory, createRng(o.profile.inventory.length * 7919 + o.profile.stars)),
     [o.profile.inventory, o.profile.stars],
   );
-  const showPicker = o.profile.pendingRewards > 0 && openIndex === null;
+  const showPicker = o.profile.pendingRewards > 0 && openIndex === null && !o.holdPicker;
   const showBreak = o.breakDue && openIndex === null;
   useEffect(() => {
     if (showBreak) speech().speak(de.breakTime.speak);
@@ -97,12 +104,14 @@ export function useChestFlow(o: ChestFlowOptions): ChestFlow {
           onSolved={(stars, outcome) => {
             setState(openIndex, 'solved');
             setStarsEarned((s) => s + stars);
+            o.onChestSolved?.(openIndex, stars);
             o.onChallengeResult(chest.challenge.typeId, chest.challenge.level, outcome);
             o.onStars(stars);
             setOpenIndex(null);
           }}
           onSkip={() => {
             setState(openIndex, 'skipped');
+            o.onChestSkipped?.(openIndex);
             o.onChallengeResult(chest.challenge.typeId, chest.challenge.level, { kind: 'skipped' });
             setOpenIndex(null);
           }}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { playFanfare, playPling } from '../../audio/sfx';
 import { speech } from '../../audio/speech';
 import { de } from '../../content/de/strings';
@@ -7,24 +7,19 @@ import { findPath } from '../../core/maze/pathfinding';
 import type { Tile } from '../../core/maze/types';
 import type { Profile } from '../../core/profile/profile';
 import { createRng, randomSeed } from '../../core/rng';
-import { rewardOffer } from '../../core/rewards/rewards';
 import { isLostAnimal, nextLostAnimal, type LostAnimal } from '../../core/profile/lostAnimals';
 import { lostAnimalIcons } from '../lostAnimalIcons';
-import { rewardCatalog } from '../../modules/rewards/catalog';
-import { RewardPicker } from '../rewards/RewardPicker';
 import { StarJar } from '../rewards/StarJar';
 import { Wardrobe } from '../rewards/Wardrobe';
-import { MazeSession, type Chest } from '../../core/session/mazeSession';
+import { chestIndex, MazeSession } from '../../core/session/mazeSession';
+import { useChestFlow } from '../activities/chestFlow';
 import type { SubjectId } from '../../core/challenges/types';
 import { currentLevel, levelSpec } from '../../core/progress/levels';
-import { planChests, type ChallengeOutcome } from '../../core/skills/skillModel';
-import { selectChallengeTypes } from '../../core/challenges/selection';
+import type { ChallengeOutcome } from '../../core/skills/skillModel';
 import type { StageId } from '../../core/learner/stage';
-import { getChallengeType } from '../../modules/challenges';
 import { getWorld, worlds } from '../../modules/worlds';
 import { progressFor } from '../../modules/activities';
 import { MazeView } from '../../render/MazeView';
-import { ChallengeDialog } from '../challenges/ChallengeDialog';
 
 interface Props {
   profile: Profile;
@@ -65,7 +60,16 @@ function route(path: Tile[]): string {
     .join('');
 }
 
-export function GameScreen({
+/**
+ * The maze activity. Like every activity (ADR-0010) a round is a keyed component, so "next
+ * level" remounts it and the shared chest flow plans fresh chests.
+ */
+export function GameScreen(props: Props) {
+  const [round, setRound] = useState(0);
+  return <MazeRound key={round} {...props} round={round} onNextRound={() => setRound((r) => r + 1)} />;
+}
+
+function MazeRound({
   profile,
   worldId,
   subjects,
@@ -79,22 +83,47 @@ export function GameScreen({
   onRescue,
   onSetPet,
   onChallengeResult,
-}: Props) {
+  round,
+  onNextRound,
+}: Props & { round: number; onNextRound: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sessionRef = useRef<MazeSession | null>(null);
   const viewRef = useRef<MazeView | null>(null);
-  const [round, setRound] = useState(0);
   const [goalStars, setGoalStars] = useState<number | null>(null);
-  const [openChest, setOpenChest] = useState<{ chest: Chest; visit: number } | null>(null);
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
+  // Fixed for the round: seed (?seed=N for tests) and maze size from the child's level.
+  const [seed] = useState(() => {
+    const forced = seedFromUrl();
+    return forced !== null ? forced + round : randomSeed();
+  });
+  const [spec] = useState(() => levelSpec(currentLevel(profile.levels[worldId])));
+  const level = spec.level;
+  const flow = useChestFlow({
+    profile,
+    stage,
+    subjects,
+    breakDue,
+    count: spec.chests,
+    seed,
+    worldId,
+    holdPicker: goalStars !== null || wardrobeOpen,
+    onStars,
+    onChallengeResult,
+    onChooseReward,
+    onHome,
+    onChestSolved: (i, stars) => sessionRef.current?.solveChest(`chest-${i}`, stars),
+    onChestSkipped: (i) => sessionRef.current?.skipChest(`chest-${i}`),
+  });
+  const flowRef = useRef(flow);
+  useEffect(() => {
+    flowRef.current = flow;
+  });
   const equippedRef = useRef(profile.equipped);
   const rescuedRef = useRef(profile.rescued);
-  const skillsRef = useRef(profile.skills);
   const levelsRef = useRef(profile.levels);
   useEffect(() => {
     levelsRef.current = profile.levels;
   }, [profile.levels]);
-  const [level, setLevel] = useState(1);
   const [guide, setGuide] = useState<string>('olli');
   const [newWorld, setNewWorld] = useState<string | null>(null);
   // Will finishing this maze unlock a new activity (ADR-0010)? Kept in a ref for the maze events.
@@ -104,28 +133,13 @@ export function GameScreen({
   useEffect(() => {
     unlocksActivityRef.current = unlocksActivity;
   }, [unlocksActivity]);
-  const disabledRef = useRef(profile.disabledChallenges);
-  const subjectsRef = useRef(subjects);
-  const stageRef = useRef(stage);
-  useEffect(() => {
-    stageRef.current = stage;
-  }, [stage]);
-  useEffect(() => {
-    subjectsRef.current = subjects;
-  }, [subjects]);
-  useEffect(() => {
-    disabledRef.current = profile.disabledChallenges;
-  }, [profile.disabledChallenges]);
-  useEffect(() => {
-    skillsRef.current = profile.skills;
-  }, [profile.skills]);
   const pet = profile.pet && isLostAnimal(profile.pet) ? profile.pet : null;
   const petRef = useRef(pet);
   const [lostAnimal, setLostAnimal] = useState<LostAnimal>('chick');
-  const callbacks = useRef({ onStars, onMazeCompleted, onRescue });
+  const callbacks = useRef({ onMazeCompleted, onRescue });
   useEffect(() => {
-    callbacks.current = { onStars, onMazeCompleted, onRescue };
-  }, [onStars, onMazeCompleted, onRescue]);
+    callbacks.current = { onMazeCompleted, onRescue };
+  }, [onMazeCompleted, onRescue]);
   useEffect(() => {
     rescuedRef.current = profile.rescued;
   }, [profile.rescued]);
@@ -144,29 +158,13 @@ export function GameScreen({
     const container = containerRef.current;
     if (!container) return;
     const world = getWorld(worldId);
-    const spec = levelSpec(currentLevel(levelsRef.current[world.id]));
-    setLevel(spec.level);
     const forced = seedFromUrl();
-    const seed = forced !== null ? forced + round : randomSeed();
     const animal = nextLostAnimal(rescuedRef.current, createRng(seed), world.lostAnimals);
     setGuide(world.guide);
     setLostAnimal(animal);
-    // ?challenge=<typeId> puts only that type into the chests (review / E2E tests).
-    const only = new URLSearchParams(window.location.search).get('challenge');
-    const chests = planChests(
-      createRng(seed ^ 0x2545f491),
-      selectChallengeTypes({
-        types: world.chests.challenges.map(getChallengeType),
-        disabled: disabledRef.current,
-        subjects: subjectsRef.current,
-        stage: stageRef.current,
-        only,
-      }),
-      skillsRef.current,
-      spec.chests,
-    );
+    // Chest contents come from the shared chest flow (ADR-0010); the maze only places them.
     const session = new MazeSession(generateMaze({ cols: spec.cols, rows: spec.rows, braid: world.maze.braid, seed }), {
-      chests,
+      chests: flow.chests,
     });
     sessionRef.current = session;
     container.dataset.goalTile = `${session.maze.goal.x},${session.maze.goal.y}`;
@@ -179,7 +177,6 @@ export function GameScreen({
     if (forced !== null) {
       container.dataset.testRouteGoal = route(findPath(session.maze, session.maze.start, session.maze.goal) ?? []);
     }
-    let visits = 0;
     const view = new MazeView({
       container,
       session,
@@ -192,7 +189,7 @@ export function GameScreen({
         if (ev.type === 'chestReached') {
           playPling();
           view.setPaused(true);
-          setOpenChest({ chest: session.chest(ev.chestId), visit: ++visits });
+          flowRef.current.open(chestIndex(ev.chestId));
         } else if (ev.type === 'goalReached') {
           setGoalStars(session.starsEarned);
           playFanfare();
@@ -221,9 +218,7 @@ export function GameScreen({
       sessionRef.current = null;
       speech().stop();
     };
-  }, [profile.avatar, round, worldId]);
-
-  const closeChest = () => setOpenChest(null);
+  }, [profile.avatar, worldId, seed, spec, flow.chests]);
 
   // "Olli zeigt den Weg": short glowing path, then a cool-down so it stays a help, not autopilot.
   const [hintReadyAt, setHintReadyAt] = useState(0);
@@ -242,18 +237,9 @@ export function GameScreen({
     window.setTimeout(() => setHintCooling(false), HINT_COOLDOWN_MS);
   };
 
-  // A full star jar waits until no other dialog is open.
-  const showPicker = profile.pendingRewards > 0 && !openChest && goalStars === null && !wardrobeOpen;
-  const offer = useMemo(
-    () => rewardOffer(rewardCatalog, profile.inventory, createRng(profile.inventory.length * 7919 + profile.stars)),
-    [profile.inventory, profile.stars],
-  );
-
-  const showBreak = breakDue && !openChest;
-  const blocked = Boolean(openChest) || showPicker || wardrobeOpen || goalStars !== null || showBreak;
-  useEffect(() => {
-    if (showBreak) speech().speak(de.breakTime.speak);
-  }, [showBreak]);
+  // The chest flow shows the question, the reward picker (held back during the goal dialog and
+  // the wardrobe) and the break screen; the maze pauses while any dialog is open.
+  const blocked = flow.busy || wardrobeOpen || goalStars !== null;
   useEffect(() => {
     viewRef.current?.setPaused(blocked);
   }, [blocked]);
@@ -291,45 +277,10 @@ export function GameScreen({
         </span>
       </button>
 
-      {openChest && (
-        <ChallengeDialog
-          key={`${openChest.chest.id}-${openChest.visit}`}
-          chest={openChest.chest}
-          onSolved={(stars, outcome) => {
-            const { challenge } = openChest.chest;
-            sessionRef.current?.solveChest(openChest.chest.id, stars);
-            onChallengeResult(challenge.typeId, challenge.level, outcome);
-            callbacks.current.onStars(stars);
-            closeChest();
-          }}
-          onSkip={() => {
-            const { challenge } = openChest.chest;
-            sessionRef.current?.skipChest(openChest.chest.id);
-            onChallengeResult(challenge.typeId, challenge.level, { kind: 'skipped' });
-            closeChest();
-          }}
-        />
-      )}
-
-      {showPicker && <RewardPicker offer={offer} onChoose={onChooseReward} />}
+      {flow.overlays}
 
       {wardrobeOpen && (
         <Wardrobe profile={profile} onToggle={onToggleEquip} onSetPet={onSetPet} onClose={() => setWardrobeOpen(false)} />
-      )}
-
-      {showBreak && (
-        <div className="overlay break-overlay" role="dialog" aria-modal data-testid="break">
-          <div className="dialog">
-            <div className="dialog-icon" aria-hidden>
-              🦉💤
-            </div>
-            <h2>{de.breakTime.title}</h2>
-            <p>{de.breakTime.text}</p>
-            <button className="button primary" aria-label={de.game.home} onClick={onHome}>
-              🏠
-            </button>
-          </div>
-        </div>
       )}
 
       {goalStars !== null && (
@@ -361,10 +312,7 @@ export function GameScreen({
               </button>
               <button
                 className="button primary"
-                onClick={() => {
-                  setGoalStars(null);
-                  setRound((r) => r + 1);
-                }}
+                onClick={onNextRound}
               >
                 {de.levels.next(level + 1)}
               </button>

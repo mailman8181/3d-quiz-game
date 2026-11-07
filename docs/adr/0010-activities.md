@@ -88,6 +88,8 @@ maze excluded because `mazesCompleted` exists). The migration sets `{}`.
   The maze uses them too.
 - The maze still has its own copy of the dialog, picker and break code. It moves onto
   `useChestFlow` when it is next changed (see the add-activity skill).
+  **Done (2026-11-07):** the maze uses `useChestFlow` (options `worldId`, `holdPicker`,
+  `onChestSolved`, `onChestSkipped`); `MazeSession` receives `ChestContent[]`.
 
 ## Consequences
 - **Easier:** new games are small modules; every challenge type, reward and parents' setting
