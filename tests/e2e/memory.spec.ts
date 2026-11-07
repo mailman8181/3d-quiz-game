@@ -18,6 +18,13 @@ const save = (mazesCompleted: number) => ({
   ],
 });
 
+test('after 3 mazes exactly one new game is open, the mystery card counts the rest', async ({ page }) => {
+  await seedSave(page, save(3));
+  await page.getByRole('button', { name: /Testkind/ }).click();
+  await expect(page.locator('[data-activity]')).toHaveCount(1);
+  await expect(page.getByTestId('mystery-card')).toContainText('Noch 3 Runden');
+});
+
 test('before 3 mazes the hub shows a mystery card instead of new games', async ({ page }) => {
   await seedSave(page, save(2));
   await page.getByRole('button', { name: /Testkind/ }).click();
@@ -26,7 +33,8 @@ test('before 3 mazes the hub shows a mystery card instead of new games', async (
 });
 
 test('memory: find all pairs, chest pairs open questions, the round is counted', async ({ page }) => {
-  await seedSave(page, save(3));
+  // 6 mazes: both activities are unlocked, whatever this child's random order is.
+  await seedSave(page, save(6));
   await page.getByRole('button', { name: /Testkind/ }).click();
   await page.locator('[data-activity="memory"]').click();
   const grid = page.getByTestId('memory-grid');
@@ -60,8 +68,8 @@ test('memory: find all pairs, chest pairs open questions, the round is counted',
   await expect(done).toBeVisible();
   await expect(done).toContainText('Alle Paare gefunden!');
 
-  // Back on the hub; memory is the only extra game so far, so no mystery card is left.
+  // Back on the hub; all extra games are open, so no mystery card is left.
   await done.getByRole('button', { name: 'Zurück zum Start' }).click();
-  await expect(page.getByTestId('mystery-card')).toHaveCount(0); // only one activity exists yet
+  await expect(page.getByTestId('mystery-card')).toHaveCount(0);
   await expect(page.locator('[data-activity="memory"]')).toBeVisible();
 });

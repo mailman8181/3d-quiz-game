@@ -16,6 +16,7 @@ import { levelWindow, typesForStage } from '../core/challenges/selection';
 import { createLearner, currentStage, type StageId } from '../core/learner/stage';
 import { StageScreen } from '../ui/screens/StageScreen';
 import { MemoryScreen } from '../ui/activities/MemoryScreen';
+import { JumpScreen } from '../ui/activities/JumpScreen';
 import { progressFor } from '../modules/activities';
 import type { SubjectId } from '../core/challenges/types';
 import { WorldSelectScreen } from '../ui/worlds/WorldSelectScreen';
@@ -218,6 +219,7 @@ export function App() {
         ),
     };
     if (screen.id === 'memory') return <MemoryScreen {...shared} />;
+    if (screen.id === 'jump') return <JumpScreen {...shared} />;
   }
 
   if (screen.name === 'game' && active) {

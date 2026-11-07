@@ -119,6 +119,34 @@ From memory (M14b), the first activity. Read these before building the next one.
 - Unlock rules are pure (`core/progress/activities.ts`): test thresholds and the stable
   per-child order in unit tests, and only the visible result (mystery card, activity card) in E2E.
 
+From the side scroller (M14c), the first moving activity:
+
+**Real-time activities**
+- Keep the physics **pure and frame-based** in core: `step(course, state, input, dt) →
+  { state, events }`. Unit tests drive it at 60 Hz and check the children-first rules
+  directly: "nothing moves without input", "walking only right still reaches the goal",
+  "a gold chest is reachable without timing".
+- Apply **vertical movement before the horizontal collision check**. Otherwise a jump started
+  this frame is still at ground height and counts as bumping into the obstacle.
+- The game loop is one `requestAnimationFrame` effect. It reads the latest flow, profile and
+  callbacks through **refs** updated in an effect without deps, skips stepping while
+  `flow.busy` (dialog open), and clamps `dt` (≤ 50 ms) so a background tab doesn't teleport the avatar.
+  React re-renders once per frame; that is fine for ~50 DOM elements.
+- Input: hold buttons use pointer events with `setPointerCapture` and `touch-action: none`.
+  A hop is a one-shot flag the loop consumes. Clear held input when a chest opens,
+  otherwise the avatar keeps walking after the dialog.
+- Scale world units with `min(100vw / visibleUnits, N dvh)` so portrait phones get big
+  sprites without jumps leaving the sky. Background decoration (trees, clouds) makes the
+  scene feel alive at almost no cost.
+
+**Unlocking and tests**
+- Once there are two or more activities, **which one opens after 3 mazes is random per
+  child**. E2E tests that open a specific activity must seed `mazesCompleted: 6` or more
+  (enough for all of them), not 3.
+- A walking E2E holds `ArrowRight`, answers any chest dialog that appears (release the key
+  first), and stops at the end dialog. Floating chests may be passed, so assert
+  "≥ ground chests answered".
+
 **Still to do**
 - The maze still has its own copy of the chest dialog, reward picker and break code. Move it
   onto `useChestFlow` when the maze is next changed.

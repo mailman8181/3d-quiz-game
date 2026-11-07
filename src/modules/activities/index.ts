@@ -1,6 +1,7 @@
 import { activityProgress, type ActivityProgress } from '../../core/progress/activities';
 import { stageRank, type StageId } from '../../core/learner/stage';
 import type { Profile } from '../../core/profile/profile';
+import { jumpActivity } from './jump';
 import { memoryActivity } from './memory';
 import type { ActivityDef } from './types';
 
@@ -8,7 +9,7 @@ import type { ActivityDef } from './types';
  * Registry of activities besides the maze (ADR-0010). Add one: follow the skill
  * `.claude/skills/add-activity/`, then list it here. Unlocking is automatic.
  */
-export const activities: readonly ActivityDef[] = [memoryActivity];
+export const activities: readonly ActivityDef[] = [memoryActivity, jumpActivity];
 
 export function getActivity(id: string): ActivityDef {
   const a = activities.find((x) => x.id === id);

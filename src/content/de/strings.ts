@@ -57,11 +57,21 @@ export const de = {
   },
   /** Activities besides the maze (ADR-0010). */
   activities: {
-    names: { maze: 'Labyrinth', memory: 'Memory' } as Record<string, string>,
-    icons: { maze: '🌿', memory: '🃏' } as Record<string, string>,
+    names: { maze: 'Labyrinth', memory: 'Memory', jump: 'Hüpf-Abenteuer' } as Record<string, string>,
+    icons: { maze: '🌿', memory: '🃏', jump: '🦘' } as Record<string, string>,
     intros: {
       memory: 'Finde die Paare! Wenn du zwei gleiche Schatzkisten findest, gibt es eine Aufgabe.',
+      jump: 'Halte den Pfeil gedrückt, dann läufst du. Mit dem Hüpf-Knopf springst du. Sammle die Schatzkisten und lauf bis zur Fahne!',
     } as Record<string, string>,
+    jump: {
+      stumble: 'Hoppla!',
+      highChest: 'Die Kiste ist hoch oben. Stell dich darunter und hüpf!',
+      goalTitle: 'Geschafft!',
+      goalSpeak: 'Geschafft! Du bist an der Fahne angekommen.',
+      left: 'Nach links laufen',
+      right: 'Nach rechts laufen',
+      hop: 'Hüpfen',
+    },
     pair: 'Ein Paar!',
     chest: 'Eine Schatzkiste!',
     doneTitle: 'Alle Paare gefunden!',

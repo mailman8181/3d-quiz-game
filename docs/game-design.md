@@ -62,7 +62,7 @@ rewards and adaptive levels.
 |---|---|---|
 | Labyrinth | ✅ | walk the maze, chests on the way, rescue the animal at the goal |
 | Memory | ✅ M14b | flip cards and find pairs (picture cards say their name); **chest pairs** (tier colour + emblem ⭐❤️🌙🌸🍀) open a question. Upright grid by stage: Kita 2×4 (2 chests), Vorschule 3×4 (3), school 4×4 (4). Two different cards turn back after a short look or on the next tap; a skipped chest pair can be tapped again |
-| Hüpf-Abenteuer | M14c | side scroller: the child walks with a "go" button and jumps; chests on the path and up on platforms; hitting an obstacle means a funny stumble, never "game over" |
+| Hüpf-Abenteuer | ✅ M14c | side scroller with Rick: hold ⬅️/➡️ to walk (nothing moves without a press), ⬆️ to hop; arrow keys + Space on desktop. Chests stand on the path; **gold chests float on a cloud** — stand underneath and hop (no timing needed; tapping one explains it). Logs, stones and mushrooms: walking into one is a "Hoppla!" stumble, after a moment the avatar climbs over by itself. Flag at the end. Kita 3 chests / 3 obstacles, Vorschule 4/5, school 5/7 |
 | Later ideas | — | Wimmelbild (hidden chests in a busy scene), river ride (3 lanes), bridge building, slow bubbles |
 
 ## 4a. Avatar & profiles
@@ -234,6 +234,7 @@ German challenges (planned next), more worlds/scenarios, multiplayer, teacher mo
 cloud sync, other languages, speech-recognition answers.
 
 ## Changelog
+- v1.27 (2026-11-07): M14c — Hüpf-Abenteuer, the second activity (§4b).
 - v1.26 (2026-11-07): M14b — Memory, the first activity; hub shows unlocked activities and a mystery card; maze end dialog announces a new game.
 - v1.25 (2026-11-07): Activities (§4b, ADR-0010) — memory and side scroller planned; unlock after 3 mazes, then every 3 rounds, random order per child (owner).
 - v1.24 (2026-11-02): M13e — Wissen pack, 6 new types following the KC Sachunterricht (§6.5).
