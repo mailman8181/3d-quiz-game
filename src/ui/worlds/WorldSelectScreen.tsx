@@ -8,6 +8,7 @@ import { currentLevel } from '../../core/progress/levels';
 import { isUnlocked, mazesUntilUnlock } from '../../core/progress/worlds';
 import { worlds } from '../../modules/worlds';
 import type { ActivityProgress } from '../../core/progress/activities';
+import { alwaysOpenActivities } from '../../modules/activities';
 
 interface Props {
   profile: Profile;
@@ -96,7 +97,7 @@ export function WorldSelectScreen({ profile, allowed, chosen, onToggleSubject, o
             </button>
           );
         })}
-        {activities.unlocked.map((id) => (
+        {[...alwaysOpenActivities(), ...activities.unlocked].map((id) => (
           <button
             key={id}
             className="card world-card activity-card"

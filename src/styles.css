@@ -2023,3 +2023,242 @@ button {
 .memory-chest.tier-gold {
   --chest: #ffd24a;
 }
+
+/* Activity: jump (M14c, ADR-0010) — side scroller in DOM; positions come from inline styles. */
+.jump-screen {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: linear-gradient(#bfe8ff 0%, #e6f7ff 60%, #7fcf5f 60%);
+  --ground: 30dvh;
+}
+
+.jump-scene {
+  position: absolute;
+  inset: 0;
+}
+
+.jump-ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--ground);
+  background: linear-gradient(#7fcf5f 0 14px, #5aa83f 14px);
+  border-top: 4px solid #3f7d2a;
+}
+
+.jump-scene > span,
+.jump-scene > button {
+  position: absolute;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  line-height: 1;
+}
+
+.jump-obstacle {
+  font-size: calc(var(--u) * 0.8);
+  z-index: 2;
+}
+
+.jump-decor {
+  font-size: calc(var(--u) * 1.6);
+  opacity: 0.55;
+  z-index: 0;
+}
+
+.jump-sky {
+  font-size: calc(var(--u) * 1.2);
+  opacity: 0.8;
+}
+
+.jump-avatar,
+.jump-chest {
+  z-index: 3;
+}
+
+.jump-goal {
+  font-size: calc(var(--u) * 1.4);
+}
+
+.jump-chest {
+  padding: 0;
+  border: none;
+  background: none;
+  flex-direction: column;
+  align-items: center;
+}
+
+.jump-chest .memory-chest {
+  width: 100%;
+}
+
+.jump-chest.skipped .memory-chest {
+  opacity: 0.6;
+}
+
+.jump-chest.solved {
+  font-size: calc(var(--u) * 0.6);
+}
+
+.jump-cloud {
+  position: absolute;
+  bottom: -40%;
+  font-size: calc(var(--u) * 1.1);
+  z-index: -1;
+}
+
+.jump-avatar {
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  align-items: center !important;
+  font-size: calc(var(--u) * 0.5);
+  transition: transform 0.15s;
+}
+
+.jump-avatar.stumble {
+  transform: rotate(-18deg);
+}
+
+.jump-stars {
+  position: absolute;
+  top: -60%;
+  font-size: calc(var(--u) * 0.45);
+}
+
+.jump-controls {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.jump-button {
+  width: min(96px, 24vw);
+  height: min(96px, 24vw);
+  border: 4px solid var(--ink);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow);
+  font-size: min(44px, 11vw);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.jump-button.hop {
+  background: #ffd93d;
+}
+
+.jump-button:active {
+  transform: translateY(4px);
+}
+
+/* Activity: practice "Rätselpfad" (M14d, ADR-0011) */
+.practice-picker {
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+
+.practice-subjects {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.practice-topics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: min(100%, 460px);
+}
+
+.topic-tile {
+  min-height: 88px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 34px;
+  padding: 6px;
+}
+
+.topic-tile small {
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.topic-tile.on {
+  outline: 5px solid #ffd93d;
+  background: #fff7d1;
+}
+
+.practice-screen {
+  background: linear-gradient(#bfe8ff, #9fdc7c);
+}
+
+.practice-path {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px 10px;
+  width: min(100%, 420px);
+  padding: 80px 8px 24px;
+}
+
+.stone {
+  width: min(72px, 18vw);
+  height: min(60px, 15vw);
+  border-radius: 50% / 45%;
+  border: 4px solid var(--ink);
+  background: #d9d2c5;
+  box-shadow: var(--shadow);
+  font-size: min(30px, 7vw);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.stone.skipped {
+  border-style: dashed;
+  background: #b9b4ab;
+}
+
+.stone.current {
+  background: #fff7d1;
+  outline: 4px solid #ffd93d;
+}
+
+.stone.goal {
+  width: min(84px, 21vw);
+  height: min(70px, 17vw);
+  background: #ffe9a8;
+}
+
+.stone-avatar {
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  border: 3px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: min(24px, 6vw);
+  animation: hop 0.5s ease;
+}
+
+@keyframes hop {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+  100% { transform: translateY(0); }
+}

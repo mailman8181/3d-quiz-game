@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { allSpokenTexts, speechText } from '../../content/de/speech';
+import { de } from '../../content/de/strings';
 import { createRng } from '../../core/rng';
 import { stageRank, type StageId } from '../../core/learner/stage';
 import { selectChallengeTypes } from '../../core/challenges/selection';
@@ -326,3 +327,10 @@ describe('stage selection with the real catalogue (ADR-0009)', () => {
   });
 });
 
+describe('Rätselpfad topic names (ADR-0011)', () => {
+  it('every challenge type has a child-friendly topic name and icon', () => {
+    for (const t of challengeTypes) {
+      expect(de.practice.topics[t.id], t.id).toMatchObject({ icon: expect.any(String), name: expect.any(String) });
+    }
+  });
+});

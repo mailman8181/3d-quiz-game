@@ -16,7 +16,9 @@ import { levelWindow, typesForStage } from '../core/challenges/selection';
 import { createLearner, currentStage, type StageId } from '../core/learner/stage';
 import { StageScreen } from '../ui/screens/StageScreen';
 import { MemoryScreen } from '../ui/activities/MemoryScreen';
-import { progressFor } from '../modules/activities';
+import { JumpScreen } from '../ui/activities/JumpScreen';
+import { PracticeScreen } from '../ui/activities/PracticeScreen';
+import { activities, progressFor } from '../modules/activities';
 import type { SubjectId } from '../core/challenges/types';
 import { WorldSelectScreen } from '../ui/worlds/WorldSelectScreen';
 import { TreehouseScreen } from '../ui/treehouse/TreehouseScreen';
@@ -57,6 +59,15 @@ function recordChallenge(p: Profile, typeId: string, level: number, outcome: Cha
   const range = levelWindow(type, stage) ?? { startLevel: 1, maxLevel: type.levels };
   const current = p.skills[typeId] ?? initialSkill(range.startLevel);
   return { ...p, skills: { ...p.skills, [typeId]: recordOutcome(current, outcome, level, range.maxLevel) } };
+}
+
+/**
+ * Review link (like `?challenge=`): `?activity=<id>` opens that activity right after a profile is
+ * chosen or created, without unlocking it first. For PR previews and tests only.
+ */
+function activityFromUrl(): string | null {
+  const id = new URLSearchParams(window.location.search).get('activity');
+  return id && activities.some((a) => a.id === id) ? id : null;
 }
 
 export function App() {
@@ -141,7 +152,9 @@ export function App() {
           stageAsked: true,
         })),
       );
-      if (screen.next === 'game') startGame();
+      const review = activityFromUrl();
+      if (review) setScreen({ name: 'activity', id: review });
+      else if (screen.next === 'game') startGame();
       else setScreen({ name: 'worlds' });
     };
     return <StageScreen onChoose={(s) => answer(s)} onLater={() => answer(null)} />;
@@ -218,6 +231,8 @@ export function App() {
         ),
     };
     if (screen.id === 'memory') return <MemoryScreen {...shared} />;
+    if (screen.id === 'jump') return <JumpScreen {...shared} />;
+    if (screen.id === 'practice') return <PracticeScreen {...shared} allowed={allowed} />;
   }
 
   if (screen.name === 'game' && active) {
@@ -284,7 +299,14 @@ export function App() {
         // Hub: worlds (locked ones show what is still to discover) and the tree house.
         // Profiles from before v9 are asked for their stage once (ADR-0009).
         const chosen = doc.profiles.find((p) => p.id === id);
-        setScreen(chosen && !chosen.stageAsked ? { name: 'stage', next: 'worlds' } : { name: 'worlds' });
+        const review = activityFromUrl();
+        setScreen(
+          chosen && !chosen.stageAsked
+            ? { name: 'stage', next: 'worlds' }
+            : review
+              ? { name: 'activity', id: review }
+              : { name: 'worlds' },
+        );
       }}
       onNew={() => setScreen({ name: 'create' })}
       onParents={() => setGateOpen(true)}

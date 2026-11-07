@@ -60,9 +60,11 @@ Write the answers into the PR description; put real open points into
    (docs/audio.md) and commit the clips.
 5. **Unlocking** is automatic. It uses the activity list and `core/progress/activities.ts`;
    no per-activity code.
-6. **Test hooks:** `data-*` attributes so E2E can find a chest deterministically (e.g. card
+6. **Review link:** `?activity=<id>` already opens any registered activity right after choosing or
+   creating a profile, without unlocking it. Put the link to the PR preview in the PR description.
+7. **Test hooks:** `data-*` attributes so E2E can find a chest deterministically (e.g. card
    ids, chest positions), plus `?seed=N` support.
-7. **Styles** in `src/styles.css` under a comment `/* Activity: <id> */`.
+8. **Styles** in `src/styles.css` under a comment `/* Activity: <id> */`.
 
 ## 3. Verify
 - `npm run check`, then `CI=1 npm run e2e`. Add an E2E test that unlocks the activity via a seeded save
@@ -118,6 +120,52 @@ From memory (M14b), the first activity. Read these before building the next one.
   `ANSWERS` locator that taps until "Weiter".
 - Unlock rules are pure (`core/progress/activities.ts`): test thresholds and the stable
   per-child order in unit tests, and only the visible result (mystery card, activity card) in E2E.
+
+From the side scroller (M14c), the first moving activity:
+
+**Real-time activities**
+- Keep the physics **pure and frame-based** in core: `step(course, state, input, dt) →
+  { state, events }`. Unit tests drive it at 60 Hz and check the children-first rules
+  directly: "nothing moves without input", "walking only right still reaches the goal",
+  "a gold chest is reachable without timing".
+- Apply **vertical movement before the horizontal collision check**. Otherwise a jump started
+  this frame is still at ground height and counts as bumping into the obstacle.
+- The game loop is one `requestAnimationFrame` effect. It reads the latest flow, profile and
+  callbacks through **refs** updated in an effect without deps, skips stepping while
+  `flow.busy` (dialog open), and clamps `dt` (≤ 50 ms) so a background tab doesn't teleport the avatar.
+  React re-renders once per frame; that is fine for ~50 DOM elements.
+- Input: hold buttons use pointer events with `setPointerCapture` and `touch-action: none`.
+  A hop is a one-shot flag the loop consumes. Clear held input when a chest opens,
+  otherwise the avatar keeps walking after the dialog.
+- Scale world units with `min(100vw / visibleUnits, N dvh)` so portrait phones get big
+  sprites without jumps leaving the sky. Background decoration (trees, clouds) makes the
+  scene feel alive at almost no cost.
+
+**Unlocking and tests**
+- Once there are two or more activities, **which one opens after 3 mazes is random per
+  child**. E2E tests that open a specific activity must seed `mazesCompleted: 6` or more
+  (enough for all of them), not 3.
+- A walking E2E holds `ArrowRight`, answers any chest dialog that appears (release the key
+  first), and stops at the end dialog. Floating chests may be passed, so assert
+  "≥ ground chests answered".
+
+From the Rätselpfad (M14d, ADR-0011), the first activity without a game around the questions:
+
+- **Exceptions belong in a new ADR**, not an edit of ADR-0010: here "always open"
+  (`ActivityDef.alwaysOpen`, kept out of `progressFor`), longer rounds and the topic filter.
+- **Filters go through the shared pipeline:** a new choice such as practice topics becomes an
+  optional field on `SelectionInput` and `ChestFlowOptions`, with the existing fallbacks, so a
+  round can never be empty. Don't filter chests inside the screen.
+- **Child-facing choices need spoken names.** Parents' names (`challengeNames`) are too
+  technical for children. Keep a separate child list (`de.practice.topics`) and enforce it
+  with a test over the registry.
+- **Auto-advancing activities:** open the next question in a timer effect keyed on
+  `flow.busy` and the next index, read `flow` through a ref, and let a tap on the next item
+  open it immediately. Call `onRoundCompleted` once (guard with a ref) when nothing is left.
+- **An always-open activity changes the hub:** E2E tests that count activity cards must
+  exclude it (`[data-activity]:not([data-activity="practice"])`).
+- The picker is a separate component; a round component keyed by `round` keeps "Nochmal"
+  (same choice) and "Etwas anderes üben" (back to the picker) simple.
 
 **Still to do**
 - The maze still has its own copy of the chest dialog, reward picker and break code. Move it

@@ -25,6 +25,8 @@ export interface ChestFlowOptions {
   /** Chests in this round (fixed for the round). */
   count: number;
   seed: number;
+  /** Practice topics (challenge type ids), ADR-0011. */
+  topics?: readonly string[];
   onStars: (stars: number) => void;
   onChallengeResult: (typeId: string, level: number, outcome: ChallengeOutcome) => void;
   onChooseReward: (itemId: string | null) => void;
@@ -52,6 +54,7 @@ function planRound(o: ChestFlowOptions): ChestContent[] {
     subjects: o.subjects,
     stage: o.stage,
     only,
+    topics: o.topics,
   });
   const rng = createRng(o.seed ^ 0x2545f491);
   return planChests(rng, selected, o.profile.skills, o.count).map((p) => ({

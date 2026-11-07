@@ -44,6 +44,8 @@ export interface SelectionInput {
   stage: StageId | null;
   /** Review/test override (`?challenge=<typeId>`): only this type, ignoring all filters. */
   only?: string | null;
+  /** Practice topics (ADR-0011): only these type ids, after the other filters. */
+  topics?: readonly string[];
 }
 
 /**
@@ -64,7 +66,8 @@ export function selectChallengeTypes(input: SelectionInput): SelectedType[] {
     if (forced.length > 0) return withWindow(forced, null);
   }
   const filtered = input.types.filter((t) => !input.disabled.includes(t.id) && input.subjects.includes(t.subject));
-  for (const candidate of [withWindow(filtered, input.stage), withWindow(input.types, input.stage)]) {
+  const topical = input.topics?.length ? filtered.filter((t) => input.topics!.includes(t.id)) : [];
+  for (const candidate of [withWindow(topical, input.stage), withWindow(filtered, input.stage), withWindow(input.types, input.stage)]) {
     if (candidate.length > 0) return candidate;
   }
   return withWindow(input.types, null);

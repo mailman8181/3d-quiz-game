@@ -1,14 +1,19 @@
 import { activityProgress, type ActivityProgress } from '../../core/progress/activities';
 import { stageRank, type StageId } from '../../core/learner/stage';
 import type { Profile } from '../../core/profile/profile';
+import { jumpActivity } from './jump';
 import { memoryActivity } from './memory';
+import { practiceActivity } from './practice';
 import type { ActivityDef } from './types';
 
 /**
  * Registry of activities besides the maze (ADR-0010). Add one: follow the skill
  * `.claude/skills/add-activity/`, then list it here. Unlocking is automatic.
  */
-export const activities: readonly ActivityDef[] = [memoryActivity];
+export const activities: readonly ActivityDef[] = [memoryActivity, jumpActivity, practiceActivity];
+
+/** Open from the start, outside the unlock order (ADR-0011). */
+export const alwaysOpenActivities = (): string[] => activities.filter((a) => a.alwaysOpen).map((a) => a.id);
 
 export function getActivity(id: string): ActivityDef {
   const a = activities.find((x) => x.id === id);
@@ -18,7 +23,9 @@ export function getActivity(id: string): ActivityDef {
 
 /** Which activities this child can play and how far the next one is. */
 export function progressFor(profile: Profile, stage: StageId | null, extraMazes = 0): ActivityProgress {
-  const playable = activities.filter((a) => !a.minStage || stage === null || stageRank(stage) >= stageRank(a.minStage));
+  const playable = activities.filter(
+    (a) => !a.alwaysOpen && (!a.minStage || stage === null || stageRank(stage) >= stageRank(a.minStage)),
+  );
   return activityProgress({
     ids: playable.map((a) => a.id),
     profileId: profile.id,

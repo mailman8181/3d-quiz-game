@@ -8,11 +8,11 @@ import type { SubjectId } from '../../core/challenges/types';
 import type { StageId } from '../../core/learner/stage';
 import type { Profile } from '../../core/profile/profile';
 import { createRng, randomSeed } from '../../core/rng';
-import type { ChestTier } from '../../core/skills/skillModel';
 import type { ChallengeOutcome } from '../../core/skills/skillModel';
 import { progressFor } from '../../modules/activities';
 import { StarJar } from '../rewards/StarJar';
 import { useChestFlow } from './chestFlow';
+import { ChestFace } from './ChestFace';
 
 interface Props {
   profile: Profile;
@@ -43,15 +43,6 @@ function seedFromUrl(): number | null {
 export function MemoryScreen(props: Props) {
   const [round, setRound] = useState(0);
   return <MemoryRound key={round} {...props} round={round} onAgain={() => setRound((r) => r + 1)} />;
-}
-
-function ChestFace({ tier, emblem }: { tier: ChestTier; emblem: string }) {
-  return (
-    <span className={`memory-chest tier-${tier}`} aria-hidden>
-      <span className="memory-chest-lid" />
-      <span className="memory-chest-body">{emblem}</span>
-    </span>
-  );
 }
 
 function MemoryRound({ profile, stage, subjects, breakDue, onHome, onStars, onChallengeResult, onChooseReward, onRoundCompleted, round, onAgain }: Props & { round: number; onAgain: () => void }) {

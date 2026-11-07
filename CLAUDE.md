@@ -43,14 +43,17 @@ npm run audio:generate  # (re)generate speech clips — see docs/audio.md
 npm run curriculum:sources -- --fetch  # re-download curriculum PDFs; git diff docs/curriculum/sources/text
 ```
 `?seed=N` in the URL forces a maze seed (reproducible bug reports); `?challenge=<typeId>` puts
-only that challenge type into the chests (review a new challenge quickly).
+only that challenge type into the chests (review a new challenge quickly); `?activity=<id>`
+(e.g. `jump`, `memory`) opens that activity right after choosing/creating a profile, without
+unlocking it first (review a new activity in a PR preview).
 
 ## Conventions
 - `src/core/` is pure TypeScript (ESLint enforces: no Three.js/React/presentation imports).
 - All randomness via `core/rng.ts`; never `Math.random()` in core.
 - New challenge type → `src/modules/challenges/<id>/` (see architecture §3.1), with
   `levelInfo` per level: stage range + competency ids from `src/content/curriculum/de-ni.ts`
-  (ADR-0009, research in `docs/curriculum/`).
+  (ADR-0009, research in `docs/curriculum/`), and a child-friendly topic name + icon in
+  `de.practice.topics` for the Rätselpfad (ADR-0011; a unit test checks it).
   New world → `src/modules/worlds/<id>/` + register in `modules/worlds/index.ts`.
   New activity (mini game) → follow the skill `.claude/skills/add-activity/` (ADR-0010).
 - Anything the child hears must be in `src/content/de/speech.ts` (templates with `variants`
