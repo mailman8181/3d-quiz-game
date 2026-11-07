@@ -1,0 +1,74 @@
+name: PR Preview (fork deploy)
+
+# Step 2 of 2 for PRs from forks (ADR-0013). Runs in the base repository with a write token,
+# so it never checks out or runs code from the PR: it only copies the built files.
+# The job uses the environment `fork-preview`, which must require a maintainer's approval:
+# preview pages run on the same origin as the real game (patst.github.io), so only reviewed
+# code may be published there. The first step refuses to deploy without that protection.
+on:
+  workflow_run:
+    workflows: ['PR Preview (fork build)']
+    types: [completed]
+
+permissions: {}
+
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name != github.repository
+    runs-on: ubuntu-latest
+    environment: fork-preview
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Require approval for fork previews
+        run: |
+          rules=$(gh api "repos/$REPO/environments/fork-preview" --jq '[.protection_rules[]?.type] | join(",")')
+          if [[ ",$rules," != *",required_reviewers,"* ]]; then
+            echo "::error::Environment 'fork-preview' has no required reviewers. Add them in Settings → Environments (ADR-0013)."
+            exit 1
+          fi
+      - uses: actions/download-artifact@v4
+        with:
+          name: fork-preview
+          path: preview
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - name: Check the PR number against the approved commit
+        id: pr
+        run: |
+          pr=$(tr -d '[:space:]' < preview/preview-meta/pr.txt)
+          if [[ ! "$pr" =~ ^[0-9]+$ ]]; then echo "::error::Bad PR number"; exit 1; fi
+          read -r sha fork state < <(gh api "repos/$REPO/pulls/$pr" --jq '[.head.sha, (.head.repo.full_name != .base.repo.full_name), .state] | @tsv')
+          if [[ "$sha" != "$HEAD_SHA" || "$fork" != "true" || "$state" != "open" ]]; then
+            echo "::error::Artifact does not belong to the open fork PR #$pr at $HEAD_SHA"; exit 1
+          fi
+          echo "number=$pr" >> "$GITHUB_OUTPUT"
+      - uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: preview/dist
+          target-folder: pr-preview/pr-${{ steps.pr.outputs.number }}
+          clean: true
+          force: false
+          commit-message: Deploy fork preview for PR ${{ steps.pr.outputs.number }} (${{ github.event.workflow_run.head_sha }})
+      - name: Comment the preview link
+        env:
+          PR: ${{ steps.pr.outputs.number }}
+        run: |
+          owner=${REPO%%/*}; name=${REPO#*/}
+          url="https://${owner}.github.io/${name}/pr-preview/pr-${PR}/"
+          body=$(printf '🔎 Preview (fork, approved by a maintainer): %s\n\nCommit: `%s`. Every new push needs a new approval.' "$url" "$HEAD_SHA")
+          gh pr comment "$PR" --repo "$REPO" --edit-last --body "$body" 2>/dev/null || gh pr comment "$PR" --repo "$REPO" --body "$body"

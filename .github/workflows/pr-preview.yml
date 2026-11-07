@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   preview:
-    # Fork PRs have no write token; skip them.
+    # Fork PRs have no write token here; they use the pr-preview-fork-* workflows (ADR-0013).
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:

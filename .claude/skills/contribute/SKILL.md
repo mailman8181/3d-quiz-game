@@ -44,5 +44,5 @@ Both must be green. For visible changes, look at the app at 390×844 and at desk
 ## Pull request
 Use `.github/pull_request_template.md`. Include: what and why, the design section / ADR, small
 choices you made (agents: list them), how you tested, a phone-width screenshot, and the review
-link (`https://patst.github.io/3d-quiz-game/pr-preview/pr-<N>/?…`, not available for forks).
+link (`https://patst.github.io/3d-quiz-game/pr-preview/pr-<N>/?…`, for forks only after a maintainer approved the preview).
 Commit messages and PR text in English. The owner reviews and merges with a merge commit.

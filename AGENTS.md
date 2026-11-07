@@ -20,7 +20,7 @@ animal friends). Play it: https://patst.github.io/3d-quiz-game/
 |---|---|---|
 | Game design (what we build) | `docs/game-design.md` | APPROVED, changes need owner sign-off (changelog at the end) |
 | Architecture (how we build it) | `docs/architecture.md` | APPROVED; §8 "As built" is the current state |
-| Decisions and their reasons | `docs/adr/` (0001–0012) | status in each ADR |
+| Decisions and their reasons | `docs/adr/` (0001–0013) | status in each ADR |
 | Roadmap / milestones | `docs/roadmap.md` | living |
 | Open questions for the owner | `docs/open-questions.md` | living |
 | Speech audio how-to | `docs/audio.md` | |
@@ -138,6 +138,7 @@ other agents should open the matching file before starting the task — they are
   (`?challenge=…` / `?activity=…`). Use the PR template.
 - CI runs lint, typecheck, unit tests, audio check and Playwright. PRs from branches of this
   repository get a preview at `https://patst.github.io/3d-quiz-game/pr-preview/pr-<N>/`
-  (ADR-0005); PRs from forks get no preview — attach screenshots instead.
+  (ADR-0005). PRs from forks get one too, after a maintainer reviewed the diff and approved
+  the deployment (ADR-0013); until then, attach screenshots.
 - Never commit secrets, tracking code, third-party runtime URLs or assets without a compatible
   licence (record licences in `ASSETS.md`; CC0 preferred).
