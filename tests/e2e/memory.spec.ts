@@ -21,7 +21,7 @@ const save = (mazesCompleted: number) => ({
 test('after 3 mazes exactly one new game is open, the mystery card counts the rest', async ({ page }) => {
   await seedSave(page, save(3));
   await page.getByRole('button', { name: /Testkind/ }).click();
-  await expect(page.locator('[data-activity]')).toHaveCount(1);
+  await expect(page.locator('[data-activity]:not([data-activity="practice"])')).toHaveCount(1);
   await expect(page.getByTestId('mystery-card')).toContainText('Noch 3 Runden');
 });
 
@@ -29,7 +29,7 @@ test('before 3 mazes the hub shows a mystery card instead of new games', async (
   await seedSave(page, save(2));
   await page.getByRole('button', { name: /Testkind/ }).click();
   await expect(page.getByTestId('mystery-card')).toContainText('Noch 1 Labyrinth');
-  await expect(page.locator('[data-activity]')).toHaveCount(0);
+  await expect(page.locator('[data-activity]:not([data-activity="practice"])')).toHaveCount(0);
 });
 
 test('memory: find all pairs, chest pairs open questions, the round is counted', async ({ page }) => {

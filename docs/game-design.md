@@ -63,6 +63,7 @@ rewards and adaptive levels.
 | Labyrinth | ✅ | walk the maze, chests on the way, rescue the animal at the goal |
 | Memory | ✅ M14b | flip cards and find pairs (picture cards say their name); **chest pairs** (tier colour + emblem ⭐❤️🌙🌸🍀) open a question. Upright grid by stage: Kita 2×4 (2 chests), Vorschule 3×4 (3), school 4×4 (4). Two different cards turn back after a short look or on the next tap; a skipped chest pair can be tapped again |
 | Hüpf-Abenteuer | ✅ M14c | side scroller with Rick: hold ⬅️/➡️ to walk (nothing moves without a press), ⬆️ to hop; arrow keys + Space on desktop. Chests stand on the path; **gold chests float on a cloud** — stand underneath and hop (no timing needed; tapping one explains it). Logs, stones and mushrooms: walking into one is a "Hoppla!" stumble, after a moment the avatar climbs over by itself. Flag at the end. Kita 3 chests / 3 obstacles, Vorschule 4/5, school 5/7 |
+| Rätselpfad | ✅ M14d (ADR-0011) | **practice without a game, always open**: "Was möchtest du üben?" → 🎲 Alles gemischt or a subject, then optionally one topic (picture tiles with spoken names, only what parents allow and the stage fits) → a path of stepping stones, one question each (opens by itself), the animal hops along, solved stones become flowers in the tier colour, skipped ones grey pebbles (tap to retry), "Schon die Hälfte!" once. Kita 5 / Vorschule 6 / school 8 questions; "Nochmal", "Etwas anderes üben", 🏠. No parents' switch (owner) |
 | Later ideas | — | Wimmelbild (hidden chests in a busy scene), river ride (3 lanes), bridge building, slow bubbles |
 
 ## 4a. Avatar & profiles
@@ -234,6 +235,7 @@ German challenges (planned next), more worlds/scenarios, multiplayer, teacher mo
 cloud sync, other languages, speech-recognition answers.
 
 ## Changelog
+- v1.28 (2026-11-07): M14d — Rätselpfad practice activity (§4b, ADR-0011), owner decisions: name, always open, 5/6/8 questions, optional topic step, no parents' switch.
 - v1.27 (2026-11-07): M14c — Hüpf-Abenteuer, the second activity (§4b).
 - v1.26 (2026-11-07): M14b — Memory, the first activity; hub shows unlocked activities and a mystery card; maze end dialog announces a new game.
 - v1.25 (2026-11-07): Activities (§4b, ADR-0010) — memory and side scroller planned; unlock after 3 mazes, then every 3 rounds, random order per child (owner).

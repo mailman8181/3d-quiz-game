@@ -149,6 +149,24 @@ From the side scroller (M14c), the first moving activity:
   first), and stops at the end dialog. Floating chests may be passed, so assert
   "≥ ground chests answered".
 
+From the Rätselpfad (M14d, ADR-0011), the first activity without a game around the questions:
+
+- **Exceptions belong in a new ADR**, not an edit of ADR-0010: here "always open"
+  (`ActivityDef.alwaysOpen`, kept out of `progressFor`), longer rounds and the topic filter.
+- **Filters go through the shared pipeline:** a new choice such as practice topics becomes an
+  optional field on `SelectionInput` and `ChestFlowOptions`, with the existing fallbacks, so a
+  round can never be empty. Don't filter chests inside the screen.
+- **Child-facing choices need spoken names.** Parents' names (`challengeNames`) are too
+  technical for children. Keep a separate child list (`de.practice.topics`) and enforce it
+  with a test over the registry.
+- **Auto-advancing activities:** open the next question in a timer effect keyed on
+  `flow.busy` and the next index, read `flow` through a ref, and let a tap on the next item
+  open it immediately. Call `onRoundCompleted` once (guard with a ref) when nothing is left.
+- **An always-open activity changes the hub:** E2E tests that count activity cards must
+  exclude it (`[data-activity]:not([data-activity="practice"])`).
+- The picker is a separate component; a round component keyed by `round` keeps "Nochmal"
+  (same choice) and "Etwas anderes üben" (back to the picker) simple.
+
 **Still to do**
 - The maze still has its own copy of the chest dialog, reward picker and break code. Move it
   onto `useChestFlow` when the maze is next changed.

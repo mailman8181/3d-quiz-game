@@ -10,4 +10,6 @@ export interface ActivityDef {
   chests(stage: StageId | null): number;
   /** Lowest stage that can play it; missing = everyone. */
   minStage?: StageId;
+  /** Open from the start, outside the random unlock order (ADR-0011, practice). */
+  alwaysOpen?: boolean;
 }

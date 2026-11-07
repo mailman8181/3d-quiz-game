@@ -50,6 +50,13 @@ describe('selectChallengeTypes', () => {
     expect(ids(selectChallengeTypes({ types: [reading], disabled: [], subjects: all, stage: 'kita' }))).toEqual(['read']);
   });
 
+  it('practice topics narrow the selection; unusable topics fall back (ADR-0011)', () => {
+    const ids = (r: ReturnType<typeof selectChallengeTypes>) => r.map((s) => s.type.id);
+    expect(ids(selectChallengeTypes({ types, disabled: [], subjects: all, stage: 'grade1', topics: ['read'] }))).toEqual(['read']);
+    // Disabled by parents → ignored, normal selection.
+    expect(ids(selectChallengeTypes({ types, disabled: ['read'], subjects: all, stage: 'grade1', topics: ['read'] }))).toEqual(['count', 'colors']);
+  });
+
   it('?challenge= forces one type regardless of filters', () => {
     const r = selectChallengeTypes({ types, disabled: ['read'], subjects: ['math'], stage: 'kita', only: 'read' });
     expect(r.map((s) => s.type.id)).toEqual(['read']);
