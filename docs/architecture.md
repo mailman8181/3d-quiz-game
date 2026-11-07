@@ -136,6 +136,7 @@ docs/ (game-design, architecture, adr/, roadmap, open-questions)
 | Challenge UI | `src/ui/challenges/` (`ChallengeDialog`, view registry, `CountView`, `AdditionView`) | answer buttons sorted ascending (number line) |
 | Test hooks | `data-test-route-chest`, `data-test-route-goal` (only with `?seed=`) | arrow-key routes for E2E |
 | Contributor guide (ADR-0012) | `AGENTS.md` (imported by `CLAUDE.md`), `CONTRIBUTING.md`, `.github/pull_request_template.md`, skills `.claude/skills/{contribute,add-challenge-type,add-activity,add-speech}/` | change rules/commands there in the same PR |
+| Fork PR previews (ADR-0013) | `.github/workflows/pr-preview-fork-{build,deploy,cleanup}.yml` | untrusted build → artifact → approved deploy (environment `fork-preview` with required reviewers) |
 | Rewards | `src/core/rewards/rewards.ts` (jar, offer, equip), `src/modules/rewards/catalog.ts`, `src/render/avatars/accessories.ts`, `src/render/trails.ts`, `src/ui/rewards/` | save v2 adds jar, pendingRewards, inventory, equipped |
 | Animal friends | `src/core/profile/lostAnimals.ts`, `src/render/avatars/lostAnimals.ts`, pet following in `MazeView.updatePet` | save v3 adds rescued, pet |
 | Parents area | `src/ui/parents/` (`ParentGate`, `ParentsArea`), `content/de/numbers.ts` | save v4 adds `settings` (speech); `setSpeechEnabled` in audio |

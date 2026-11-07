@@ -1,0 +1,39 @@
+name: PR Preview (fork build)
+
+# Step 1 of 2 for PRs from forks (ADR-0013). Builds the PR with a read-only token and no
+# secrets, and uploads the site as an artifact. Nothing is published here: the trusted
+# workflow `pr-preview-fork-deploy.yml` publishes it after a maintainer approved it.
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      # No npm cache on purpose: untrusted code must not write caches.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/pr-preview/pr-${{ github.event.number }}/
+      - name: Record which PR this is
+        run: |
+          mkdir -p preview-meta
+          echo "${{ github.event.number }}" > preview-meta/pr.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fork-preview
+          path: |
+            dist/
+            preview-meta/
+          retention-days: 3

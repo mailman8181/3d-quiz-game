@@ -17,4 +17,4 @@
 
 ## Review
 <!-- Preview link, e.g. https://patst.github.io/3d-quiz-game/pr-preview/pr-<N>/?challenge=<id>
-     (PRs from forks have no preview: add screenshots). -->
+     (PRs from forks get a preview after a maintainer approved it: add screenshots meanwhile). -->

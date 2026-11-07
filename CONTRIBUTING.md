@@ -33,4 +33,5 @@ New spoken sentences need audio clips generated with Piper (see [`docs/audio.md`
 If you can't run it, say so in the PR and a maintainer will add the clips.
 
 Open a pull request against `main` and fill in the template. Visible changes need a phone-width
-screenshot; PRs from this repository's branches also get a preview deployment.
+screenshot. Every PR gets a preview deployment; for PRs from forks a maintainer reviews the code
+and approves the preview first, because previews run on the same site as the real game.
