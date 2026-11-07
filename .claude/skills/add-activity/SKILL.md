@@ -167,6 +167,9 @@ From the Rätselpfad (M14d, ADR-0011), the first activity without a game around 
 - The picker is a separate component; a round component keyed by `round` keeps "Nochmal"
   (same choice) and "Etwas anderes üben" (back to the picker) simple.
 
-**Still to do**
-- The maze still has its own copy of the chest dialog, reward picker and break code. Move it
-  onto `useChestFlow` when the maze is next changed.
+**The maze uses it too** (since the maze refactor): `GameScreen` is a wrapper with a round
+counter around `MazeRound`. `useChestFlow` plans the chests, and `MazeSession` only places
+them (`ChestPlan = { chests: ChestContent[] }`). The maze uses the optional hooks `worldId`
+(that world's challenge list), `holdPicker` (no reward picker over its own goal dialog or
+wardrobe) and `onChestSolved`/`onChestSkipped` (update the 3D chests). Use the same hooks when an
+activity has its own dialogs or its own chest objects.
