@@ -127,7 +127,7 @@ docs/ (game-design, architecture, adr/, roadmap, open-questions)
 | Maze rules | `src/core/session/mazeSession.ts` | renderer asks for paths, reports arrivals → events |
 | Profiles & save | `src/core/profile`, `src/core/save` | versioned `SaveDoc` + `migrateSave`; IndexedDB store in `src/app/storage.ts`, key namespaced by `BASE_URL` |
 | 3D view | `src/render/MazeView.ts` | instanced hedges, inverted-hull outlines, toon gradient, tap-to-walk + keys, camera follow |
-| Avatars | `src/render/avatars/animals.ts` | procedural animals (ADR-0006) |
+| Avatars | `src/render/avatars/animals.ts`, `src/render/avatars/models.ts`, `public/models/*.glb` | glTF model per animal where one exists (cat), loaded in the background and swapped in place; procedural animals as fallback (ADR-0006, ADR-0014) |
 | Speech | `src/audio/speech.ts`, `src/audio/clipId.ts`, `public/audio/de/` | pre-generated whole-sentence clips (ADR-0007) → local Web Speech fallback |
 | Audio pipeline | `scripts/generate-audio.ts`, `scripts/check-audio.ts`, `docs/audio.md` | Piper, run locally; CI checks completeness |
 | World | `src/modules/worlds/forest` | theme colours + maze size |
@@ -143,7 +143,7 @@ docs/ (game-design, architecture, adr/, roadmap, open-questions)
 | Adaptive difficulty | `src/core/skills/skillModel.ts` (`recordOutcome`, `planChests`, tiers) | save v5 adds `skills` per challenge type; start levels come from the stage (ADR-0009) |
 | Views with own answers | `ChallengeViewEntry.ownsChoices` in `src/ui/challenges/index.ts` (compare, pattern); `ChallengeInstance.promptDisplay` hides spoken answers | `?challenge=<typeId>` limits chests to one type (review/E2E) |
 | German word bank | `src/content/de/words.ts` (word, emoji, syllables, initial, rhyme) used by `src/modules/challenges/german-*` | modules may read content data; consistency tests in `words.test.ts`; save v6 adds `disabledChallenges` |
-| PWA / offline | `vite.config.ts` (`vite-plugin-pwa`), `public/icons/`, clip fetch in `src/audio/speech.ts` | ADR-0008; no service worker on PR previews |
+| PWA / offline | `vite.config.ts` (`vite-plugin-pwa`), `public/icons/`, clip fetch in `src/audio/speech.ts` | ADR-0008; no service worker on PR previews; `public/models/*.glb` is precached (~350 KB per model, watch the size) |
 | Sound effects | `src/audio/sfx.ts` (Web Audio synth: jingles, fanfare, bloop, pling) | no audio files; `settings.sfx` toggle |
 | Maze levels | `src/core/progress/levels.ts` (`levelSpec`, `currentLevel`) | save v7 adds `levels` per world; world config only sets `braid` |
 | Worlds | `src/modules/worlds/{forest,underwater}`, `WorldTheme` (guide, lostAnimals, unlock, style hedge/coral, colours), `src/core/progress/worlds.ts`, `src/ui/worlds/WorldSelectScreen.tsx` | new world = module + register + content texts + lost-animal models |

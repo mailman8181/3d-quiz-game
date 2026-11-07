@@ -39,7 +39,8 @@ export default defineConfig({
       workbox: {
         // App shell is precached; voice clips are cached when first played (or via the
         // parents area "Für offline speichern").
-        globPatterns: ['**/*.{js,css,html,svg,png,json,woff2}'],
+        // .glb: hand-made avatar models (public/models/), small and needed offline.
+        globPatterns: ['**/*.{js,css,html,svg,png,json,woff2,glb}'],
         globIgnores: ['**/node_modules/**'],
         navigateFallbackDenylist: [/\/pr-preview\//],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,

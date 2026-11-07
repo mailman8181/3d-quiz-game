@@ -1,6 +1,7 @@
 # ADR-0006: Procedural comic avatars from primitives
 
-- **Status:** Accepted (agent decision, reversible)
+- **Status:** Accepted (agent decision, reversible); amended by ADR-0014 (glTF models per
+  animal, these procedural animals stay as fallback)
 - **Date:** 2026-10-31
 - **Deciders:** agent
 
