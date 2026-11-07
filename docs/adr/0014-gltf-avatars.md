@@ -1,6 +1,6 @@
 # ADR-0014: Hand-modelled glTF avatars, starting with the cat
 
-- **Status:** Proposed
+- **Status:** Proposed; amended by ADR-0015 (optional skeleton and `Idle`/`Walk` clips)
 - **Date:** 2026-11-07
 - **Deciders:** owner (proposal by Fabian)
 

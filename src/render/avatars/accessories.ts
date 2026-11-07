@@ -3,6 +3,7 @@ import type { AvatarAnimal } from '../../core/profile/profile';
 import type { Equipped } from '../../core/rewards/rewards';
 import { starGeometry } from '../props';
 import { addOutlines, disposeObject, toonMaterial } from '../toon';
+import { attachOutfitToBones } from './animation';
 import { hasAnimalModel } from './models';
 
 /** Where accessories sit on an animal built by `buildAnimal` (see animals.ts). */
@@ -177,6 +178,7 @@ export function buildOutfit(animal: AvatarAnimal, equipped: Equipped): THREE.Gro
     const item = build(a);
     // Hats are built for the procedural head; scale them around their own anchor point.
     if (slot === 'hat' && a.headScale !== 1) item.scale.multiplyScalar(a.headScale);
+    item.userData.slot = slot;
     outfit.add(item);
   }
   addOutlines(outfit, 0.02);
@@ -186,16 +188,20 @@ export function buildOutfit(animal: AvatarAnimal, equipped: Equipped): THREE.Gro
   return outfit;
 }
 
-/** Replaces the outfit of an animal group built by buildAnimal. */
+/**
+ * Replaces the outfit of an animal group built by buildAnimal. On an animated model the
+ * items live on the bones (attachOutfitToBones), so every `outfit` group is removed.
+ */
 export function setOutfit(root: THREE.Object3D, animal: AvatarAnimal, equipped: Equipped): void {
-  const old = root.getObjectByName('outfit');
-  if (old) {
-    root.remove(old);
-    disposeObject(old);
+  const old = root.getObjectsByProperty('name', 'outfit');
+  for (const o of old) {
+    o.removeFromParent();
+    disposeObject(o);
   }
   // Remembered so a model that finishes loading later keeps this outfit (animals.ts).
   root.userData.equipped = equipped;
   root.add(buildOutfit(animal, equipped));
+  attachOutfitToBones(root);
 }
 
 export const accessoryIds = Object.keys(builders);

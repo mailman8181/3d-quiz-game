@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import type { AvatarAnimal } from '../../core/profile/profile';
 
 /**
@@ -13,13 +14,21 @@ import type { AvatarAnimal } from '../../core/profile/profile';
  * Contract for a model file:
  * - stands on y=0, faces +z, about 1 unit tall (like the procedural animals);
  * - one mesh per colour, named by material: `Body` (tinted with the avatar colour),
- *   `Light` (belly/muzzle, a lighter shade of the avatar colour), `Dark`, `Pink`, `White`.
+ *   `Light` (belly/muzzle, a lighter shade of the avatar colour), `Dark`, `Pink`, `White`;
+ * - optional skeleton (skinned meshes) and animation clips named `Idle` and `Walk`
+ *   (ADR-0015, played by `animation.ts`).
  */
 const MODEL_FILES: Partial<Record<AvatarAnimal, string>> = {
   cat: 'models/cat.glb',
 };
 
 const cache = new Map<AvatarAnimal, THREE.Object3D>();
+const clipCache = new Map<AvatarAnimal, THREE.AnimationClip[]>();
+
+/** The model's animation clips (shared, read-only), empty for static or missing models. */
+export function animalModelClips(animal: AvatarAnimal): THREE.AnimationClip[] {
+  return clipCache.get(animal) ?? [];
+}
 const pending = new Set<AvatarAnimal>();
 const listeners = new Map<AvatarAnimal, Set<() => void>>();
 
@@ -28,14 +37,16 @@ export function hasAnimalModel(animal: AvatarAnimal): boolean {
 }
 
 /**
- * A fresh clone of the loaded model, or null if there is none (yet). The clone's meshes share
- * their geometry with the cache, so they are marked `sharedGeometry` and `disposeObject`
- * leaves the geometry alone (materials are replaced per avatar and are freed as usual).
+ * A fresh clone of the loaded model, or null if there is none (yet). Skinned models are cloned
+ * with SkeletonUtils so each clone gets its own bones (Object3D.clone would bind the clone to
+ * the cached skeleton). The clone's meshes share their geometry with the cache, so they are
+ * marked `sharedGeometry` and `disposeObject` leaves the geometry alone (materials are
+ * replaced per avatar and are freed as usual).
  */
 export function cloneAnimalModel(animal: AvatarAnimal): THREE.Object3D | null {
   const src = cache.get(animal);
   if (!src) return null;
-  const clone = src.clone(true);
+  const clone = cloneSkinned(src);
   clone.traverse((o) => {
     if (o instanceof THREE.Mesh) o.userData.sharedGeometry = true;
   });
@@ -54,12 +65,13 @@ export function onAnimalModelLoaded(animal: AvatarAnimal, cb: () => void): boole
   return true;
 }
 
-function settle(animal: AvatarAnimal, model: THREE.Object3D | null): void {
+function settle(animal: AvatarAnimal, model: THREE.Object3D | null, clips: THREE.AnimationClip[] = []): void {
   pending.delete(animal);
   const set = listeners.get(animal);
   listeners.delete(animal);
   if (!model) return;
   cache.set(animal, model);
+  clipCache.set(animal, clips);
   for (const cb of set ?? []) cb();
 }
 
@@ -75,7 +87,7 @@ export function preloadAnimalModels(): Promise<void> {
     pending.add(animal);
     try {
       const gltf = await loader.loadAsync(base + file);
-      settle(animal, gltf.scene);
+      settle(animal, gltf.scene, gltf.animations);
     } catch (err) {
       console.warn(`Avatar model ${file} could not be loaded, keeping the procedural animal.`, err);
       settle(animal, null);
@@ -89,8 +101,17 @@ export function preloadAnimalModels(): Promise<void> {
 export function markAnimalModelPending(animal: AvatarAnimal): void {
   pending.add(animal);
 }
-export function registerAnimalModel(animal: AvatarAnimal, model: THREE.Object3D | null): void {
-  if (pending.has(animal)) settle(animal, model);
-  else if (model) cache.set(animal, model);
-  else cache.delete(animal);
+export function registerAnimalModel(
+  animal: AvatarAnimal,
+  model: THREE.Object3D | null,
+  clips: THREE.AnimationClip[] = [],
+): void {
+  if (pending.has(animal)) settle(animal, model, clips);
+  else if (model) {
+    cache.set(animal, model);
+    clipCache.set(animal, clips);
+  } else {
+    cache.delete(animal);
+    clipCache.delete(animal);
+  }
 }
