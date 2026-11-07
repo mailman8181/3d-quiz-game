@@ -45,3 +45,11 @@ test('Hüpf-Abenteuer: walk, stumble over obstacles, answer chests, reach the fl
   expect(answered).toBeGreaterThanOrEqual(3 - high);
   await expect(done).toContainText('Geschafft!');
 });
+
+test('review link ?activity=jump opens the game without unlocking it', async ({ page }) => {
+  await page.goto('./?activity=jump');
+  await page.getByRole('radio', { name: /Frosch/ }).click();
+  await page.getByRole('button', { name: "Los geht's!" }).click();
+  await page.getByTestId('stage-screen').getByRole('button', { name: 'Später' }).click();
+  await expect(page.getByTestId('jump')).toBeVisible();
+});

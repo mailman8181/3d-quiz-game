@@ -43,7 +43,9 @@ npm run audio:generate  # (re)generate speech clips — see docs/audio.md
 npm run curriculum:sources -- --fetch  # re-download curriculum PDFs; git diff docs/curriculum/sources/text
 ```
 `?seed=N` in the URL forces a maze seed (reproducible bug reports); `?challenge=<typeId>` puts
-only that challenge type into the chests (review a new challenge quickly).
+only that challenge type into the chests (review a new challenge quickly); `?activity=<id>`
+(e.g. `jump`, `memory`) opens that activity right after choosing/creating a profile, without
+unlocking it first (review a new activity in a PR preview).
 
 ## Conventions
 - `src/core/` is pure TypeScript (ESLint enforces: no Three.js/React/presentation imports).

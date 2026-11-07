@@ -60,9 +60,11 @@ Write the answers into the PR description; put real open points into
    (docs/audio.md) and commit the clips.
 5. **Unlocking** is automatic. It uses the activity list and `core/progress/activities.ts`;
    no per-activity code.
-6. **Test hooks:** `data-*` attributes so E2E can find a chest deterministically (e.g. card
+6. **Review link:** `?activity=<id>` already opens any registered activity right after choosing or
+   creating a profile, without unlocking it. Put the link to the PR preview in the PR description.
+7. **Test hooks:** `data-*` attributes so E2E can find a chest deterministically (e.g. card
    ids, chest positions), plus `?seed=N` support.
-7. **Styles** in `src/styles.css` under a comment `/* Activity: <id> */`.
+8. **Styles** in `src/styles.css` under a comment `/* Activity: <id> */`.
 
 ## 3. Verify
 - `npm run check`, then `CI=1 npm run e2e`. Add an E2E test that unlocks the activity via a seeded save
