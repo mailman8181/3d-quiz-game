@@ -2,6 +2,11 @@ import { AdditionView } from './AdditionView';
 import { CompareView } from './CompareView';
 import { CountView } from './CountView';
 import { DiceView } from './DiceView';
+import { AreaView } from './AreaView';
+import { ChartView } from './ChartView';
+import { DivisionView } from './DivisionView';
+import { RoundingView } from './RoundingView';
+import { SolidsView } from './SolidsView';
 import { ChanceView } from './ChanceView';
 import { ClockView } from './ClockView';
 import { DoubleHalfView } from './DoubleHalfView';
@@ -60,6 +65,13 @@ export const challengeViews: Record<string, ChallengeViewEntry> = {
   'math.clock': { View: ClockView as ChallengeView, ownsChoices: true },
   'math.symmetry': { View: SymmetryView as ChallengeView, ownsChoices: true },
   'math.chance': { View: ChanceView as ChallengeView },
+  // Grades 3–4 math (M15a)
+  'math.division': { View: DivisionView as ChallengeView },
+  'math.units': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'math.rounding': { View: RoundingView as ChallengeView },
+  'math.area': { View: AreaView as ChallengeView },
+  'math.solids': { View: SolidsView as ChallengeView, ownsChoices: true },
+  'math.chart': { View: ChartView as ChallengeView, ownsChoices: true },
   // Grade 1–2 German pack (M13d): all quiz cards
   'german.article': { View: KnowledgeView as ChallengeView, ownsChoices: true },
   'german.plural': { View: KnowledgeView as ChallengeView, ownsChoices: true },

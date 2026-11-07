@@ -87,6 +87,13 @@ export const de = {
       'math.clock': { icon: '🕒', name: 'Uhrzeit' },
       'math.symmetry': { icon: '🦋', name: 'Spiegelbild' },
       'math.chance': { icon: '🎱', name: 'Sicher oder nicht?' },
+      'math.division': { icon: '➗', name: 'Teilen' },
+      'math.units': { icon: '📏', name: 'Einheiten' },
+      'math.rounding': { icon: '🎯', name: 'Runden' },
+      'math.area': { icon: '🟩', name: 'Fläche und Rand' },
+      'math.solids': { icon: '🧊', name: 'Körper' },
+      'math.chart': { icon: '📊', name: 'Diagramme' },
+
       'german.initial-sound': { icon: '🔤', name: 'Anfangsbuchstaben' },
       'german.syllables': { icon: '👏', name: 'Silben klatschen' },
       'german.rhyme': { icon: '🎵', name: 'Reime' },
@@ -409,8 +416,17 @@ export const de = {
   },
   /** Challenge type names for the parents area. */
   /** Grade 1–2 math pack (M13c): short labels inside task pictures. */
-  placeValue: { short: (tens: number, ones: number) => `${tens} Z ${ones} E` },
-  money: { euro: (n: number) => `${n}\u00a0€`, cent: (n: number) => `${n}\u00a0ct` },
+  placeValue: {
+    short: (tens: number, ones: number) => `${tens} Z ${ones} E`,
+    /** Column heads of the place-value table (grades 3–4). */
+    columns: { ZT: 'ZT', T: 'T', H: 'H', Z: 'Z', E: 'E' } as Record<string, string>,
+  },
+  money: {
+    euro: (n: number) => `${n}\u00a0€`,
+    cent: (n: number) => `${n}\u00a0ct`,
+    /** Cents as euros with a comma: 250 → "2,50 €" (grade 3). */
+    mixed: (cents: number) => `${Math.floor(cents / 100)},${String(cents % 100).padStart(2, '0')}\u00a0€`,
+  },
   chance: {
     answers: { certain: 'sicher', possible: 'möglich', impossible: 'unmöglich' },
     colours: { red: 'rot', blue: 'blau', yellow: 'gelb', green: 'grün' } as Record<string, string>,
@@ -450,6 +466,13 @@ export const de = {
     'math.clock': 'Uhrzeit',
     'math.symmetry': 'Spiegelbild',
     'math.chance': 'Sicher, möglich, unmöglich',
+    'math.division': 'Teilen',
+    'math.units': 'Einheiten umrechnen',
+    'math.rounding': 'Runden',
+    'math.area': 'Fläche und Umfang',
+    'math.solids': 'Körper',
+    'math.chart': 'Diagramme lesen',
+
     'german.article': 'Der, die, das',
     'german.plural': 'Einzahl und Mehrzahl',
     'german.word-type': 'Wortarten',

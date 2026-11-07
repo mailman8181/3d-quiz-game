@@ -47,7 +47,11 @@ import {
   withArticle,
 } from './grammar';
 import { BINS, FEELING_SITUATIONS, FEELINGS, FLOAT_ITEMS, JOBS, MONTHS, TRAFFIC_QUESTIONS, WASTE_ITEMS, WEEKDAYS } from './wissen';
-import { ALL_CLOCK_TIMES, clockSpoken, type ClockMinute } from './clock';
+import { ALL_CLOCK_TIMES, clockSpoken, DIGITAL_CLOCK_TIMES, type ClockMinute } from './clock';
+import { amount, CONVERSIONS } from './units';
+import { SOLID_PROPERTIES, SOLIDS } from './solids';
+import { divisionPairs } from '../../modules/challenges/math-division';
+import { CHART_FRUITS } from '../../modules/challenges/math-chart';
 import { timesPairs } from '../../modules/challenges/math-times';
 
 /** German names of countable objects: [singular, plural]. */
@@ -109,9 +113,23 @@ const positionVariants = () => POSITION_OBJECTS.flatMap((o) => POSITIONS.map((po
 const bondVariants = () => [
   ...range(3, 10).flatMap((total) => range(1, total - 1).map((known) => ({ total, known, answer: total - known }))),
   ...range(1, 9).map((t) => ({ total: 100, known: t * 10, answer: 100 - t * 10 })),
+  ...range(1, 9).map((t) => ({ total: 1000, known: t * 100, answer: 1000 - t * 100 })),
 ];
-const doubleNs = () => [...range(1, 10), 20, 30, 40, 50];
-const halfNs = () => [...range(1, 10).map((n) => n * 2), 40, 60, 80, 100];
+const doubleNs = () => [...range(1, 10), 20, 30, 40, 50, 100, 200, 300, 400, 500];
+const halfNs = () => [...range(1, 10).map((n) => n * 2), 40, 60, 80, 100, 200, 400, 600, 800, 1000];
+// Grades 3–4 math helpers (M15a).
+const conversion = (id: string | number | undefined) => CONVERSIONS.find((c) => c.id === id)!;
+const conversionVariants = () => CONVERSIONS.flatMap((c) => range(1, 9).map((n) => ({ conv: c.id, n })));
+const solid = (id: string | number | undefined) => SOLIDS.find((x) => x.id === id)!;
+const fruit = (id: string | number | undefined) => CHART_FRUITS.find((f) => f.id === id)!;
+const fruitPairs = () => CHART_FRUITS.flatMap((a) => CHART_FRUITS.filter((b) => b.id !== a.id).map((b) => ({ a: a.id, b: b.id })));
+const euroCents = (cents: number) => {
+  const e = Math.floor(cents / 100);
+  const c = cents % 100;
+  if (e === 0) return `${c} Cent`;
+  if (c === 0) return e === 1 ? 'ein Euro' : `${e} Euro`;
+  return `${e} Euro ${c}`;
+};
 const onesPhrase = (ones: number) => (ones === 0 ? 'keine Einer' : ones === 1 ? 'ein Einer' : `${ones} Einer`);
 const tensPhrase = (tens: number) => (tens === 1 ? 'ein Zehner' : `${tens} Zehner`);
 const chanceColours = () => Object.keys(de.chance.colours).map((colour) => ({ colour }));
@@ -558,6 +576,84 @@ export const speechTemplates: Record<string, Template> = {
     render: (p) => `Vor ${p.name} kommt ${p.answer}.`,
     variants: () => [...cyclicVariants(WEEKDAYS, 'before'), ...cyclicVariants(MONTHS, 'before')],
   },
+  // ── Grades 3–4 math (M15a) ──
+  'math.calc.explain-big': { render: () => 'Schau, so ist es richtig.', variants: none },
+  'math.place-value.prompt-hundreds': { render: () => 'Welche Zahl ist das? Zähle Hunderter, Zehner und Einer.', variants: none },
+  'math.place-value.prompt-place': {
+    render: (p) => `Welche Ziffer steht an der ${Number(p.place) === 3 ? 'Tausenderstelle' : 'Hunderterstelle'}?`,
+    variants: () => [{ place: 2 }, { place: 3 }],
+  },
+  'math.place-value.explain-big': { render: () => 'Schau in die Stellenwerttafel.', variants: none },
+  'math.clock.explain-digital': {
+    render: (p) => `Es ist ${clockSpoken(Number(p.hour), Number(p.minute), true)}.`,
+    variants: () => DIGITAL_CLOCK_TIMES.filter((t) => t.minute > 0),
+  },
+  'math.money.explain-mixed': {
+    render: (p) => `Das sind ${euroCents(Number(p.n))}.`,
+    variants: () => range(1, 100).map((n) => ({ n: n * 10 })),
+  },
+  'math.neighbors.prompt-after-big': { render: () => 'Welche Zahl kommt danach?', variants: none },
+  'math.neighbors.prompt-before-big': { render: () => 'Welche Zahl kommt davor?', variants: none },
+  'math.neighbors.explain-big': { render: () => 'Schau, so geht die Zahlenreihe weiter.', variants: none },
+  'math.even-odd.explain-even-big': { render: () => 'Die letzte Ziffer ist gerade. Also ist die Zahl gerade.', variants: none },
+  'math.even-odd.explain-odd-big': { render: () => 'Die letzte Ziffer ist ungerade. Also ist die Zahl ungerade.', variants: none },
+  'math.division.prompt': { render: (p) => `Was ist ${p.a} geteilt durch ${p.b}?`, variants: divisionPairs },
+  'math.division.explain': {
+    render: (p) => `${p.a} geteilt durch ${p.b} ist ${p.q}.`,
+    variants: () => divisionPairs().map(({ a, b }) => ({ a, b, q: a / b })),
+  },
+  'math.division.prompt-rest': { render: () => 'Teile mit Rest! Wie viel ist das?', variants: none },
+  'math.division.explain-rest': { render: () => 'Schau: So oft passt die Zahl hinein, und das bleibt als Rest übrig.', variants: none },
+  'math.units.prompt': {
+    render: (p) => {
+      const c = conversion(p.conv);
+      return `Wie viele ${c.to.many} sind ${amount(Number(p.n), c.from)}?`;
+    },
+    variants: conversionVariants,
+  },
+  'math.units.explain': {
+    render: (p) => {
+      const c = conversion(p.conv);
+      return `${amount(Number(p.n), c.from)} sind ${Number(p.n) * c.factor} ${c.to.many}.`;
+    },
+    variants: conversionVariants,
+  },
+  'math.rounding.prompt': {
+    render: (p) => `Runde auf ${Number(p.to) === 1000 ? 'Tausender' : Number(p.to) === 100 ? 'Hunderter' : 'Zehner'}!`,
+    variants: () => [{ to: 10 }, { to: 100 }, { to: 1000 }],
+  },
+  'math.rounding.explain-up': { render: () => 'Ab der Mitte wird aufgerundet.', variants: none },
+  'math.rounding.explain-down': { render: () => 'Vor der Mitte wird abgerundet.', variants: none },
+  'math.area.prompt-area': { render: () => 'Wie viele Kästchen groß ist die Fläche?', variants: none },
+  'math.area.prompt-perimeter': { render: () => 'Wie lang ist der Rand? Zähle die Kästchenseiten rundherum.', variants: none },
+  'math.area.explain-area': { render: (p) => `Die Fläche ist ${p.n} Kästchen groß.`, variants: () => range(1, 30).map((n) => ({ n })) },
+  'math.area.explain-perimeter': { render: (p) => `Der Rand ist ${p.n} Kästchenseiten lang.`, variants: () => range(4, 40).map((n) => ({ n })) },
+  'math.solids.prompt-name': { render: () => 'Wie heißt dieser Körper?', variants: none },
+  'math.solids.explain-name': { render: (p) => `Dieser Körper heißt ${solid(p.solid).name}.`, variants: () => SOLIDS.map((x) => ({ solid: x.id })) },
+  'math.solids.prompt-count': {
+    render: (p) => `Wie viele ${SOLID_PROPERTIES[p.ask as keyof typeof SOLID_PROPERTIES]} hat ${solid(p.solid).withArticle}?`,
+    variants: () => SOLIDS.filter((x) => x.counts).flatMap((x) => (['corners', 'edges', 'faces'] as const).map((ask) => ({ solid: x.id, ask }))),
+  },
+  'math.solids.explain-count': {
+    render: (p) => {
+      const x = solid(p.solid);
+      const ask = p.ask as keyof typeof SOLID_PROPERTIES;
+      return `${capitalize(x.withArticle)} hat ${x.counts?.[ask] ?? 0} ${SOLID_PROPERTIES[ask]}.`;
+    },
+    variants: () => SOLIDS.filter((x) => x.counts).flatMap((x) => (['corners', 'edges', 'faces'] as const).map((ask) => ({ solid: x.id, ask }))),
+  },
+  'math.chart.prompt-most': { render: () => 'Welches Obst mögen die meisten Kinder?', variants: none },
+  'math.chart.explain-most': { render: (p) => `Die meisten Kinder mögen ${fruit(p.fruit).plural}.`, variants: () => CHART_FRUITS.map((f) => ({ fruit: f.id })) },
+  'math.chart.prompt-count': { render: (p) => `Wie viele Kinder mögen ${fruit(p.fruit).plural}?`, variants: () => CHART_FRUITS.map((f) => ({ fruit: f.id })) },
+  'math.chart.explain-count': {
+    render: (p) => `${p.n} Kinder mögen ${fruit(p.fruit).plural}.`,
+    variants: () => CHART_FRUITS.flatMap((f) => range(2, 9).map((n) => ({ fruit: f.id, n }))),
+  },
+  'math.chart.prompt-diff': { render: (p) => `Wie viele Kinder mehr mögen ${fruit(p.a).plural} als ${fruit(p.b).plural}?`, variants: fruitPairs },
+  'math.chart.explain-diff': {
+    render: (p) => `${p.n} ${Number(p.n) === 1 ? 'Kind mag' : 'Kinder mögen'} lieber ${fruit(p.a).plural} als ${fruit(p.b).plural}.`,
+    variants: () => fruitPairs().flatMap((x) => range(1, 7).map((n) => ({ ...x, n }))),
+  },
   'feedback.tryAgain': { render: () => 'Fast! Versuch es nochmal.', variants: none },
   'feedback.hint': { render: () => 'Ich helfe dir. Schau genau hin!', variants: none },
   'feedback.skipQuestion': { render: () => 'Möchtest du diese Aufgabe wirklich überspringen?', variants: none },
@@ -624,6 +720,8 @@ export const staticSpokenTexts: readonly string[] = [
   ...BODY_PARTS.map((b) => b.word),
   // Grade 1–2 math pack: clock answer cards.
   ...ALL_CLOCK_TIMES.map((t) => clockSpoken(t.hour, t.minute)),
+  ...DIGITAL_CLOCK_TIMES.map((t) => clockSpoken(t.hour, t.minute, true)),
+  ...SOLIDS.map((x) => x.name),
   // Grade 1–2 German pack: speaker buttons on word cards.
   ...VERBS,
   ...ADJECTIVES,

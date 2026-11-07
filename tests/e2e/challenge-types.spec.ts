@@ -33,6 +33,12 @@ for (const type of [
   'german.riddle',
   // Wissen pack (M13e): quiz cards; one representative.
   'knowledge.feelings',
+  // Grades 3–4 math (M15a): the new views.
+  'math.rounding',
+  'math.area',
+  'math.solids',
+  'math.chart',
+  'math.division',
 ]) {
   test(`${type}: open a chest and answer until finished`, async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== 'desktop', 'one viewport is enough per type');

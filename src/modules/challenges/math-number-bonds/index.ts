@@ -20,6 +20,8 @@ const LEVELS = [
   { totals: [10], step: 1, choices: 4, dots: true },
   { totals: [5, 6, 7, 8, 9, 10], step: 1, choices: 4, dots: false },
   { totals: [100], step: 10, choices: 4, dots: false },
+  // M15 (grade 3): make 1000 with hundreds.
+  { totals: [1000], step: 100, choices: 4, dots: false },
 ] as const;
 
 export const mathNumberBonds: ChallengeType<NumberBondsData> = {
@@ -32,6 +34,7 @@ export const mathNumberBonds: ChallengeType<NumberBondsData> = {
     lv('grade1', 'grade1', 'ni.ma2.zerlegen', 'ni.ma2.einspluseins'),
     lv('grade1', 'grade2', 'ni.ma2.zerlegen'),
     lv('grade2', 'grade2', 'ni.ma2.zerlegen', 'ni.ma2.zahlen-100'),
+    lv('grade3', 'grade3', 'ni.ma4.zahlen', 'ni.ma4.rechnen'),
   ],
   generate({ rng, level }) {
     const cfg = LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1]!;
@@ -42,7 +45,7 @@ export const mathNumberBonds: ChallengeType<NumberBondsData> = {
     const { choices, correctChoiceId } =
       cfg.step === 1
         ? numberChoices(rng, answer, cfg.choices, 1, total - 1)
-        : tensChoices(rng.shuffle([10, 20, 30, 40, 50, 60, 70, 80, 90].filter((v) => v !== answer)).slice(0, cfg.choices - 1), answer);
+        : tensChoices(rng.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => d * cfg.step).filter((v) => v !== answer)).slice(0, cfg.choices - 1), answer);
     return {
       typeId: 'math.number-bonds',
       level,

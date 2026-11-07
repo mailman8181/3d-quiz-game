@@ -1,4 +1,4 @@
-import { numberChoices } from '../../../core/challenges/choices';
+import { bigNumberChoices, numberChoices } from '../../../core/challenges/choices';
 import { type ChallengeInstance, type ChallengeType, lv } from '../../../core/challenges/types';
 import type { Rng } from '../../../core/rng';
 import { HUNDRED_FROM_LEVEL } from '../math-addition';
@@ -76,6 +76,26 @@ const LEVELS: readonly Level[] = [
     choices: 4,
     max: 99,
   },
+  // 9–10 (M15, grades 3–4): three-digit differences, then up to 100 000.
+  {
+    pick: (rng) => {
+      const a = rng.int(200, 999);
+      return [a, rng.int(11, a - 50)];
+    },
+    pictures: false,
+    choices: 4,
+    max: 999,
+  },
+  {
+    pick: (rng) => {
+      const a = rng.int(2000, 99_999);
+      return [a, rng.int(150, Math.min(9999, a - 500))];
+    },
+    pictures: false,
+    choices: 4,
+    max: 99_999,
+  },
+
 ];
 
 function minuend(rng: Rng, min: number, max: number): [number, number] {
@@ -95,15 +115,19 @@ export const mathSubtraction: ChallengeType<SubtractionData> = {
     lv('grade1', 'grade2', 'ni.ma2.einspluseins'),
     lv('grade1', 'grade2', 'ni.ma2.einspluseins'),
     lv('grade2', 'grade2', 'ni.ma2.subtraktion-100'),
-    lv('grade2', undefined, 'ni.ma2.subtraktion-100'),
-    lv('grade2', undefined, 'ni.ma2.subtraktion-100'),
+    lv('grade2', 'grade3', 'ni.ma2.subtraktion-100'),
+    lv('grade2', 'grade3', 'ni.ma2.subtraktion-100'),
+    lv('grade3', 'grade4', 'ni.ma4.rechnen'),
+    lv('grade4', undefined, 'ni.ma4.rechnen'),
   ],
   generate({ rng, level }): ChallengeInstance<SubtractionData> {
     const cfg = LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1]!;
     const [a, b] = cfg.pick(rng);
     const difference = a - b;
     const object = rng.pick(COUNT_OBJECTS);
-    const { choices, correctChoiceId } = numberChoices(rng, difference, cfg.choices, 0, cfg.max);
+    // Big numbers (grades 3–4): place-value distractors instead of ±1.
+    const { choices, correctChoiceId } =
+      cfg.max > 99 ? bigNumberChoices(rng, difference, cfg.choices, 0, cfg.max) : numberChoices(rng, difference, cfg.choices, 0, cfg.max);
     return {
       typeId: 'math.subtraction',
       level,
@@ -111,7 +135,11 @@ export const mathSubtraction: ChallengeType<SubtractionData> = {
       choices,
       correctChoiceId,
       ...(level >= HUNDRED_FROM_LEVEL
-        ? { prompt: { key: 'math.calc100.prompt' }, explanation: { key: 'math.calc100.explain', params: { n: difference } } }
+        ? {
+            prompt: { key: 'math.calc100.prompt' },
+            // Above 99 the result is shown on screen; one generic sentence instead of a clip per number.
+            explanation: difference > 99 ? { key: 'math.calc.explain-big' } : { key: 'math.calc100.explain', params: { n: difference } },
+          }
         : {
             prompt: { key: 'math.subtraction.prompt', params: { a, b } },
             explanation: { key: 'math.subtraction.explain', params: { a, b, difference } },

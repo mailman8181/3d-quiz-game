@@ -26,6 +26,7 @@ voice → Thorsten high).
 | **M11 New categories** | a) Olli zeigt den Weg · b) Wissen: Tiernamen, Tierbabys, Farben & Formen, Jahreszeiten & Wetter, Was gehört nicht dazu? · c) child chooses subjects per session within parents' selection | ✅ PRs |
 | **M13 Curriculum stages** | Learner stage on the profile, stage + competency tags on challenge levels (ADR-0009); content packs: a) stage model + migration, b) preschool pack, c) grade 1–2 math (KC), d) grade 1–2 German (KC). Research: `docs/curriculum/niedersachsen.md` | a–d) ✅ · e) Wissen pack 🔨 PR; scope kita – grade 2 |
 | **M14 Activities** | More ways to find chests (ADR-0010): a) ADR + design + agent skill, b) activity framework + Memory, c) Hüpf-Abenteuer (side scroller); later Wimmelbild, river ride … | a) ✅ · b) Memory ✅ · c) Hüpf-Abenteuer 🔨 PR · d) Rätselpfad 🔨 PR |
+| **M15 Grades 3–4** | KC end of Jg. 4 content (owner): a) math (extended levels + Teilen, Einheiten, Runden, Fläche/Umfang, Körper, Diagramme), b) German, c) Wissen | a) math 🔨 PR · b) German · c) Wissen |
 | **M12 Voice upgrade** | Paid/licensed TTS at build time (e.g. Azure; child voice "Gisela"), letter sounds | parked — owner keeps it in mind |
 
 Further ideas: "Olli zeigt den Weg" (hint arrow towards the goal in big mazes), word bank → 150 words, parents' progress over time, world map / journey.

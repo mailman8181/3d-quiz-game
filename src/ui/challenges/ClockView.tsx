@@ -32,7 +32,7 @@ export function ClockView({ data, solved, answers }: ChallengeViewProps<ClockDat
           const choiceId = `c${i}`;
           const wrong = answers?.wrongChoiceIds.includes(choiceId);
           const correct = solved && answers?.correctChoiceId === choiceId;
-          const spoken = clockSpoken(t.hour, t.minute);
+          const spoken = clockSpoken(t.hour, t.minute, data.digital);
           return (
             <div key={i} className={`picture-choice ${wrong ? 'wrong' : ''} ${correct ? 'correct' : ''}`}>
               <button
@@ -41,7 +41,7 @@ export function ClockView({ data, solved, answers }: ChallengeViewProps<ClockDat
                 aria-label={spoken}
                 onClick={() => answers?.onChoose(choiceId)}
               >
-                {clockLabel(t.hour, t.minute)}
+                {clockLabel(t.hour, t.minute, data.digital)}
               </button>
               <button className="say-word" aria-label={`${de.challenge.listen}: ${spoken}`} onClick={() => speech().speak(spoken)}>
                 🔊

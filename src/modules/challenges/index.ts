@@ -17,6 +17,12 @@ import { mathFindNumber } from './math-find-number';
 import { mathPattern } from './math-pattern';
 import { mathSubtraction } from './math-subtraction';
 import { mathDice } from './math-dice';
+import { mathDivision } from './math-division';
+import { mathUnits } from './math-units';
+import { mathRounding } from './math-rounding';
+import { mathArea } from './math-area';
+import { mathSolids } from './math-solids';
+import { mathChart } from './math-chart';
 import {
   knowledgeCalendar,
   knowledgeFeelings,
@@ -83,6 +89,12 @@ export const challengeTypes: readonly ChallengeType[] = [
   mathClock,
   mathSymmetry,
   mathChance,
+  mathDivision,
+  mathUnits,
+  mathRounding,
+  mathArea,
+  mathSolids,
+  mathChart,
   germanInitialSound,
   germanSyllables,
   germanRhyme,

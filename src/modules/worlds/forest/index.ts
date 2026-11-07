@@ -46,6 +46,13 @@ export const forestWorld: WorldTheme = {
       'math.clock',
       'math.symmetry',
       'math.chance',
+      // Grades 3–4 math (M15a)
+      'math.division',
+      'math.units',
+      'math.rounding',
+      'math.area',
+      'math.solids',
+      'math.chart',
       // Grade 1–2 German pack (M13d)
       'german.article',
       'german.plural',

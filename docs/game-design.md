@@ -13,6 +13,10 @@ collectible rewards. The child should feel like an *explorer*, not a *test-taker
 Both pre-readers (5) and early readers (6–7) are supported. Baseline assumption for v1:
 a 5-year-old recognises some digits and can do very easy addition.
 
+**Widened (owner, 2026-11-07, M15):** content goes up to **4. Klasse (about age 10)**, so
+children keep finding fitting tasks when their stage moves up each 1 August. The design rules
+below still apply to everyone; older children mainly get harder content, not a different game.
+
 | Fact about 5–7 year olds | Design consequence |
 |---|---|
 | Many cannot read yet or read slowly | Every instruction is **spoken** (German) **and** shown as text. "Vorlesen" is on by default. Answers are tapped (numbers, pictures), never typed. |
@@ -190,6 +194,25 @@ instruction is spoken.
 Feelings: every explanation adds "Alle Gefühle sind in Ordnung" / "Das ist in Ordnung"; situations
 are everyday and blame-free. Healthy food is left out on purpose (no good/bad food judgements).
 
+**Grades 3–4 math (M15a)** (KC Mathematik, Ende Jg. 4). Existing types got new levels so skill
+progress carries over; big numbers are spoken generically ("Rechne aus!", "Schau, so ist es
+richtig.") with the numbers on screen.
+
+| Type | Grade 3–4 content |
+|---|---|
+| Zehner und Einer (+ levels) | hundreds plates up to 999 → which digit is at the hundreds/thousands place (up to 99 999), place-value table |
+| Plus / Minus (+ levels) | three-digit up to 1000 → up to 100 000; distractors are place-value mistakes (±10, ±100, swapped digits) |
+| Einmaleins (+ level) | the whole small 1×1 |
+| Uhrzeit (+ level) | every 5 minutes, read like a digital clock ("3:25 Uhr") |
+| Geld (+ level) | euros and cents with a comma (2,50 €) |
+| Nachbarzahlen, Zahlenhaus, Verdoppeln, Gerade/ungerade, Spiegelbild (+ levels) | up to 1000 (…99 → …00, 1000 = 300 + ?, 400 · 2), bigger mirror figures |
+| Teilen (new) | sharing out with pictures → 1×1 reversed → with remainder ("17 : 5 = 3 R 2") |
+| Einheiten umrechnen (new) | m→cm, h→min, €→ct, then km→m, kg→g, l→ml, min→s |
+| Runden (new) | on a number line to tens, hundreds, thousands; exactly 5 rounds up |
+| Fläche und Umfang (new) | figures on squared paper: count squares, then the border |
+| Körper (new) | name the drawn solid (Würfel … Pyramide, Kegel), then Ecken/Kanten/Flächen |
+| Diagramme lesen (new) | pictogram → bar chart → "Wie viele Kinder mehr …?" |
+
 Plus/Minus above 20 is spoken generically ("Rechne aus! Wie viel ist das?" / "Das Ergebnis ist 39.")
 with the equation on screen: one clip per sentence (ADR-0007) would need thousands of clips for every
 pair up to 100. Reading two-digit numbers is itself a grade-2 goal.
@@ -235,6 +258,7 @@ German challenges (planned next), more worlds/scenarios, multiplayer, teacher mo
 cloud sync, other languages, speech-recognition answers.
 
 ## Changelog
+- v1.29 (2026-11-07): Owner decision: content for 3. and 4. Klasse (M15, target widened to about age 10). Without it a child moving into 3. Klasse would find only 3 task types.
 - v1.28 (2026-11-07): M14d — Rätselpfad practice activity (§4b, ADR-0011), owner decisions: name, always open, 5/6/8 questions, optional topic step, no parents' switch.
 - v1.27 (2026-11-07): M14c — Hüpf-Abenteuer, the second activity (§4b).
 - v1.26 (2026-11-07): M14b — Memory, the first activity; hub shows unlocked activities and a mystery card; maze end dialog announces a new game.

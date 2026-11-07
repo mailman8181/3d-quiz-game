@@ -18,6 +18,8 @@ const LEVELS = [
   { asks: ['half'], max: 10, dots: true, choices: 3 },
   { asks: ['double', 'half'], max: 20, dots: false, choices: 4 },
   { asks: ['double', 'half'], max: 100, dots: false, choices: 4 },
+  // M15 (grade 3): hundreds (300 → 600, half of 800).
+  { asks: ['double', 'half'], max: 1000, dots: false, choices: 4 },
 ] as const;
 
 export const mathDoubleHalf: ChallengeType<DoubleHalfData> = {
@@ -30,18 +32,20 @@ export const mathDoubleHalf: ChallengeType<DoubleHalfData> = {
     lv('grade1', 'grade1', 'ni.ma2.doppelt-haelfte'),
     lv('grade1', 'grade2', 'ni.ma2.doppelt-haelfte'),
     lv('grade2', 'grade2', 'ni.ma2.doppelt-haelfte', 'ni.ma2.zahlen-100'),
+    lv('grade3', 'grade3', 'ni.ma4.rechnen'),
   ],
   generate({ rng, level }) {
     const cfg = LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1]!;
     const ask = rng.pick(cfg.asks);
     // Level 4: doubles of tens and halves of even tens (40 → 20, 30 → 60).
-    const tens = cfg.max === 100;
+    const tens = cfg.max >= 100;
+    const unit = cfg.max / 10; // 10 for up to 100, 100 for up to 1000
     let n: number;
-    if (ask === 'double') n = tens ? rng.int(1, 5) * 10 : rng.int(1, cfg.max / 2);
-    else n = tens ? rng.int(1, 5) * 20 : rng.int(1, cfg.max / 2) * 2;
+    if (ask === 'double') n = tens ? rng.int(1, 5) * unit : rng.int(1, cfg.max / 2);
+    else n = tens ? rng.int(1, 5) * unit * 2 : rng.int(1, cfg.max / 2) * 2;
     const answer = ask === 'double' ? n * 2 : n / 2;
     const { choices, correctChoiceId } = tens
-      ? spread(rng.shuffle([10, 20, 30, 40, 50, 60, 70, 80, 90, 100].filter((v) => v !== answer)).slice(0, cfg.choices - 1), answer)
+      ? spread(rng.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((d) => d * unit).filter((v) => v !== answer)).slice(0, cfg.choices - 1), answer)
       : numberChoices(rng, answer, cfg.choices, 1, cfg.max);
     return {
       typeId: 'math.double-half',

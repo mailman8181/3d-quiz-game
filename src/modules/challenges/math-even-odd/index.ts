@@ -1,4 +1,4 @@
-import { type ChallengeType, lv } from '../../../core/challenges/types';
+import { type ChallengeInstance, type ChallengeType, lv } from '../../../core/challenges/types';
 import { arrange, clampLevel, quizChoices, type QuizData } from '../knowledge/common';
 
 /**
@@ -10,6 +10,8 @@ const LEVELS = [
   { max: 10, pairs: true },
   { max: 20, pairs: false },
   { max: 100, pairs: false },
+  // M15 (grade 3): up to 1000 — only the last digit counts.
+  { max: 1000, pairs: false },
 ] as const;
 
 export const mathEvenOdd: ChallengeType<QuizData> = {
@@ -21,8 +23,9 @@ export const mathEvenOdd: ChallengeType<QuizData> = {
     lv('grade1', 'grade1', 'ni.ma2.gerade'),
     lv('grade1', 'grade2', 'ni.ma2.gerade'),
     lv('grade2', 'grade2', 'ni.ma2.gerade', 'ni.ma2.zahlen-100'),
+    lv('grade3', 'grade3', 'ni.ma4.zahlen'),
   ],
-  generate({ rng, level }) {
+  generate({ rng, level }): ChallengeInstance<QuizData> {
     const cfg = LEVELS[clampLevel(level, LEVELS.length) - 1]!;
     const ask = rng.pick(['even', 'odd'] as const);
     const isAsked = (n: number) => (n % 2 === 0) === (ask === 'even');
@@ -44,7 +47,7 @@ export const mathEvenOdd: ChallengeType<QuizData> = {
       choices: quizChoices(options),
       correctChoiceId: `c${correctIndex}`,
       prompt: { key: `math.even-odd.prompt-${ask}` },
-      explanation: { key: `math.even-odd.explain-${ask}`, params: { n: target } },
+      explanation: target > 100 ? { key: `math.even-odd.explain-${ask}-big` } : { key: `math.even-odd.explain-${ask}`, params: { n: target } },
     };
   },
 };

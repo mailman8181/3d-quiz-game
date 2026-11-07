@@ -42,7 +42,7 @@ export interface SelectionInput {
   /** Subjects chosen for this session. */
   subjects: readonly SubjectId[];
   stage: StageId | null;
-  /** Review/test override (`?challenge=<typeId>`): only this type, ignoring all filters. */
+  /** Review/test override (`?challenge=<typeId>`): only this type, ignoring the other filters. */
   only?: string | null;
   /** Practice topics (ADR-0011): only these type ids, after the other filters. */
   topics?: readonly string[];
@@ -62,8 +62,12 @@ export function selectChallengeTypes(input: SelectionInput): SelectedType[] {
     });
 
   if (input.only) {
+    // Review link: this type only, at the child's stage when it fits, otherwise all levels.
     const forced = input.types.filter((t) => t.id === input.only);
-    if (forced.length > 0) return withWindow(forced, null);
+    if (forced.length > 0) {
+      const atStage = withWindow(forced, input.stage);
+      return atStage.length > 0 ? atStage : withWindow(forced, null);
+    }
   }
   const filtered = input.types.filter((t) => !input.disabled.includes(t.id) && input.subjects.includes(t.subject));
   const topical = input.topics?.length ? filtered.filter((t) => input.topics!.includes(t.id)) : [];

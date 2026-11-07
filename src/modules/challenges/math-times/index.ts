@@ -18,18 +18,12 @@ export interface TimesData {
 export const CORE_FACTORS = [1, 2, 5, 10] as const;
 
 export function timesPairs(): { a: number; b: number }[] {
-  const pairs = new Map<string, { a: number; b: number }>();
-  for (let a = 1; a <= 10; a++) {
-    for (const b of CORE_FACTORS) {
-      pairs.set(`${a}x${b}`, { a, b });
-      pairs.set(`${b}x${a}`, { a: b, b: a });
-    }
-    pairs.set(`${a}x${a}`, { a, b: a });
-  }
-  return [...pairs.values()];
+  // Since M15 the whole small 1×1 (grade 3), so every pair from 1·1 to 10·10.
+  return Array.from({ length: 10 }, (_, i) => i + 1).flatMap((a) => Array.from({ length: 10 }, (_, j) => ({ a, b: j + 1 })));
 }
 
 const LEVELS: readonly { pick: (rng: Rng) => [number, number]; pictures: boolean; choices: number }[] = [
+
   // ×2 and ×10 with pictures, a ≤ 5
   { pick: (rng) => [rng.int(1, 5), rng.pick([2, 10])], pictures: true, choices: 3 },
   // ×5 and ×1 with pictures
@@ -52,6 +46,8 @@ const LEVELS: readonly { pick: (rng: Rng) => [number, number]; pictures: boolean
     pictures: false,
     choices: 4,
   },
+  // 5 (M15, grade 3): the whole small 1×1, both factors 2–10.
+  { pick: (rng) => [rng.int(2, 10), rng.int(2, 10)], pictures: false, choices: 4 },
 ];
 
 export const mathTimes: ChallengeType<TimesData> = {
@@ -62,8 +58,9 @@ export const mathTimes: ChallengeType<TimesData> = {
   levelInfo: [
     lv('grade2', 'grade2', 'ni.ma2.mal'),
     lv('grade2', 'grade2', 'ni.ma2.mal'),
-    lv('grade2', undefined, 'ni.ma2.einmaleins'),
-    lv('grade2', undefined, 'ni.ma2.einmaleins'),
+    lv('grade2', 'grade3', 'ni.ma2.einmaleins'),
+    lv('grade2', 'grade3', 'ni.ma2.einmaleins'),
+    lv('grade3', undefined, 'ni.ma4.einmaleins'),
   ],
   generate({ rng, level }) {
     const cfg = LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1]!;
