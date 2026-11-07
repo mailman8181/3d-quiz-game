@@ -16,14 +16,18 @@ export const TAP_WALK: DirectWalkOptions = { maxSteps: 6, maxDetour: 0 };
 
 export type ChestState = 'closed' | 'solved' | 'skipped';
 
-export interface Chest {
-  id: string;
-  tile: Tile;
-  state: ChestState;
+/** What a chest holds, in any activity (ADR-0010). */
+export interface ChestContent {
   challenge: ChallengeInstance;
   tier: ChestTier;
   /** Stars for solving with at most one wrong try (game-design §7). */
   stars: number;
+}
+
+export interface Chest extends ChestContent {
+  id: string;
+  tile: Tile;
+  state: ChestState;
 }
 
 /** What each chest of a maze contains (see core/skills planChests). */

@@ -8,12 +8,15 @@ import { addProfile, migrateSave, removeProfile, setActiveProfile, updateProfile
 import { MAX_NAME_LENGTH } from '../core/profile/profile';
 import { fillJar, toggleEquip } from '../core/rewards/rewards';
 import { autoPlace, placeDecor, removeDecor, type TreehouseSpot } from '../core/rewards/treehouse';
-import { initialSkill, recordOutcome } from '../core/skills/skillModel';
+import { initialSkill, recordOutcome, type ChallengeOutcome } from '../core/skills/skillModel';
+import type { Profile } from '../core/profile/profile';
 import { challengeTypes, getChallengeType } from '../modules/challenges';
 import { allowedSubjects, sessionSubjects, toggleSubject } from '../core/challenges/subjects';
 import { levelWindow, typesForStage } from '../core/challenges/selection';
 import { createLearner, currentStage, type StageId } from '../core/learner/stage';
 import { StageScreen } from '../ui/screens/StageScreen';
+import { MemoryScreen } from '../ui/activities/MemoryScreen';
+import { progressFor } from '../modules/activities';
 import type { SubjectId } from '../core/challenges/types';
 import { WorldSelectScreen } from '../ui/worlds/WorldSelectScreen';
 import { TreehouseScreen } from '../ui/treehouse/TreehouseScreen';
@@ -31,8 +34,30 @@ type Screen =
   | { name: 'game'; worldId: string }
   | { name: 'treehouse' }
   | { name: 'parents' }
+  | { name: 'activity'; id: string }
   /** One-time "Kindergarten oder Schule?" (ADR-0009), then continue to `next`. */
   | { name: 'stage'; next: 'game' | 'worlds' };
+
+/** A chosen reward goes into the inventory and is worn or placed right away. */
+function chooseReward(p: Profile, itemId: string | null): Profile {
+  const item = itemId ? getRewardItem(itemId) : undefined;
+  return {
+    ...p,
+    pendingRewards: Math.max(0, p.pendingRewards - 1),
+    inventory: item && !p.inventory.includes(item.id) ? [...p.inventory, item.id] : p.inventory,
+    // A new item is worn right away (or placed in the tree house) so the child sees it.
+    equipped: item && item.slot !== 'decor' ? { ...p.equipped, [item.slot]: item.id } : p.equipped,
+    treehouse: item?.slot === 'decor' ? autoPlace(p.treehouse, item.id) : p.treehouse,
+  };
+}
+
+/** Skill model update for one answered chest, limited to the stage window (ADR-0009). */
+function recordChallenge(p: Profile, typeId: string, level: number, outcome: ChallengeOutcome, stage: StageId | null): Profile {
+  const type = getChallengeType(typeId);
+  const range = levelWindow(type, stage) ?? { startLevel: 1, maxLevel: type.levels };
+  const current = p.skills[typeId] ?? initialSkill(range.startLevel);
+  return { ...p, skills: { ...p.skills, [typeId]: recordOutcome(current, outcome, level, range.maxLevel) } };
+}
 
 export function App() {
   const store = useMemo(() => createIdbStore(), []);
@@ -144,6 +169,11 @@ export function App() {
         chosen={subjects}
         onToggleSubject={(s) => setChosenSubjects(toggleSubject(subjects, s))}
         onChoose={(worldId) => startGame(worldId)}
+        activities={progressFor(active, stage)}
+        onActivity={(id) => {
+          setSessionStart((s) => s ?? Date.now());
+          setScreen({ name: 'activity', id });
+        }}
         onTreehouse={() => setScreen({ name: 'treehouse' })}
         onBack={() => setScreen({ name: 'profiles' })}
       />
@@ -167,6 +197,29 @@ export function App() {
     );
   }
 
+  if (screen.name === 'activity' && active) {
+    const shared = {
+      profile: active,
+      stage,
+      subjects,
+      breakDue,
+      onHome: () => setScreen({ name: 'worlds' }),
+      onStars: (stars: number) =>
+        update((d) => updateProfile(d, active.id, (p) => ({ ...p, stars: p.stars + stars, ...fillJar(p.jar, p.pendingRewards, stars) }))),
+      onChallengeResult: (typeId: string, level: number, outcome: ChallengeOutcome) =>
+        update((d) => updateProfile(d, active.id, (p) => recordChallenge(p, typeId, level, outcome, stage))),
+      onChooseReward: (itemId: string | null) => update((d) => updateProfile(d, active.id, (p) => chooseReward(p, itemId))),
+      onRoundCompleted: () =>
+        update((d) =>
+          updateProfile(d, active.id, (p) => ({
+            ...p,
+            activityRounds: { ...p.activityRounds, [screen.id]: (p.activityRounds[screen.id] ?? 0) + 1 },
+          })),
+        ),
+    };
+    if (screen.id === 'memory') return <MemoryScreen {...shared} />;
+  }
+
   if (screen.name === 'game' && active) {
     return (
       <GameScreen
@@ -181,21 +234,7 @@ export function App() {
             updateProfile(d, active.id, (p) => ({ ...p, stars: p.stars + stars, ...fillJar(p.jar, p.pendingRewards, stars) })),
           )
         }
-        onChooseReward={(itemId) =>
-          update((d) =>
-            updateProfile(d, active.id, (p) => {
-              const item = itemId ? getRewardItem(itemId) : undefined;
-              return {
-                ...p,
-                pendingRewards: Math.max(0, p.pendingRewards - 1),
-                inventory: item && !p.inventory.includes(item.id) ? [...p.inventory, item.id] : p.inventory,
-                // A new item is worn right away (or placed in the tree house) so the child sees it.
-                equipped: item && item.slot !== 'decor' ? { ...p.equipped, [item.slot]: item.id } : p.equipped,
-                treehouse: item?.slot === 'decor' ? autoPlace(p.treehouse, item.id) : p.treehouse,
-              };
-            }),
-          )
-        }
+        onChooseReward={(itemId) => update((d) => updateProfile(d, active.id, (p) => chooseReward(p, itemId)))}
         onRescue={(animal) =>
           update((d) =>
             updateProfile(d, active.id, (p) =>
@@ -207,14 +246,7 @@ export function App() {
           )
         }
         onChallengeResult={(typeId, level, outcome) =>
-          update((d) =>
-            updateProfile(d, active.id, (p) => {
-              const type = getChallengeType(typeId);
-              const range = levelWindow(type, stage) ?? { startLevel: 1, maxLevel: type.levels };
-              const current = p.skills[typeId] ?? initialSkill(range.startLevel);
-              return { ...p, skills: { ...p.skills, [typeId]: recordOutcome(current, outcome, level, range.maxLevel) } };
-            }),
-          )
+          update((d) => updateProfile(d, active.id, (p) => recordChallenge(p, typeId, level, outcome, stage)))
         }
         onSetPet={(animal) =>
           update((d) =>

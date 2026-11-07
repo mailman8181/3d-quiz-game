@@ -7,6 +7,7 @@ import type { Profile } from '../../core/profile/profile';
 import { currentLevel } from '../../core/progress/levels';
 import { isUnlocked, mazesUntilUnlock } from '../../core/progress/worlds';
 import { worlds } from '../../modules/worlds';
+import type { ActivityProgress } from '../../core/progress/activities';
 
 interface Props {
   profile: Profile;
@@ -15,12 +16,15 @@ interface Props {
   chosen: readonly SubjectId[];
   onToggleSubject: (subject: SubjectId) => void;
   onChoose: (worldId: string) => void;
+  /** Unlocked activities and the way to the next one (ADR-0010). */
+  activities: ActivityProgress;
+  onActivity: (id: string) => void;
   onTreehouse: () => void;
   onBack: () => void;
 }
 
 /** "Wohin geht die Reise?" — big world cards; locked worlds say how many mazes are missing. */
-export function WorldSelectScreen({ profile, allowed, chosen, onToggleSubject, onChoose, onTreehouse, onBack }: Props) {
+export function WorldSelectScreen({ profile, allowed, chosen, onToggleSubject, onChoose, activities, onActivity, onTreehouse, onBack }: Props) {
   useEffect(() => {
     speech().speak(de.worldSelect.speak);
   }, []);
@@ -92,6 +96,37 @@ export function WorldSelectScreen({ profile, allowed, chosen, onToggleSubject, o
             </button>
           );
         })}
+        {activities.unlocked.map((id) => (
+          <button
+            key={id}
+            className="card world-card activity-card"
+            data-activity={id}
+            aria-label={de.activities.names[id] ?? id}
+            onClick={() => {
+              playPling();
+              onActivity(id);
+            }}
+          >
+            <span className="world-icon" aria-hidden>
+              {de.activities.icons[id]}
+            </span>
+            <span className="world-name">{de.activities.names[id] ?? id}</span>
+          </button>
+        ))}
+        {activities.missing !== null && (
+          <button
+            className="card world-card locked mystery-card"
+            data-testid="mystery-card"
+            aria-label={`${de.activities.mysteryTitle}: ${de.activities.mysteryMissing(activities.missing, activities.mazesNeeded)}`}
+            onClick={() => speech().speak(de.activities.speakMystery)}
+          >
+            <span className="world-icon" aria-hidden>
+              ❓
+            </span>
+            <span className="world-name">{de.activities.mysteryTitle}</span>
+            <span className="world-locked">{de.activities.mysteryMissing(activities.missing, activities.mazesNeeded)}</span>
+          </button>
+        )}
         <button className="card world-card treehouse-card" aria-label={de.treehouse.title} onClick={onTreehouse}>
           <span className="world-icon" aria-hidden>
             🌳🏠

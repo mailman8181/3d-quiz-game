@@ -45,6 +45,26 @@ start maze → walk → find chest (optional) → solve or skip → stars into j
   "Möchtest du diese Aufgabe wirklich überspringen?"). A skipped chest stays closed and can
   be retried while in the maze.
 
+## 4b. Activities: more ways to find chests (M14, ADR-0010)
+The maze is one of several **activities**. Every activity is a different way to *find* chests.
+What happens after a chest is found is the same everywhere: the question, stars, star jar,
+rewards and adaptive levels.
+
+- **Hub "Was spielst du heute?"**: world cards (maze), unlocked activity cards, the tree
+  house, and one **mystery card "?"** that says how many rounds are missing for the next
+  game.
+- **Unlocking (owner):** the first new activity unlocks after **3 finished mazes**, then one
+  more per **3 finished rounds** of any kind. The order is **random per child** but fixed.
+- **Same rules for all:** no time pressure, nothing to lose, everything spoken, 2–4 minute
+  rounds with 3–5 chests, an end dialog with stars and "nochmal".
+
+| Activity | Status | Idea |
+|---|---|---|
+| Labyrinth | ✅ | walk the maze, chests on the way, rescue the animal at the goal |
+| Memory | ✅ M14b | flip cards and find pairs (picture cards say their name); **chest pairs** (tier colour + emblem ⭐❤️🌙🌸🍀) open a question. Upright grid by stage: Kita 2×4 (2 chests), Vorschule 3×4 (3), school 4×4 (4). Two different cards turn back after a short look or on the next tap; a skipped chest pair can be tapped again |
+| Hüpf-Abenteuer | M14c | side scroller: the child walks with a "go" button and jumps; chests on the path and up on platforms; hitting an obstacle means a funny stumble, never "game over" |
+| Later ideas | — | Wimmelbild (hidden chests in a busy scene), river ride (3 lanes), bridge building, slow bubbles |
+
 ## 4a. Avatar & profiles
 - The child plays a **comic animal**: Hase, Bär, Katze, Frosch, Pinguin (more later),
   in one of 6 colours. Rewards (hats, pets, trails) are added on top of the animal.
@@ -214,6 +234,8 @@ German challenges (planned next), more worlds/scenarios, multiplayer, teacher mo
 cloud sync, other languages, speech-recognition answers.
 
 ## Changelog
+- v1.26 (2026-11-07): M14b — Memory, the first activity; hub shows unlocked activities and a mystery card; maze end dialog announces a new game.
+- v1.25 (2026-11-07): Activities (§4b, ADR-0010) — memory and side scroller planned; unlock after 3 mazes, then every 3 rounds, random order per child (owner).
 - v1.24 (2026-11-02): M13e — Wissen pack, 6 new types following the KC Sachunterricht (§6.5).
 - v1.23 (2026-11-01): M13d — grade 1–2 German pack: 9 new types (§6.5); word bank gets genders and plurals.
 - v1.22 (2026-11-01): M13c — grade 1–2 math pack: 9 new types and Plus/Minus up to 100 (§6.5).

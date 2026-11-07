@@ -50,6 +50,8 @@ export interface Profile {
   learner: LearnerInfo | null;
   /** The one-time stage question was answered or skipped; don't ask again on open. */
   stageAsked: boolean;
+  /** Finished rounds per activity id, maze excluded (ADR-0010). */
+  activityRounds: Record<string, number>;
 }
 
 export const MAX_PROFILES = 6;
@@ -75,5 +77,6 @@ export function createProfile(input: { id: string; name: string; avatar: Avatar;
     treehouse: {},
     learner: null,
     stageAsked: false,
+    activityRounds: {},
   };
 }
