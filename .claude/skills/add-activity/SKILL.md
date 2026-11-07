@@ -79,5 +79,46 @@ Write the answers into the PR description; put real open points into
   when it is small and reversible).
 
 ## Learnings
-<!-- Updated after each activity. M14b (memory) will add concrete notes here. -->
-- (to be filled after the memory game, M14b)
+From memory (M14b), the first activity. Read these before building the next one.
+
+**Wiring (copy from memory)**
+- The screen is a wrapper that holds the round counter and renders the round component with
+  `key={round}`. "Nochmal" increments it, so `useChestFlow` plans fresh chests and the
+  activity state resets cleanly. Don't reset state by hand.
+- The seed comes from `?seed=N` (+ round) or `randomSeed()`, taken once in a lazy `useState`.
+  Lint forbids `Math.random`/`Date` during render: use lazy initializers or event handlers.
+- `useChestFlow({ count, seed, … })` gives you `chests[i]` (tier for drawing), `states[i]`,
+  `open(i)`, `overlays` (render them last), `busy` (ignore input while true) and `starsEarned`.
+- Register it in `App.tsx` under `screen.name === 'activity'`; the `shared` callbacks
+  (stars, skill, reward, `onRoundCompleted`) already exist, so only the `if (screen.id === …)`
+  line is new.
+- Count the round (`onRoundCompleted`) in the **event handler** that completes it, not in an
+  effect (react-hooks lint). Compute "unlocks a new game" there too, by calling `progressFor`
+  with the round added.
+- The end dialog shows only when nothing is open: `done && !flow.busy && no chest 'closed'`.
+  Chests found just before the end open after a short delay, and the dialog waits for them.
+
+**Child-friendliness that mattered**
+- Two different cards turn back after a short look (~1.3 s) **or** on the next tap. A
+  child is never blocked waiting for an animation.
+- Speak what is turned (picture name, "Eine Schatzkiste!"); pairs get a jingle plus "Ein Paar!".
+- Chest looks need two cues (tier colour **and** an emblem): two silver chest pairs must still
+  be told apart.
+- A skipped chest pair stays visible (dashed); tapping it opens the question again.
+- Layout: phones are portrait, so use upright grids (cols < rows) and size the grid with
+  `min(96vw, …, (100dvh − header) × cols/rows)` so every row fits without scrolling.
+- Hub cards need an explicit background colour (`.activity-card`); white text on the default
+  card is unreadable.
+
+**Testing**
+- Give every interactive element a `data-*` hook (`data-card-id`, `data-pair`, `data-kind`),
+  so E2E can solve a round deterministically without depending on the seed.
+- `seedSave()` navigates to `./` and reloads, which drops URL parameters such as
+  `?challenge=`. Write the test so it works with any chest content, using the generic
+  `ANSWERS` locator that taps until "Weiter".
+- Unlock rules are pure (`core/progress/activities.ts`): test thresholds and the stable
+  per-child order in unit tests, and only the visible result (mystery card, activity card) in E2E.
+
+**Still to do**
+- The maze still has its own copy of the chest dialog, reward picker and break code. Move it
+  onto `useChestFlow` when the maze is next changed.

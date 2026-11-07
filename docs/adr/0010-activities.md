@@ -69,7 +69,8 @@ maze excluded because `mazesCompleted` exists). The migration sets `{}`.
 ### 4. Rules every activity must follow
 - **No time pressure, no losing.** Mistakes have a funny reaction, no penalty, no lives.
   Anything moving waits for the child or comes back.
-- **Round length:** 2–4 minutes, 3–5 chests (3 for Kita), then an end dialog: stars, the
+- **Round length:** 2–4 minutes, 3–5 chests (2–3 for Kita when the activity itself is small,
+  e.g. memory 2×4), then an end dialog: stars, the
   rescued friend or the activity's reward moment, "nochmal" or 🏠.
 - **Everything spoken:** the rules (guide intro), names of things the child taps, feedback.
   Sentences go into `speech.ts`, and clips are committed (ADR-0007).
@@ -77,6 +78,16 @@ maze excluded because `mazesCompleted` exists). The migration sets `{}`.
 - **Stage-aware difficulty** for the activity itself (e.g. memory grid size), separate from
   the challenge level.
 - **Test hooks** (`data-*`) so E2E tests can reach a chest without luck or timing.
+
+## Implementation notes (M14b)
+- `ChallengeDialog` takes a `ChestContent` (`challenge`, `tier`, `stars`), which any activity
+  can produce. The maze's `Chest` extends it with a tile and a state.
+- `useChestFlow()` is a React hook in `src/ui/activities/chestFlow.tsx`. It plans the round's
+  chests once (lazy state). Activities remount it with a `key` per round.
+- Reward and skill updates are shared helpers in `App.tsx` (`chooseReward`, `recordChallenge`).
+  The maze uses them too.
+- The maze still has its own copy of the dialog, picker and break code. It moves onto
+  `useChestFlow` when it is next changed (see the add-activity skill).
 
 ## Consequences
 - **Easier:** new games are small modules; every challenge type, reward and parents' setting

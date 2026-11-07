@@ -5,14 +5,14 @@ import { Confetti } from '../Confetti';
 import { speechText } from '../../content/de/speech';
 import { de } from '../../content/de/strings';
 import { initialAttempt, submitAnswer, type AttemptFeedback, type AttemptState } from '../../core/challenges/attempt';
-import type { Chest } from '../../core/session/mazeSession';
+import type { ChestContent } from '../../core/session/mazeSession';
 import type { ChallengeOutcome } from '../../core/skills/skillModel';
 import { challengeViews } from '.';
 
 const TIER_ICONS = { bronze: '🥉', silver: '🥈', gold: '🥇' } as const;
 
 interface Props {
-  chest: Chest;
+  chest: ChestContent;
   onSolved: (stars: number, outcome: ChallengeOutcome) => void;
   onSkip: () => void;
 }

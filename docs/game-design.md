@@ -61,7 +61,7 @@ rewards and adaptive levels.
 | Activity | Status | Idea |
 |---|---|---|
 | Labyrinth | ✅ | walk the maze, chests on the way, rescue the animal at the goal |
-| Memory | M14b | flip cards and find pairs; **chest pairs** (colours and shapes) open a question. Grid by stage: Kita 2×4, Vorschule 3×4, school 4×4 |
+| Memory | ✅ M14b | flip cards and find pairs (picture cards say their name); **chest pairs** (tier colour + emblem ⭐❤️🌙🌸🍀) open a question. Upright grid by stage: Kita 2×4 (2 chests), Vorschule 3×4 (3), school 4×4 (4). Two different cards turn back after a short look or on the next tap; a skipped chest pair can be tapped again |
 | Hüpf-Abenteuer | M14c | side scroller: the child walks with a "go" button and jumps; chests on the path and up on platforms; hitting an obstacle means a funny stumble, never "game over" |
 | Later ideas | — | Wimmelbild (hidden chests in a busy scene), river ride (3 lanes), bridge building, slow bubbles |
 
@@ -234,6 +234,7 @@ German challenges (planned next), more worlds/scenarios, multiplayer, teacher mo
 cloud sync, other languages, speech-recognition answers.
 
 ## Changelog
+- v1.26 (2026-11-07): M14b — Memory, the first activity; hub shows unlocked activities and a mystery card; maze end dialog announces a new game.
 - v1.25 (2026-11-07): Activities (§4b, ADR-0010) — memory and side scroller planned; unlock after 3 mazes, then every 3 rounds, random order per child (owner).
 - v1.24 (2026-11-02): M13e — Wissen pack, 6 new types following the KC Sachunterricht (§6.5).
 - v1.23 (2026-11-01): M13d — grade 1–2 German pack: 9 new types (§6.5); word bank gets genders and plurals.

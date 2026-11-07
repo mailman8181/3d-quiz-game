@@ -22,6 +22,7 @@ import { selectChallengeTypes } from '../../core/challenges/selection';
 import type { StageId } from '../../core/learner/stage';
 import { getChallengeType } from '../../modules/challenges';
 import { getWorld, worlds } from '../../modules/worlds';
+import { progressFor } from '../../modules/activities';
 import { MazeView } from '../../render/MazeView';
 import { ChallengeDialog } from '../challenges/ChallengeDialog';
 
@@ -96,6 +97,13 @@ export function GameScreen({
   const [level, setLevel] = useState(1);
   const [guide, setGuide] = useState<string>('olli');
   const [newWorld, setNewWorld] = useState<string | null>(null);
+  // Will finishing this maze unlock a new activity (ADR-0010)? Kept in a ref for the maze events.
+  const [newActivity, setNewActivity] = useState(false);
+  const unlocksActivity = progressFor(profile, stage, 1).unlocked.length > progressFor(profile, stage).unlocked.length;
+  const unlocksActivityRef = useRef(unlocksActivity);
+  useEffect(() => {
+    unlocksActivityRef.current = unlocksActivity;
+  }, [unlocksActivity]);
   const disabledRef = useRef(profile.disabledChallenges);
   const subjectsRef = useRef(subjects);
   const stageRef = useRef(stage);
@@ -192,7 +200,14 @@ export function GameScreen({
           const finished = (levelsRef.current[world.id] ?? 0) + 1;
           const unlocked = worlds.find((w) => w.unlock?.world === world.id && w.unlock.mazes === finished);
           setNewWorld(unlocked?.id ?? null);
-          speech().speak(unlocked ? de.worldSelect.speakUnlocked : de.lostAnimals[animal].speakGoal);
+          setNewActivity(unlocksActivityRef.current);
+          speech().speak(
+            unlocked
+              ? de.worldSelect.speakUnlocked
+              : unlocksActivityRef.current
+                ? de.activities.speakUnlocked
+                : de.lostAnimals[animal].speakGoal,
+          );
           callbacks.current.onRescue(animal);
           callbacks.current.onMazeCompleted(world.id);
         }
@@ -329,6 +344,11 @@ export function GameScreen({
             {newWorld && (
               <p className="new-world" data-testid="new-world">
                 {de.worlds[newWorld]?.icon} {de.worldSelect.unlocked}
+              </p>
+            )}
+            {newActivity && (
+              <p className="new-world" data-testid="new-activity">
+                🎁 {de.activities.unlocked}
               </p>
             )}
             {levelSpec(level + 1).cols * levelSpec(level + 1).rows > levelSpec(level).cols * levelSpec(level).rows && (

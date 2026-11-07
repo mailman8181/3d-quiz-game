@@ -21,7 +21,7 @@ export async function seedSave(page: Page, doc: unknown): Promise<void> {
 }
 
 /** Current save version for seeded documents. */
-export const SAVE_VERSION = 9;
+export const SAVE_VERSION = 10;
 
 export function profileFixture(overrides: Record<string, unknown> = {}) {
   return {
@@ -44,6 +44,7 @@ export function profileFixture(overrides: Record<string, unknown> = {}) {
     // Stage question already answered/skipped, so tests land on the hub (ADR-0009).
     learner: null,
     stageAsked: true,
+    activityRounds: {},
     ...overrides,
   };
 }

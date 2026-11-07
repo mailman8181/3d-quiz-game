@@ -55,6 +55,26 @@ export const de = {
     /** Suggested stage range of a challenge type, shown next to its toggle. */
     range: (from: string, to: string | null) => (to && to !== from ? `${from} – ${to}` : `ab ${from}`),
   },
+  /** Activities besides the maze (ADR-0010). */
+  activities: {
+    names: { maze: 'Labyrinth', memory: 'Memory' } as Record<string, string>,
+    icons: { maze: '🌿', memory: '🃏' } as Record<string, string>,
+    intros: {
+      memory: 'Finde die Paare! Wenn du zwei gleiche Schatzkisten findest, gibt es eine Aufgabe.',
+    } as Record<string, string>,
+    pair: 'Ein Paar!',
+    chest: 'Eine Schatzkiste!',
+    doneTitle: 'Alle Paare gefunden!',
+    doneSpeak: 'Super! Du hast alle Paare gefunden.',
+    again: 'Nochmal',
+    mysteryTitle: 'Neues Spiel',
+    mysteryMissing: (n: number, mazes: boolean) =>
+      mazes ? `Noch ${n} ${n === 1 ? 'Labyrinth' : 'Labyrinthe'}` : `Noch ${n} ${n === 1 ? 'Runde' : 'Runden'}`,
+    speakMystery: 'Spiel weiter, dann wartet hier bald ein neues Spiel auf dich!',
+    unlocked: 'Ein neues Spiel ist frei!',
+    speakUnlocked: 'Hurra! Ein neues Spiel wartet auf dich.',
+    cardBack: 'Karte umdrehen',
+  },
   animals: {
     bunny: 'Hase',
     bear: 'Bär',

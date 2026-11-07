@@ -5,7 +5,7 @@ import { JAR_SIZE } from '../rewards/rewards';
  * The persisted save document for one device (all local profiles).
  * Bump SAVE_VERSION and add a migration whenever the shape changes.
  */
-export const SAVE_VERSION = 9;
+export const SAVE_VERSION = 10;
 
 /** Device-wide settings, changed in the parents area. */
 export interface Settings {
@@ -103,6 +103,12 @@ const migrations: Record<number, (doc: Record<string, unknown>) => Record<string
       learner: null,
       stageAsked: false,
     })),
+  }),
+  // v9 → v10: finished rounds per activity (ADR-0010).
+  9: (doc) => ({
+    ...doc,
+    version: 10,
+    profiles: (Array.isArray(doc.profiles) ? doc.profiles : []).map((p: Record<string, unknown>) => ({ ...p, activityRounds: {} })),
   }),
 };
 
