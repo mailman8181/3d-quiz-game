@@ -18,8 +18,11 @@ Playtest feedback (a 9-year-old picked the cat first) asks for nicer, more detai
 ## Decision
 Option 3, one animal at a time, procedural animals stay as fallback.
 
-- `src/render/avatars/models.ts` preloads `public/models/<animal>.glb` before the first
-  render (4 s timeout); `buildAnimal` stays synchronous and uses the model when present.
+- `src/render/avatars/models.ts` loads `public/models/<animal>.glb` in the background; the
+  first screen never waits. `buildAnimal` stays synchronous: it uses the model when loaded,
+  otherwise returns the procedural animal, which swaps its contents to the model in place
+  once loading finishes (same group, outfit from `setOutfit` kept). Load errors keep the
+  procedural animal. After the first visit the model comes from the service-worker cache.
 - Model contract: stands on y=0, faces +z, ~1 unit tall; one mesh per material named
   `Body` (avatar colour), `Light` (lighter shade), `Dark`, `Pink`, `White`. All colours come
   from `toonMaterial`, so the avatar colour choice and the cel look keep working.

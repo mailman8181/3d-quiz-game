@@ -10,12 +10,12 @@ import './styles.css';
 speech();
 initSfx();
 
-// Hand-made avatar models are loaded before the first render so buildAnimal stays sync.
-// On error or timeout the procedural animals are used.
-void preloadAnimalModels().then(() => {
-  createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
-  );
-});
+// Hand-made avatar models load in the background; avatars built before they arrive swap
+// themselves in place (see render/avatars/models.ts). The first screen never waits.
+void preloadAnimalModels();
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);

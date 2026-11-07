@@ -186,6 +186,8 @@ export function setOutfit(root: THREE.Object3D, animal: AvatarAnimal, equipped: 
     root.remove(old);
     disposeObject(old);
   }
+  // Remembered so a model that finishes loading later keeps this outfit (animals.ts).
+  root.userData.equipped = equipped;
   root.add(buildOutfit(animal, equipped));
 }
 

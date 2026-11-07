@@ -1,20 +1,36 @@
 import * as THREE from 'three';
 import type { Avatar, AvatarAnimal } from '../../core/profile/profile';
 import type { Equipped } from '../../core/rewards/rewards';
-import { addOutlines, toonMaterial } from '../toon';
+import { addOutlines, disposeObject, toonMaterial } from '../toon';
 import { buildOutfit } from './accessories';
-import { cloneAnimalModel } from './models';
+import { cloneAnimalModel, onAnimalModelLoaded } from './models';
 
 /**
- * Builds a chunky comic animal. Uses the hand-made glTF model when one is preloaded
- * (see models.ts), otherwise builds it from primitives.
+ * Builds a chunky comic animal. Uses the hand-made glTF model when it is loaded
+ * (see models.ts), otherwise builds it from primitives. If the model is still loading,
+ * the returned group swaps its contents to the model once it arrives (same group, so
+ * position, rotation and parent stay; the outfit last set via `setOutfit` is kept).
  * The returned group stands on y=0, faces +z and is about 1 unit tall.
  */
 export function buildAnimal(avatar: Avatar, equipped: Equipped = {}): THREE.Group {
   const modelled = buildModelledAnimal(avatar, equipped);
   if (modelled) return modelled;
 
+  const root = buildProceduralAnimal(avatar, equipped);
+  onAnimalModelLoaded(avatar.animal, () => {
+    const next = buildModelledAnimal(avatar, (root.userData.equipped as Equipped | undefined) ?? equipped);
+    if (!next) return;
+    const old = [...root.children];
+    root.clear();
+    for (const o of old) disposeObject(o);
+    root.add(...next.children);
+  });
+  return root;
+}
+
+function buildProceduralAnimal(avatar: Avatar, equipped: Equipped): THREE.Group {
   const root = new THREE.Group();
+  root.userData.equipped = equipped;
   const body = toonMaterial(avatar.color);
   const light = toonMaterial(lighten(avatar.color, 0.55));
   const dark = toonMaterial('#2b2233');
@@ -172,6 +188,7 @@ function buildModelledAnimal(avatar: Avatar, equipped: Equipped): THREE.Group | 
     if (NO_OUTLINE.has(key)) o.userData.noOutline = true;
   });
   const root = new THREE.Group();
+  root.userData.equipped = equipped;
   root.add(model);
   addOutlines(root, 0.035);
   root.traverse((o) => {

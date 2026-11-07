@@ -3,10 +3,12 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { AvatarAnimal } from '../../core/profile/profile';
 
 /**
- * Hand-modelled animals (Blender → glTF, see ASSETS.md and docs/adr/0014-gltf-avatars.md).
+ * Hand-made animals (Blender → glTF, see ASSETS.md and docs/adr/0014-gltf-avatars.md).
  *
- * Models are preloaded once at start-up so `buildAnimal` can stay synchronous. Every animal
- * without a model here (or whose model failed to load) keeps the procedural version.
+ * Loading never blocks the first screen: `preloadAnimalModels` starts in the background and
+ * `buildAnimal` uses the procedural animal until the model is there, then swaps it in place
+ * (see `onAnimalModelLoaded`). Animals without a model, or whose model fails to load, stay
+ * procedural.
  *
  * Contract for a model file:
  * - stands on y=0, faces +z, about 1 unit tall (like the procedural animals);
@@ -18,39 +20,68 @@ const MODEL_FILES: Partial<Record<AvatarAnimal, string>> = {
 };
 
 const cache = new Map<AvatarAnimal, THREE.Object3D>();
+const pending = new Set<AvatarAnimal>();
+const listeners = new Map<AvatarAnimal, Set<() => void>>();
 
 export function hasAnimalModel(animal: AvatarAnimal): boolean {
   return cache.has(animal);
 }
 
-/** A fresh clone of the preloaded model, or null if there is none. */
+/** A fresh clone of the loaded model, or null if there is none (yet). */
 export function cloneAnimalModel(animal: AvatarAnimal): THREE.Object3D | null {
   const src = cache.get(animal);
   return src ? src.clone(true) : null;
 }
 
+/**
+ * Calls `cb` once when the model for `animal` has finished loading. Returns false (and never
+ * calls back) when no load is in progress for that animal.
+ */
+export function onAnimalModelLoaded(animal: AvatarAnimal, cb: () => void): boolean {
+  if (!pending.has(animal)) return false;
+  let set = listeners.get(animal);
+  if (!set) listeners.set(animal, (set = new Set()));
+  set.add(cb);
+  return true;
+}
+
+function settle(animal: AvatarAnimal, model: THREE.Object3D | null): void {
+  pending.delete(animal);
+  const set = listeners.get(animal);
+  listeners.delete(animal);
+  if (!model) return;
+  cache.set(animal, model);
+  for (const cb of set ?? []) cb();
+}
+
 let preload: Promise<void> | null = null;
 
-/** Loads all model files once. Never rejects: failed models fall back to procedural. */
-export function preloadAnimalModels(timeoutMs = 4000): Promise<void> {
+/** Starts loading all model files once, in the background. Never rejects. */
+export function preloadAnimalModels(): Promise<void> {
   if (preload) return preload;
   const loader = new GLTFLoader();
   const base = import.meta.env.BASE_URL ?? '/';
-  const jobs = Object.entries(MODEL_FILES).map(async ([animal, file]) => {
+  const jobs = Object.entries(MODEL_FILES).map(async ([key, file]) => {
+    const animal = key as AvatarAnimal;
+    pending.add(animal);
     try {
       const gltf = await loader.loadAsync(base + file);
-      cache.set(animal as AvatarAnimal, gltf.scene);
+      settle(animal, gltf.scene);
     } catch (err) {
-      console.warn(`Avatar model ${file} could not be loaded, using procedural animal.`, err);
+      console.warn(`Avatar model ${file} could not be loaded, keeping the procedural animal.`, err);
+      settle(animal, null);
     }
   });
-  const timeout = new Promise<void>((resolve) => setTimeout(resolve, timeoutMs));
-  preload = Promise.race([Promise.all(jobs).then(() => undefined), timeout]);
+  preload = Promise.all(jobs).then(() => undefined);
   return preload;
 }
 
-/** Test hook. */
+/** Test hooks: simulate a load in progress, its success (model) or failure (null). */
+export function markAnimalModelPending(animal: AvatarAnimal): void {
+  pending.add(animal);
+}
 export function registerAnimalModel(animal: AvatarAnimal, model: THREE.Object3D | null): void {
-  if (model) cache.set(animal, model);
+  if (pending.has(animal)) settle(animal, model);
+  else if (model) cache.set(animal, model);
   else cache.delete(animal);
 }
