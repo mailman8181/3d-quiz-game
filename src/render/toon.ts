@@ -35,16 +35,37 @@ export function skinnedOutlineMaterial(thickness: number): THREE.MeshBasicMateri
   mat.userData.sharedOutline = true;
   mat.onBeforeCompile = (shader) => {
     shader.uniforms.outlineThickness = { value: thickness };
-    shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nuniform float outlineThickness;')
-      .replace(
-        '#include <skinning_vertex>',
-        '#include <skinning_vertex>\n#ifdef USE_SKINNING\n  transformed += normalize( objectNormal ) * outlineThickness;\n#endif',
-      );
+    shader.vertexShader = patchSkinnedOutlineShader(shader.vertexShader);
   };
   mat.customProgramCacheKey = () => `skinned-outline-${thickness}`;
   skinnedOutlineMaterials.set(thickness, mat);
   return mat;
+}
+
+const OUTLINE_CHUNKS = {
+  common: '#include <common>',
+  skinning: '#include <skinning_vertex>',
+} as const;
+
+/**
+ * Adds the outline offset to a three.js vertex shader: a `outlineThickness` uniform, and the
+ * skinned vertex pushed out along the skinned normal right after `<skinning_vertex>`. Relies on
+ * three.js chunk names; if an upgrade renames them, the shader is left unchanged (the outline
+ * then lies on the surface, i.e. disappears) and a warning says so. Unit-tested against the
+ * installed three.js shaders.
+ */
+export function patchSkinnedOutlineShader(vertexShader: string): string {
+  const missing = Object.values(OUTLINE_CHUNKS).filter((chunk) => !vertexShader.includes(chunk));
+  if (missing.length) {
+    console.warn(`Skinned outline: shader chunks ${missing.join(', ')} not found, outline disabled.`);
+    return vertexShader;
+  }
+  return vertexShader
+    .replace(OUTLINE_CHUNKS.common, `${OUTLINE_CHUNKS.common}\nuniform float outlineThickness;`)
+    .replace(
+      OUTLINE_CHUNKS.skinning,
+      `${OUTLINE_CHUNKS.skinning}\n#ifdef USE_SKINNING\n  transformed += normalize( objectNormal ) * outlineThickness;\n#endif`,
+    );
 }
 
 /**
@@ -79,10 +100,16 @@ export function addOutlines(root: THREE.Object3D, thickness = 0.06): void {
 /**
  * Disposes geometries and materials of a subtree. Kept: the shared outline materials, and
  * geometry marked `userData.sharedGeometry` (meshes cloned from a cached glTF model, whose
- * geometry the cache still owns; see avatars/models.ts).
+ * geometry the cache still owns; see avatars/models.ts). Animation mixers of animated animals
+ * (`userData.animator`, see avatars/animation.ts) are stopped and their cached bindings freed.
  */
 export function disposeObject(root: THREE.Object3D): void {
   root.traverse((o) => {
+    const mixer = (o.userData.animator as { mixer?: THREE.AnimationMixer } | undefined)?.mixer;
+    if (mixer) {
+      mixer.stopAllAction();
+      mixer.uncacheRoot(mixer.getRoot());
+    }
     if (o instanceof THREE.Mesh || o instanceof THREE.InstancedMesh) {
       if (!o.userData.isOutline && !o.userData.sharedGeometry) o.geometry.dispose();
       const mats = Array.isArray(o.material) ? o.material : [o.material];

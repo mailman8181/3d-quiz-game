@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { addOutlines, disposeObject, skinnedOutlineMaterial } from '../toon';
+import { addOutlines, disposeObject, patchSkinnedOutlineShader, skinnedOutlineMaterial } from '../toon';
 import { setOutfit } from './accessories';
 import { getAnimator, IDLE_CLIP, setAnimalMoving, tickAnimals, WALK_CLIP } from './animation';
 import { buildAnimal } from './animals';
@@ -183,5 +183,39 @@ describe('outlines for skinned meshes', () => {
     const dispose = vi.spyOn(skinnedOutlineMaterial(0.02), 'dispose');
     disposeObject(model);
     expect(dispose).not.toHaveBeenCalled();
+  });
+
+  it('patches the installed three.js vertex shader: uniform declared, offset after skinning', () => {
+    const src = THREE.ShaderLib.basic.vertexShader;
+    const out = patchSkinnedOutlineShader(src);
+    expect(out).not.toBe(src);
+    const uniform = out.indexOf('uniform float outlineThickness;');
+    const skinning = out.indexOf('#include <skinning_vertex>');
+    const offset = out.indexOf('transformed += normalize( objectNormal ) * outlineThickness;');
+    expect(uniform).toBeGreaterThan(-1);
+    expect(uniform).toBeLessThan(out.indexOf('void main()'));
+    expect(offset).toBeGreaterThan(skinning);
+    // objectNormal is skinned before <skinning_vertex> in this shader (needs USE_SKINNING).
+    expect(src.indexOf('#include <skinnormal_vertex>')).toBeLessThan(skinning);
+  });
+
+  it('leaves a shader without the expected chunks unchanged and warns', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(patchSkinnedOutlineShader('void main() {}')).toBe('void main() {}');
+    expect(warn).toHaveBeenCalledOnce();
+    warn.mockRestore();
+  });
+});
+
+describe('disposing animated animals', () => {
+  it('stops the mixer and frees its cached bindings', () => {
+    registerAnimalModel('cat', fakeRiggedModel(), fakeClips());
+    const g = buildAnimal(cat);
+    const a = getAnimator(g)!;
+    const uncache = vi.spyOn(a.mixer, 'uncacheRoot');
+    expect(a.idle!.isRunning()).toBe(true);
+    disposeObject(g);
+    expect(a.idle!.isRunning()).toBe(false);
+    expect(uncache).toHaveBeenCalledWith(a.mixer.getRoot());
   });
 });

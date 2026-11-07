@@ -50,6 +50,10 @@ Option 3.
   (~15.7k drawn with outlines); skinning adds vertex work for 12 bones, negligible here.
 - Every view that shows animals must call `tickAnimals`, or the animals stand still in their
   rest pose (still correct, just not animated).
+- The skinned outline patches three.js shader chunks (`<common>`, `<skinning_vertex>`) by
+  name. `patchSkinnedOutlineShader` warns and leaves the shader alone if a three.js upgrade
+  renames them, and a unit test runs it against the installed three.js shader.
+- `disposeObject` stops an animal's mixer and frees its cached bindings.
 - Further animals need a rig with the same bone names for the outfit (`Head`, `Body`), or
   their outfit simply stays on the root.
 - Follow-ups (need the owner): cheer / head-shake clips and where to play them; rigs for the
