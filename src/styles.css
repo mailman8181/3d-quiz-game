@@ -2448,3 +2448,52 @@ button {
 .chart-label {
   font-size: 22px;
 }
+
+/* ── Grades 3–4 Wissen (M15c): map with compass ── */
+.map-area {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.map-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  width: min(220px, 60vw);
+  padding: 6px;
+  background: #d9f2c8;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+}
+
+.map-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: min(36px, 9vw);
+  border-radius: 8px;
+}
+
+.map-cell.school {
+  background: #fff7d1;
+}
+
+.map-cell.marked {
+  outline: 4px solid #ffd93d;
+  background: #fff7d1;
+}
+
+.map-cell.compass {
+  position: relative;
+  font-size: min(26px, 7vw);
+}
+
+.compass-n {
+  position: absolute;
+  top: 0;
+  font-size: 0.8rem;
+  font-weight: 900;
+}

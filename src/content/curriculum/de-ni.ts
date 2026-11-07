@@ -114,6 +114,14 @@ const list: Competency[] = [
   { id: 'ni.su2.schulweg', source: SU, until: 'grade2', subject: 'knowledge', text: 'Wege in der Lebenswelt erkunden (Schulweg, Mobilität)' },
   { id: 'ni.su2.gefuehle', source: SU, until: 'grade2', subject: 'knowledge', text: 'Gefühle benennen und beschreiben' },
   { id: 'ni.su2.zeiteinteilung', source: SU, until: 'grade2', subject: 'knowledge', text: 'Formen der Zeiteinteilung benennen (Tag, Woche, Monat)' },
+  // KC Sachunterricht 2017, Ende Schuljahrgang 4 (M15c)
+  { id: 'ni.su4.stoffe', source: SU, until: 'grade4', subject: 'knowledge', text: 'Eigenschaften und Veränderungen von Stoffen (Aggregatzustände)' },
+  { id: 'ni.su4.natur', source: SU, until: 'grade4', subject: 'knowledge', text: 'Naturphänomene (Wasserkreislauf, Ebbe und Flut), Funktionen des Körpers' },
+  { id: 'ni.su4.technik', source: SU, until: 'grade4', subject: 'knowledge', text: 'Strom (Licht, Gefahren), Erfindungen und Bionik' },
+  { id: 'ni.su4.raum', source: SU, until: 'grade4', subject: 'knowledge', text: 'Sich mit Plänen und Karten orientieren; sich in Deutschland verorten' },
+  { id: 'ni.su4.zeit', source: SU, until: 'grade4', subject: 'knowledge', text: 'Lebensbedingungen früher und heute (Schule vor 100 Jahren)' },
+  { id: 'ni.su4.gesellschaft', source: SU, until: 'grade4', subject: 'knowledge', text: 'Streitkultur, Wahlen, Kinderrechte, Konsum und Werbung' },
+  { id: 'ni.su4.mobilitaet', source: SU, until: 'grade4', subject: 'knowledge', text: 'Mobilität: verkehrssicheres Fahrrad, Verkehrsregeln' },
   { id: 'ni.su2.natur', source: SU, until: 'grade2', subject: 'knowledge', text: 'Einfache Naturphänomene (Wind, Wetter)' },
 ];
 

@@ -243,5 +243,5 @@ skill progress carries over. New concepts get new types.
 | Ma Größen | mm…km, g/kg/t, ml/l, s/min/h; umwandeln; Uhrzeiten | new `math.units`, clock level (5 minutes), money level (Komma) |
 | Ma Raum und Form | Körper incl. Pyramide, Eigenschaften (Ecke, Kante, Fläche); Flächeninhalt, Umfang | new `math.solids`, new `math.area` |
 | Ma Daten | Tabellen und Diagramme lesen | new `math.chart` |
-| De (M15b) | Zeitformen, Satzglieder, Wortfamilien, Rechtschreibstrategien, Steigerung, Wörterbuch | planned |
-| SU (M15c) | Aggregatzustände, Stromkreis, Wasserkreislauf, Karten/Himmelsrichtungen, Deutschland, früher–heute | planned |
+| De (M15b) | Zeitformen, Satzglieder, Wortfamilien, Rechtschreibstrategien, Steigerung, Wörterbuch | `german.tense`, `.sentence-parts`, `.word-family`, `.spelling`, `.capital`, `.comparison`, `.reading`; `german.abc` levels |
+| SU (M15c) | Aggregatzustände, Stromkreis, Wasserkreislauf, Karten/Himmelsrichtungen, Deutschland, früher–heute, Gesellschaft, Körperfunktionen, Mobilität | `knowledge.states`, `.science`, `.compass`, `.germany`, `.past`, `.together`; levels for `.body`, `.traffic` |

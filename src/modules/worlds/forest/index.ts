@@ -78,6 +78,13 @@ export const forestWorld: WorldTheme = {
       'knowledge.traffic',
       'knowledge.feelings',
       'knowledge.calendar',
+      // Grades 3–4 Wissen (M15c)
+      'knowledge.states',
+      'knowledge.science',
+      'knowledge.compass',
+      'knowledge.germany',
+      'knowledge.past',
+      'knowledge.together',
     ],
   },
   colors: {

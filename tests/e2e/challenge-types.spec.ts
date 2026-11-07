@@ -42,6 +42,9 @@ for (const type of [
   // Grades 3–4 German (M15b): quiz cards; two representatives.
   'german.tense',
   'german.reading',
+  // Grades 3–4 Wissen (M15c): the map view and a question bank.
+  'knowledge.compass',
+  'knowledge.science',
 ]) {
   test(`${type}: open a chest and answer until finished`, async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== 'desktop', 'one viewport is enough per type');

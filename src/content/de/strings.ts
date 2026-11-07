@@ -131,6 +131,12 @@ export const de = {
       'knowledge.traffic': { icon: '🚦', name: 'Sicher unterwegs' },
       'knowledge.feelings': { icon: '😊', name: 'Gefühle' },
       'knowledge.calendar': { icon: '📅', name: 'Tage und Monate' },
+      'knowledge.states': { icon: '🧊', name: 'Fest, flüssig, gasförmig' },
+      'knowledge.science': { icon: '🔬', name: 'Natur und Technik' },
+      'knowledge.compass': { icon: '🧭', name: 'Himmelsrichtungen' },
+      'knowledge.germany': { icon: '🗺️', name: 'Deutschland' },
+      'knowledge.past': { icon: '🕰️', name: 'Früher und heute' },
+      'knowledge.together': { icon: '🤝', name: 'Zusammen leben' },
     } as Record<string, { icon: string; name: string }>,
   },
   /** Activities besides the maze (ADR-0010). */
@@ -502,6 +508,12 @@ export const de = {
     'knowledge.traffic': 'Sicher unterwegs',
     'knowledge.feelings': 'Gefühle',
     'knowledge.calendar': 'Tage und Monate',
+    'knowledge.states': 'Fest, flüssig, gasförmig',
+    'knowledge.science': 'Natur und Technik',
+    'knowledge.compass': 'Himmelsrichtungen',
+    'knowledge.germany': 'Deutschland und Niedersachsen',
+    'knowledge.past': 'Früher und heute',
+    'knowledge.together': 'Zusammen leben',
   } as Record<string, string>,
   challenge: {
     /** Shown (with a jingle and confetti) after a correct answer; picked at random. */

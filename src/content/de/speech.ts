@@ -61,6 +61,19 @@ import {
   VERBS4,
   type Tense,
 } from './grammar4';
+import {
+  BIKE_QUESTIONS,
+  BODY_QUESTIONS,
+  DIRECTION_NAMES,
+  GERMANY_QUESTIONS,
+  MAP_PLACES,
+  PAST_QUESTIONS,
+  SCIENCE_QUESTIONS,
+  STATE_QUESTIONS,
+  TOGETHER_QUESTIONS,
+  type Direction,
+} from './wissen4';
+import type { QuizQuestion } from './wissen';
 import { ALL_CLOCK_TIMES, clockSpoken, DIGITAL_CLOCK_TIMES, type ClockMinute } from './clock';
 import { amount, CONVERSIONS } from './units';
 import { SOLID_PROPERTIES, SOLIDS } from './solids';
@@ -185,6 +198,13 @@ const spellingExplain = (word: string | number | undefined) => {
   return `${item.word} ist ein Merkwort. Das merkst du dir.`;
 };
 const TENSE_DATIVE: Record<Tense, string> = { present: 'im Präsens', past: 'im Präteritum', perfect: 'im Perfekt', future: 'im Futur' };
+
+// Grades 3–4 Wissen helpers (M15c).
+const bankTemplates = (key: string, bank: readonly QuizQuestion[]): Record<string, Template> => ({
+  [`${key}.prompt`]: { render: (p) => bank.find((x) => x.id === p.q)?.question ?? '', variants: () => bank.map((x) => ({ q: x.id })) },
+  [`${key}.explain`]: { render: (p) => bank.find((x) => x.id === p.q)?.explain ?? '', variants: () => bank.map((x) => ({ q: x.id })) },
+});
+const mapPlace = (id: string | number | undefined) => MAP_PLACES.find((x) => x.id === id)!;
 
 const colorShapePairs = () => COLORS.filter((c) => c.adj).flatMap((c) => SHAPES.map((s) => ({ color: c.id, shape: s.id })));
 
@@ -572,14 +592,8 @@ export const speechTemplates: Record<string, Template> = {
     render: (p) => `${capitalize(floatItem(p.item)?.name ?? '')} geht unter.`,
     variants: () => FLOAT_ITEMS.filter((i) => !i.floats).map((i) => ({ item: i.id })),
   },
-  'knowledge.traffic.prompt': {
-    render: (p) => TRAFFIC_QUESTIONS.find((q) => q.id === p.q)?.question ?? '',
-    variants: () => TRAFFIC_QUESTIONS.map((q) => ({ q: q.id })),
-  },
-  'knowledge.traffic.explain': {
-    render: (p) => TRAFFIC_QUESTIONS.find((q) => q.id === p.q)?.explain ?? '',
-    variants: () => TRAFFIC_QUESTIONS.map((q) => ({ q: q.id })),
-  },
+  // Traffic: grade 1–2 questions plus the grade 3–4 bike questions (M15c).
+  ...bankTemplates('knowledge.traffic', [...TRAFFIC_QUESTIONS, ...BIKE_QUESTIONS]),
   'knowledge.feelings.prompt-face': { render: () => 'Wie fühlt sich das Kind?', variants: none },
   'knowledge.feelings.explain-face': {
     render: (p) => `Das Kind ist ${feelingWord(p.feeling)}. Alle Gefühle sind in Ordnung.`,
@@ -742,6 +756,25 @@ export const speechTemplates: Record<string, Template> = {
     render: (p) => `Die Antwort steht im Text: ${TEXTS.find((t) => t.id === p.text)?.answer ?? ''}.`,
     variants: () => TEXTS.map((t) => ({ text: t.id })),
   },
+  // ── Grades 3–4 Wissen (M15c) ──
+  ...bankTemplates('knowledge.states', STATE_QUESTIONS),
+  ...bankTemplates('knowledge.science', SCIENCE_QUESTIONS),
+  ...bankTemplates('knowledge.germany', GERMANY_QUESTIONS),
+  ...bankTemplates('knowledge.past', PAST_QUESTIONS),
+  ...bankTemplates('knowledge.together', TOGETHER_QUESTIONS),
+  ...bankTemplates('knowledge.body4', BODY_QUESTIONS),
+  'knowledge.compass.prompt-place': {
+    render: (p) => `Was liegt im ${DIRECTION_NAMES[p.dir as Direction]?.name ?? ''} der Schule?`,
+    variants: () => (['north', 'east', 'south', 'west'] as const).map((dir) => ({ dir })),
+  },
+  'knowledge.compass.prompt-direction': {
+    render: (p) => `In welcher Himmelsrichtung liegt ${mapPlace(p.place).name}?`,
+    variants: () => MAP_PLACES.map((x) => ({ place: x.id })),
+  },
+  'knowledge.compass.explain': {
+    render: (p) => `${capitalize(mapPlace(p.place).name)} liegt im ${DIRECTION_NAMES[p.dir as Direction]?.name ?? ''}.`,
+    variants: () => MAP_PLACES.flatMap((x) => (['north', 'east', 'south', 'west'] as const).map((dir) => ({ place: x.id, dir }))),
+  },
   'feedback.tryAgain': { render: () => 'Fast! Versuch es nochmal.', variants: none },
   'feedback.hint': { render: () => 'Ich helfe dir. Schau genau hin!', variants: none },
   'feedback.skipQuestion': { render: () => 'Möchtest du diese Aufgabe wirklich überspringen?', variants: none },
@@ -815,6 +848,12 @@ export const staticSpokenTexts: readonly string[] = [
   ...FAMILIES.flatMap((f) => [...f.members, ...f.lookAlikes]),
   ...CAPITAL_NOUNS.map((n) => n.word.toLowerCase()),
   ...LOWER_WORDS,
+  // Grades 3–4 Wissen: speaker buttons on answer cards.
+  ...[STATE_QUESTIONS, SCIENCE_QUESTIONS, GERMANY_QUESTIONS, PAST_QUESTIONS, TOGETHER_QUESTIONS, BODY_QUESTIONS, BIKE_QUESTIONS].flatMap((bank) =>
+    bank.flatMap((x) => [x.answer.label, ...x.distractors.map((d) => d.label)]),
+  ),
+  ...MAP_PLACES.map((x) => x.name),
+  ...Object.values(DIRECTION_NAMES).map((d) => d.name),
   // Grade 1–2 German pack: speaker buttons on word cards.
   ...VERBS,
   ...ADJECTIVES,

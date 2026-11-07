@@ -2,6 +2,7 @@ import { AdditionView } from './AdditionView';
 import { CompareView } from './CompareView';
 import { CountView } from './CountView';
 import { DiceView } from './DiceView';
+import { CompassView } from './CompassView';
 import { AreaView } from './AreaView';
 import { ChartView } from './ChartView';
 import { DivisionView } from './DivisionView';
@@ -97,4 +98,11 @@ export const challengeViews: Record<string, ChallengeViewEntry> = {
   'knowledge.traffic': { View: KnowledgeView as ChallengeView, ownsChoices: true },
   'knowledge.feelings': { View: KnowledgeView as ChallengeView, ownsChoices: true },
   'knowledge.calendar': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  // Grades 3–4 Wissen (M15c)
+  'knowledge.states': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'knowledge.science': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'knowledge.compass': { View: CompassView as ChallengeView, ownsChoices: true },
+  'knowledge.germany': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'knowledge.past': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'knowledge.together': { View: KnowledgeView as ChallengeView, ownsChoices: true },
 };

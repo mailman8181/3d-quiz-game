@@ -226,6 +226,19 @@ richtig.") with the numbers on screen.
 | Texte lesen | a short text and a question (who, what, why, when, how many) |
 | Das ABC (+ levels) | dictionary order by the 2nd, then the 3rd letter |
 
+**Grades 3–4 Wissen (M15c)** (KC Sachunterricht, Ende Jg. 4). Picture answer cards, all spoken.
+
+| Type | Content |
+|---|---|
+| Fest, flüssig, gasförmig | Eis, Wasser, Dampf, Luft …; then melting, boiling, freezing, a steamed-up mirror |
+| Natur und Technik | plants, magnets, the electric circuit, never put anything in a socket, rain; then conductors, the water cycle, Klette → Klettverschluss, Ebbe und Flut, what fire needs |
+| Himmelsrichtungen | a small map around the school with a compass: "Was liegt im Norden der Schule?" → "In welcher Himmelsrichtung liegt der Wald?" |
+| Deutschland und Niedersachsen | Berlin, Hannover, Nordsee, flag; Harz, Wattenmeer, Ostfriesische Inseln, Niederlande |
+| Früher und heute | Schiefertafel, Kerzen, Kutsche, Waschbrett; Wählscheibe, Plattenspieler, Keller statt Kühlschrank |
+| Zusammen leben | electing the class representative, settling arguments, class rules; children's rights, advertising, the mayor |
+| Körper und Sinne (+ level) | what the organs do: Herz, Lunge, Skelett, Gehirn, Zähne |
+| Sicher unterwegs (+ level) | the safe bike, stop sign, hand signals, rechts vor links (bike training in grade 4) |
+
 Plus/Minus above 20 is spoken generically ("Rechne aus! Wie viel ist das?" / "Das Ergebnis ist 39.")
 with the equation on screen: one clip per sentence (ADR-0007) would need thousands of clips for every
 pair up to 100. Reading two-digit numbers is itself a grade-2 goal.
@@ -271,6 +284,7 @@ German challenges (planned next), more worlds/scenarios, multiplayer, teacher mo
 cloud sync, other languages, speech-recognition answers.
 
 ## Changelog
+- v1.31 (2026-11-07): M15c — grades 3–4 Wissen: 6 new types, organs and bike rules as new levels (§6.5).
 - v1.30 (2026-11-07): M15b — grades 3–4 German: 7 new types, ABC to the 3rd letter (§6.5).
 - v1.29 (2026-11-07): Owner decision: content for 3. and 4. Klasse (M15, target widened to about age 10). Without it a child moving into 3. Klasse would find only 3 task types.
 - v1.28 (2026-11-07): M14d — Rätselpfad practice activity (§4b, ADR-0011), owner decisions: name, always open, 5/6/8 questions, optional topic step, no parents' switch.
