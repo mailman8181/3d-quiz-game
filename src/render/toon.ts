@@ -42,11 +42,15 @@ export function addOutlines(root: THREE.Object3D, thickness = 0.06): void {
   }
 }
 
-/** Disposes geometries and materials of a subtree (shared outline material is kept). */
+/**
+ * Disposes geometries and materials of a subtree. Kept: the shared outline material, and
+ * geometry marked `userData.sharedGeometry` (meshes cloned from a cached glTF model, whose
+ * geometry the cache still owns; see avatars/models.ts).
+ */
 export function disposeObject(root: THREE.Object3D): void {
   root.traverse((o) => {
     if (o instanceof THREE.Mesh || o instanceof THREE.InstancedMesh) {
-      if (!o.userData.isOutline) o.geometry.dispose();
+      if (!o.userData.isOutline && !o.userData.sharedGeometry) o.geometry.dispose();
       const mats = Array.isArray(o.material) ? o.material : [o.material];
       for (const m of mats) if (m !== outlineMaterial) m.dispose();
     }

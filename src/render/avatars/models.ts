@@ -27,10 +27,19 @@ export function hasAnimalModel(animal: AvatarAnimal): boolean {
   return cache.has(animal);
 }
 
-/** A fresh clone of the loaded model, or null if there is none (yet). */
+/**
+ * A fresh clone of the loaded model, or null if there is none (yet). The clone's meshes share
+ * their geometry with the cache, so they are marked `sharedGeometry` and `disposeObject`
+ * leaves the geometry alone (materials are replaced per avatar and are freed as usual).
+ */
 export function cloneAnimalModel(animal: AvatarAnimal): THREE.Object3D | null {
   const src = cache.get(animal);
-  return src ? src.clone(true) : null;
+  if (!src) return null;
+  const clone = src.clone(true);
+  clone.traverse((o) => {
+    if (o instanceof THREE.Mesh) o.userData.sharedGeometry = true;
+  });
+  return clone;
 }
 
 /**

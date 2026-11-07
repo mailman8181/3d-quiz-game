@@ -5,6 +5,14 @@ import { addOutlines, disposeObject, toonMaterial } from '../toon';
 import { buildOutfit } from './accessories';
 import { cloneAnimalModel, onAnimalModelLoaded } from './models';
 
+/** Fixed colours shared by the procedural animals and the glTF models (one source of truth). */
+export const ANIMAL_PALETTE = {
+  dark: '#2b2233',
+  white: '#ffffff',
+  pink: '#ff8fb1',
+  orange: '#ff9f1c',
+} as const;
+
 /**
  * Builds a chunky comic animal. Uses the hand-made glTF model when it is loaded
  * (see models.ts), otherwise builds it from primitives. If the model is still loading,
@@ -33,10 +41,10 @@ function buildProceduralAnimal(avatar: Avatar, equipped: Equipped): THREE.Group 
   root.userData.equipped = equipped;
   const body = toonMaterial(avatar.color);
   const light = toonMaterial(lighten(avatar.color, 0.55));
-  const dark = toonMaterial('#2b2233');
-  const white = toonMaterial('#ffffff');
-  const pink = toonMaterial('#ff8fb1');
-  const orange = toonMaterial('#ff9f1c');
+  const dark = toonMaterial(ANIMAL_PALETTE.dark);
+  const white = toonMaterial(ANIMAL_PALETTE.white);
+  const pink = toonMaterial(ANIMAL_PALETTE.pink);
+  const orange = toonMaterial(ANIMAL_PALETTE.orange);
 
   const sphere = (r: number, mat: THREE.Material, pos: [number, number, number], scale?: [number, number, number]) => {
     const m = new THREE.Mesh(new THREE.SphereGeometry(r, 20, 14), mat);
@@ -146,8 +154,8 @@ function addAnimalDetails(animal: AvatarAnimal, p: Parts): void {
 export function buildChick(): THREE.Group {
   const root = new THREE.Group();
   const yellow = toonMaterial('#ffd93d');
-  const orange = toonMaterial('#ff9f1c');
-  const dark = toonMaterial('#2b2233');
+  const orange = toonMaterial(ANIMAL_PALETTE.orange);
+  const dark = toonMaterial(ANIMAL_PALETTE.dark);
   const add = (geo: THREE.BufferGeometry, mat: THREE.Material, pos: [number, number, number]) => {
     const m = new THREE.Mesh(geo, mat);
     m.position.set(...pos);
@@ -167,10 +175,16 @@ export function buildChick(): THREE.Group {
   return root;
 }
 
-/** Material names used in the model files (see models.ts) and their toon colours. */
-const MODEL_COLOURS = { Dark: '#2b2233', Pink: '#ff8fb1', White: '#ffffff' } as const;
+/** Material names used in the model files (see models.ts) and their fixed toon colours. */
+const MODEL_COLOURS = { Dark: ANIMAL_PALETTE.dark, Pink: ANIMAL_PALETTE.pink, White: ANIMAL_PALETTE.white } as const;
 /** Small face details: no outline, it would swallow them. */
 const NO_OUTLINE = new Set(['Dark', 'Pink', 'White']);
+
+/** Material slot for a glTF material name: exact, or with Blender's ".001" suffix. */
+export function modelMaterialSlot(name: string): string | null {
+  const slots = ['Body', 'Light', ...Object.keys(MODEL_COLOURS)];
+  return slots.find((k) => name === k || name.startsWith(k + '.')) ?? null;
+}
 
 function buildModelledAnimal(avatar: Avatar, equipped: Equipped): THREE.Group | null {
   const model = cloneAnimalModel(avatar.animal);
@@ -183,7 +197,13 @@ function buildModelledAnimal(avatar: Avatar, equipped: Equipped): THREE.Group | 
   model.traverse((o) => {
     if (!(o instanceof THREE.Mesh)) return;
     const name = (Array.isArray(o.material) ? o.material[0] : o.material)?.name ?? '';
-    const key = Object.keys(mats).find((k) => name === k || name.startsWith(k + '.')) ?? 'Body';
+    let key = modelMaterialSlot(name);
+    if (!key) {
+      if (import.meta.env.DEV) {
+        console.warn(`Avatar model "${avatar.animal}": material "${name}" matches no slot, using Body.`);
+      }
+      key = 'Body';
+    }
     o.material = mats[key];
     if (NO_OUTLINE.has(key)) o.userData.noOutline = true;
   });
