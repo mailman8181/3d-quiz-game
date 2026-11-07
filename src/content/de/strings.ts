@@ -4,7 +4,7 @@ import type { StageId } from '../../core/learner/stage';
 
 /**
  * All German text the child sees or hears. Components must not hard-code strings
- * (CLAUDE.md rule 4). Keys are English, values German.
+ * (AGENTS.md rule 4). Keys are English, values German.
  */
 export const de = {
   appTitle: 'Labyrinth-Abenteuer',

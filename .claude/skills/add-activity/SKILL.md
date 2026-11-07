@@ -14,7 +14,7 @@ and `docs/game-design.md` §4b before starting.
 Write the answers into the PR description; put real open points into
 `docs/open-questions.md`. Do not start coding a big activity before the owner approved the idea.
 
-**Children-first (non-negotiable, CLAUDE.md rule 5)**
+**Children-first (non-negotiable, AGENTS.md rule 5)**
 - Can the child *lose* or *fail* anything? It must not. What happens on a "mistake" (a
   funny reaction, never a penalty, no lives, no restart)?
 - Is there **time pressure** anywhere (moving targets, timers, things that disappear)? Make the
@@ -22,8 +22,8 @@ Write the answers into the PR description; put real open points into
 - Is **every rule spoken** (guide intro, a hint on the 🔊 button), and is every thing the child
   taps named aloud?
 
-**Fit for age 5–7 and the stages**
-- What changes with the stage (`kita` … `grade2`)? E.g. grid size, speed, number of
+**Fit for the stages (Kita to grade 4)**
+- What changes with the stage (`kita` … `grade4`)? E.g. grid size, speed, number of
   obstacles. Keep this separate from the challenge level (the skill model handles those).
 - Can a 5-year-old play it **without reading**? Without precise timing or fine motor skills?
   If not, set `minStage`.
