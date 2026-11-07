@@ -73,6 +73,7 @@ rewards and adaptive levels.
 ## 4a. Avatar & profiles
 - The child plays a **comic animal**: Hase, Bär, Katze, Frosch, Pinguin (more later),
   in one of 6 colours. Rewards (hats, pets, trails) are added on top of the animal.
+  The cat is hand-modelled and animated (idle and walk loops, ADR-0015); the others follow.
 - **Local profiles from the start:** up to 6 children per device. Profile screen
   "Wer spielt?" shows each child's animal; the name is optional and typed by a parent.
   Deleting profiles will live in the parents area (behind the parent gate).
@@ -284,6 +285,7 @@ German challenges (planned next), more worlds/scenarios, multiplayer, teacher mo
 cloud sync, other languages, speech-recognition answers.
 
 ## Changelog
+- v1.32 (2026-11-07): Owner decision (with Fabian): animated cat as a test. The cat avatar breathes, looks around, blinks, flicks an ear and sways its tail while standing, and waddles with paws and tail while walking; hats and glasses move with its head. No animated scenes yet (ADR-0015).
 - v1.31 (2026-11-07): M15c — grades 3–4 Wissen: 6 new types, organs and bike rules as new levels (§6.5).
 - v1.30 (2026-11-07): M15b — grades 3–4 German: 7 new types, ABC to the 3rd letter (§6.5).
 - v1.29 (2026-11-07): Owner decision: content for 3. and 4. Klasse (M15, target widened to about age 10). Without it a child moving into 3. Klasse would find only 3 task types.

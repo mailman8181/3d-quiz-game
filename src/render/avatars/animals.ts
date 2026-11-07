@@ -3,7 +3,8 @@ import type { Avatar, AvatarAnimal } from '../../core/profile/profile';
 import type { Equipped } from '../../core/rewards/rewards';
 import { addOutlines, disposeObject, toonMaterial } from '../toon';
 import { buildOutfit } from './accessories';
-import { cloneAnimalModel, onAnimalModelLoaded } from './models';
+import { attachOutfitToBones, createAnimator } from './animation';
+import { animalModelClips, cloneAnimalModel, onAnimalModelLoaded } from './models';
 
 /** Fixed colours shared by the procedural animals and the glTF models (one source of truth). */
 export const ANIMAL_PALETTE = {
@@ -32,6 +33,7 @@ export function buildAnimal(avatar: Avatar, equipped: Equipped = {}): THREE.Grou
     root.clear();
     for (const o of old) disposeObject(o);
     root.add(...next.children);
+    if (next.userData.animator) root.userData.animator = next.userData.animator;
   });
   return root;
 }
@@ -210,13 +212,21 @@ function buildModelledAnimal(avatar: Avatar, equipped: Equipped): THREE.Group | 
   const root = new THREE.Group();
   root.userData.equipped = equipped;
   root.add(model);
-  addOutlines(root, 0.035);
+  // Rigged models: idle/walk loops (ADR-0015). Created before any pose change, so the
+  // bones' rest pose can be recorded for the outfit.
+  const animator = createAnimator(model, animalModelClips(avatar.animal));
+  if (animator) root.userData.animator = animator;
+  addOutlines(root, animator ? SKINNED_OUTLINE : 0.035);
   root.traverse((o) => {
     o.castShadow = true;
   });
   root.add(buildOutfit(avatar.animal, equipped));
+  attachOutfitToBones(root);
   return root;
 }
+
+/** Outline offset along the normal for skinned models, in model units (cat ~1.2 tall). */
+const SKINNED_OUTLINE = 0.022;
 
 function lighten(hex: string, amount: number): THREE.Color {
   return new THREE.Color(hex).lerp(new THREE.Color('#ffffff'), amount);

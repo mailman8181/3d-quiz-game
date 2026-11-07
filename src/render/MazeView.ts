@@ -5,6 +5,7 @@ import { DIRECTIONS, sameTile } from '../core/maze/types';
 import type { Avatar } from '../core/profile/profile';
 import type { Equipped } from '../core/rewards/rewards';
 import { setOutfit } from './avatars/accessories';
+import { setAnimalMoving, tickAnimals } from './avatars/animation';
 import { TrailEmitter } from './trails';
 import { createRng } from '../core/rng';
 import type { MazeSession, SessionEvent } from '../core/session/mazeSession';
@@ -458,6 +459,8 @@ export class MazeView {
     this.updateWayHint(dt);
     this.trail.update(dt, this.avatar.position, this.path.length > 0);
     this.updatePet(dt);
+    setAnimalMoving(this.avatar, this.path.length > 0);
+    tickAnimals(this.scene, dt);
 
     this.markerAge += dt;
     const markerMat = this.marker.material as THREE.MeshBasicMaterial;
@@ -522,6 +525,7 @@ export class MazeView {
     if (toAvatar.length() > 0.5) target.add(toAvatar.multiplyScalar(0.35));
     const delta = target.sub(pet.position.clone().setY(0));
     const dist = delta.length();
+    setAnimalMoving(pet, dist > 0.01);
     if (dist > 0.01) {
       pet.position.addScaledVector(delta.normalize(), Math.min(dist, WALK_SPEED * 1.1 * dt));
       pet.rotation.y = lerpAngle(pet.rotation.y, Math.atan2(delta.x, delta.z), Math.min(1, dt * 10));

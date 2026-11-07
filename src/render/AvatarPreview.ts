@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import type { Avatar } from '../core/profile/profile';
 import type { Equipped } from '../core/rewards/rewards';
 import { buildAnimal } from './avatars/animals';
+import { tickAnimals } from './avatars/animation';
 import { disposeObject } from './toon';
 
 /** Small turntable rendering of an avatar (used in the profile creation screen). */
@@ -27,12 +28,15 @@ export class AvatarPreview {
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(container);
     this.resize();
+    let last = 0;
     this.renderer.setAnimationLoop(() => {
       const t = this.clock.getElapsedTime();
       if (this.model) {
         this.model.rotation.y = Math.sin(t * 0.9) * 0.7;
         this.model.position.y = Math.abs(Math.sin(t * 3)) * 0.05;
       }
+      tickAnimals(this.scene, Math.min(t - last, 0.1));
+      last = t;
       this.renderer.render(this.scene, this.camera);
     });
   }

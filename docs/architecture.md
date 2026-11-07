@@ -128,6 +128,7 @@ docs/ (game-design, architecture, adr/, roadmap, open-questions)
 | Profiles & save | `src/core/profile`, `src/core/save` | versioned `SaveDoc` + `migrateSave`; IndexedDB store in `src/app/storage.ts`, key namespaced by `BASE_URL` |
 | 3D view | `src/render/MazeView.ts` | instanced hedges, inverted-hull outlines, toon gradient, tap-to-walk + keys, camera follow |
 | Avatars | `src/render/avatars/animals.ts`, `src/render/avatars/models.ts`, `public/models/*.glb` | glTF model per animal where one exists (cat), loaded in the background and swapped in place; procedural animals as fallback (ADR-0006, ADR-0014) |
+| Avatar animation | `src/render/avatars/animation.ts` (`tickAnimals`, `setAnimalMoving`, `attachOutfitToBones`), `skinnedOutlineMaterial` in `src/render/toon.ts` | rigged cat with `Idle`/`Walk` loops; views tick all animators each frame; outfit follows `Head`/`Body` bones (ADR-0015) |
 | Speech | `src/audio/speech.ts`, `src/audio/clipId.ts`, `public/audio/de/` | pre-generated whole-sentence clips (ADR-0007) → local Web Speech fallback |
 | Audio pipeline | `scripts/generate-audio.ts`, `scripts/check-audio.ts`, `docs/audio.md` | Piper, run locally; CI checks completeness |
 | World | `src/modules/worlds/forest` | theme colours + maze size |

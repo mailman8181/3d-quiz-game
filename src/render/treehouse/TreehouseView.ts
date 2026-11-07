@@ -4,6 +4,7 @@ import type { Avatar } from '../../core/profile/profile';
 import type { Equipped } from '../../core/rewards/rewards';
 import { TREEHOUSE_SPOTS, type Treehouse, type TreehouseSpot } from '../../core/rewards/treehouse';
 import { buildAnimal } from '../avatars/animals';
+import { tickAnimals } from '../avatars/animation';
 import { buildLostAnimal } from '../avatars/lostAnimals';
 import { addOutlines, disposeObject, toonMaterial } from '../toon';
 import { buildDecor } from './decor';
@@ -36,6 +37,7 @@ export class TreehouseView {
   private readonly camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
   private readonly resizeObserver: ResizeObserver;
   private readonly clock = new THREE.Clock();
+  private lastFrameTime = 0;
   private readonly raycaster = new THREE.Raycaster();
   private readonly spotMarkers = new Map<TreehouseSpot, THREE.Mesh>();
   private readonly decor = new Map<TreehouseSpot, THREE.Group>();
@@ -205,6 +207,8 @@ export class TreehouseView {
       f.model.rotation.y = Math.sin(t * 0.8 + f.phase) * 0.8;
     }
     this.avatarModel.rotation.y = Math.sin(t * 0.7) * 0.4;
+    tickAnimals(this.scene, Math.min(t - this.lastFrameTime, 0.1));
+    this.lastFrameTime = t;
     this.renderer.render(this.scene, this.camera);
   }
 
