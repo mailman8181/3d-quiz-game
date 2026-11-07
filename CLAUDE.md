@@ -52,6 +52,7 @@ only that challenge type into the chests (review a new challenge quickly).
   `levelInfo` per level: stage range + competency ids from `src/content/curriculum/de-ni.ts`
   (ADR-0009, research in `docs/curriculum/`).
   New world → `src/modules/worlds/<id>/` + register in `modules/worlds/index.ts`.
+  New activity (mini game) → follow the skill `.claude/skills/add-activity/` (ADR-0010).
 - Anything the child hears must be in `src/content/de/speech.ts` (templates with `variants`
   or `staticSpokenTexts`); then run `npm run audio:generate` and commit the clips.
 - Save format changes → bump `SAVE_VERSION` and add a migration in `core/save/save.ts`.
