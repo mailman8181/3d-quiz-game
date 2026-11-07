@@ -3,9 +3,14 @@ import type { AvatarAnimal } from '../../core/profile/profile';
 import type { Equipped } from '../../core/rewards/rewards';
 import { starGeometry } from '../props';
 import { addOutlines, disposeObject, toonMaterial } from '../toon';
+import { hasAnimalModel } from './models';
 
 /** Where accessories sit on an animal built by `buildAnimal` (see animals.ts). */
 function anchors(animal: AvatarAnimal) {
+  // The hand-modelled cat (models/cat.glb) has a bigger head and eyes than the primitives.
+  if (animal === 'cat' && hasAnimalModel('cat')) {
+    return { headTop: 1.08, eyeY: 0.85, eyeX: 0.12, eyeZ: 0.34, neckY: 0.58 };
+  }
   const frog = animal === 'frog';
   return {
     headTop: frog ? 1.08 : 1.03,

@@ -3,12 +3,17 @@ import type { Avatar, AvatarAnimal } from '../../core/profile/profile';
 import type { Equipped } from '../../core/rewards/rewards';
 import { addOutlines, toonMaterial } from '../toon';
 import { buildOutfit } from './accessories';
+import { cloneAnimalModel } from './models';
 
 /**
- * Builds a chunky comic animal from primitives (no external model files needed).
+ * Builds a chunky comic animal. Uses the hand-made glTF model when one is preloaded
+ * (see models.ts), otherwise builds it from primitives.
  * The returned group stands on y=0, faces +z and is about 1 unit tall.
  */
 export function buildAnimal(avatar: Avatar, equipped: Equipped = {}): THREE.Group {
+  const modelled = buildModelledAnimal(avatar, equipped);
+  if (modelled) return modelled;
+
   const root = new THREE.Group();
   const body = toonMaterial(avatar.color);
   const light = toonMaterial(lighten(avatar.color, 0.55));
@@ -143,6 +148,36 @@ export function buildChick(): THREE.Group {
     wing.scale.set(0.5, 1, 1.2);
   }
   addOutlines(root, 0.03);
+  return root;
+}
+
+/** Material names used in the model files (see models.ts) and their toon colours. */
+const MODEL_COLOURS = { Dark: '#2b2233', Pink: '#ff8fb1', White: '#ffffff' } as const;
+/** Small face details: no outline, it would swallow them. */
+const NO_OUTLINE = new Set(['Dark', 'Pink', 'White']);
+
+function buildModelledAnimal(avatar: Avatar, equipped: Equipped): THREE.Group | null {
+  const model = cloneAnimalModel(avatar.animal);
+  if (!model) return null;
+  const mats: Record<string, THREE.Material> = {
+    Body: toonMaterial(avatar.color),
+    Light: toonMaterial(lighten(avatar.color, 0.55)),
+    ...Object.fromEntries(Object.entries(MODEL_COLOURS).map(([k, c]) => [k, toonMaterial(c)])),
+  };
+  model.traverse((o) => {
+    if (!(o instanceof THREE.Mesh)) return;
+    const name = (Array.isArray(o.material) ? o.material[0] : o.material)?.name ?? '';
+    const key = Object.keys(mats).find((k) => name === k || name.startsWith(k + '.')) ?? 'Body';
+    o.material = mats[key];
+    if (NO_OUTLINE.has(key)) o.userData.noOutline = true;
+  });
+  const root = new THREE.Group();
+  root.add(model);
+  addOutlines(root, 0.035);
+  root.traverse((o) => {
+    o.castShadow = true;
+  });
+  root.add(buildOutfit(avatar.animal, equipped));
   return root;
 }
 
