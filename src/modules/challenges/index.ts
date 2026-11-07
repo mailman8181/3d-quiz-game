@@ -18,6 +18,29 @@ import { mathPattern } from './math-pattern';
 import { mathSubtraction } from './math-subtraction';
 import { mathDice } from './math-dice';
 import {
+  knowledgeCompass,
+  knowledgeGermany,
+  knowledgePast,
+  knowledgeScience,
+  knowledgeStates,
+  knowledgeTogether,
+} from './wissen4';
+import {
+  germanCapital,
+  germanComparison,
+  germanReading,
+  germanSentenceParts,
+  germanSpelling,
+  germanTense,
+  germanWordFamily,
+} from './german4';
+import { mathDivision } from './math-division';
+import { mathUnits } from './math-units';
+import { mathRounding } from './math-rounding';
+import { mathArea } from './math-area';
+import { mathSolids } from './math-solids';
+import { mathChart } from './math-chart';
+import {
   knowledgeCalendar,
   knowledgeFeelings,
   knowledgeFloat,
@@ -83,6 +106,12 @@ export const challengeTypes: readonly ChallengeType[] = [
   mathClock,
   mathSymmetry,
   mathChance,
+  mathDivision,
+  mathUnits,
+  mathRounding,
+  mathArea,
+  mathSolids,
+  mathChart,
   germanInitialSound,
   germanSyllables,
   germanRhyme,
@@ -99,6 +128,13 @@ export const challengeTypes: readonly ChallengeType[] = [
   germanSentenceEnd,
   germanAbc,
   germanCompound,
+  germanTense,
+  germanSentenceParts,
+  germanWordFamily,
+  germanSpelling,
+  germanCapital,
+  germanComparison,
+  germanReading,
   knowledgeAnimalName,
   knowledgeAnimalBaby,
   knowledgeColors,
@@ -113,6 +149,12 @@ export const challengeTypes: readonly ChallengeType[] = [
   knowledgeTraffic,
   knowledgeFeelings,
   knowledgeCalendar,
+  knowledgeStates,
+  knowledgeScience,
+  knowledgeCompass,
+  knowledgeGermany,
+  knowledgePast,
+  knowledgeTogether,
 ] as ChallengeType[];
 
 export function getChallengeType(id: string): ChallengeType {

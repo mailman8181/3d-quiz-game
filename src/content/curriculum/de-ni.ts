@@ -66,6 +66,19 @@ const list: Competency[] = [
   { id: 'ni.ma2.uhr', source: MA, until: 'grade2', subject: 'math', text: 'Uhrzeiten ablesen (volle Stunde, halb, viertel nach/vor)' },
   { id: 'ni.ma2.symmetrie', source: MA, until: 'grade2', subject: 'math', text: 'Achsensymmetrie untersuchen, symmetrische Muster erstellen' },
   { id: 'ni.ma2.zufall', source: MA, until: 'grade2', subject: 'math', text: 'Eintrittswahrscheinlichkeit einschätzen (sicher, möglich, unmöglich)' },
+  // KC Mathematik 2017, Ende Schuljahrgang 4 (M15)
+  { id: 'ni.ma4.zahlen', source: MA, until: 'grade4', subject: 'math', text: 'Zahlen bis 1 000 000 darstellen (Stellenwert)' },
+  { id: 'ni.ma4.runden', source: MA, until: 'grade4', subject: 'math', text: 'Zahlen sachangemessen runden' },
+  { id: 'ni.ma4.rechnen', source: MA, until: 'grade4', subject: 'math', text: 'Grundrechenaufgaben im erweiterten Zahlenraum lösen' },
+  { id: 'ni.ma4.einmaleins', source: MA, until: 'grade4', subject: 'math', text: 'Alle Aufgaben des kleinen 1×1 und ihre Umkehraufgaben' },
+  { id: 'ni.ma4.division', source: MA, until: 'grade4', subject: 'math', text: 'Dividieren (Aufteilen, Verteilen), auch mit Rest' },
+  { id: 'ni.ma4.groessen', source: MA, until: 'grade4', subject: 'math', text: 'Standardeinheiten (mm–km, g–t, ml–l, s–h) umwandeln' },
+  { id: 'ni.ma4.uhr', source: MA, until: 'grade4', subject: 'math', text: 'Uhrzeiten von analogen Uhren ablesen' },
+  { id: 'ni.ma4.geld', source: MA, until: 'grade4', subject: 'math', text: 'Geldbeträge in Kommaschreibweise (101 ct = 1,01 €)' },
+  { id: 'ni.ma4.flaeche', source: MA, until: 'grade4', subject: 'math', text: 'Flächeninhalt und Umfang ermitteln und unterscheiden' },
+  { id: 'ni.ma4.koerper', source: MA, until: 'grade4', subject: 'math', text: 'Körper benennen und beschreiben (Ecke, Kante, Fläche)' },
+  { id: 'ni.ma4.daten', source: MA, until: 'grade4', subject: 'math', text: 'Tabellen und Diagrammen Informationen entnehmen' },
+  { id: 'ni.ma4.symmetrie', source: MA, until: 'grade4', subject: 'math', text: 'Achsensymmetrische Figuren erkennen und herstellen' },
   { id: 'ni.ma2.groessen', source: MA, until: 'grade2', subject: 'math', text: 'Größen vergleichen und ordnen' },
   { id: 'ni.ma2.raumlage', source: MA, until: 'grade2', subject: 'math', text: 'Lagebeziehungen beschreiben (über, unter, neben, zwischen)' },
   // KC Deutsch 2017, Ende Schuljahrgang 2
@@ -80,6 +93,15 @@ const list: Competency[] = [
   { id: 'ni.de2.wortbildung', source: DE, until: 'grade2', subject: 'german', text: 'Zusammengesetzte Nomen bilden' },
   { id: 'ni.de2.wortschatz', source: DE, until: 'grade2', subject: 'german', text: 'Einen angemessenen Wortschatz verwenden' },
   { id: 'ni.de2.woerter-ordnen', source: DE, until: 'grade2', subject: 'german', text: 'Wörter sammeln und ordnen (Oberbegriffe)' },
+  // KC Deutsch 2017, Ende Schuljahrgang 4 (M15b)
+  { id: 'ni.de4.zeitformen', source: DE, until: 'grade4', subject: 'german', text: 'Zeitformen Präsens, Präteritum, Perfekt und Futur I untersuchen und nutzen' },
+  { id: 'ni.de4.satzglieder', source: DE, until: 'grade4', subject: 'german', text: 'Satzkern (Prädikat) und Satzglieder (Subjekt) als Grundelemente nutzen' },
+  { id: 'ni.de4.wortfamilien', source: DE, until: 'grade4', subject: 'german', text: 'Wortfamilien bilden, Wortstamm erkennen' },
+  { id: 'ni.de4.rechtschreibstrategien', source: DE, until: 'grade4', subject: 'german', text: 'Rechtschreibstrategien: Verlängern, Ableiten, Silben, Merkwörter' },
+  { id: 'ni.de4.grossschreibung', source: DE, until: 'grade4', subject: 'german', text: 'Großschreibung von Konkreta und Abstrakta (-ung, -heit, -keit, -nis, -schaft)' },
+  { id: 'ni.de4.wortarten', source: DE, until: 'grade4', subject: 'german', text: 'Funktion von Nomen, Verben und Adjektiven; Adjektive steigern' },
+  { id: 'ni.de4.lesen', source: DE, until: 'grade4', subject: 'german', text: 'Informationen auf Textebene verknüpfen (globale Kohärenz)' },
+  { id: 'ni.de4.woerterbuch', source: DE, until: 'grade4', subject: 'german', text: 'Wörter alphabetisch ordnen und nachschlagen (2. und 3. Buchstabe)' },
   // KC Sachunterricht 2017, Ende Schuljahrgang 2
   { id: 'ni.su2.tiere', source: SU, until: 'grade2', subject: 'knowledge', text: 'Typische Tiere und ihre Entwicklung kennen' },
   { id: 'ni.su2.zeit', source: SU, until: 'grade2', subject: 'knowledge', text: 'Zyklische Prozesse in der Zeit (Jahreszeiten)' },
@@ -92,6 +114,14 @@ const list: Competency[] = [
   { id: 'ni.su2.schulweg', source: SU, until: 'grade2', subject: 'knowledge', text: 'Wege in der Lebenswelt erkunden (Schulweg, Mobilität)' },
   { id: 'ni.su2.gefuehle', source: SU, until: 'grade2', subject: 'knowledge', text: 'Gefühle benennen und beschreiben' },
   { id: 'ni.su2.zeiteinteilung', source: SU, until: 'grade2', subject: 'knowledge', text: 'Formen der Zeiteinteilung benennen (Tag, Woche, Monat)' },
+  // KC Sachunterricht 2017, Ende Schuljahrgang 4 (M15c)
+  { id: 'ni.su4.stoffe', source: SU, until: 'grade4', subject: 'knowledge', text: 'Eigenschaften und Veränderungen von Stoffen (Aggregatzustände)' },
+  { id: 'ni.su4.natur', source: SU, until: 'grade4', subject: 'knowledge', text: 'Naturphänomene (Wasserkreislauf, Ebbe und Flut), Funktionen des Körpers' },
+  { id: 'ni.su4.technik', source: SU, until: 'grade4', subject: 'knowledge', text: 'Strom (Licht, Gefahren), Erfindungen und Bionik' },
+  { id: 'ni.su4.raum', source: SU, until: 'grade4', subject: 'knowledge', text: 'Sich mit Plänen und Karten orientieren; sich in Deutschland verorten' },
+  { id: 'ni.su4.zeit', source: SU, until: 'grade4', subject: 'knowledge', text: 'Lebensbedingungen früher und heute (Schule vor 100 Jahren)' },
+  { id: 'ni.su4.gesellschaft', source: SU, until: 'grade4', subject: 'knowledge', text: 'Streitkultur, Wahlen, Kinderrechte, Konsum und Werbung' },
+  { id: 'ni.su4.mobilitaet', source: SU, until: 'grade4', subject: 'knowledge', text: 'Mobilität: verkehrssicheres Fahrrad, Verkehrsregeln' },
   { id: 'ni.su2.natur', source: SU, until: 'grade2', subject: 'knowledge', text: 'Einfache Naturphänomene (Wind, Wetter)' },
 ];
 

@@ -11,6 +11,7 @@ import {
   WASTE_ITEMS,
   WEEKDAYS,
 } from '../../../content/de/wissen';
+import { BIKE_QUESTIONS } from '../../../content/de/wissen4';
 import { arrange, clampLevel, quizChoices, type QuizData } from '../knowledge/common';
 
 /**
@@ -124,15 +125,17 @@ export const knowledgeTraffic: ChallengeType<QuizData> = {
   id: 'knowledge.traffic',
   subject: 'knowledge',
   skills: ['knowledge.safety'],
-  levels: 3,
+  levels: 4,
   levelInfo: [
     lv('preschool', 'grade1', 'ni.su2.schulweg'),
     lv('preschool', 'grade2', 'ni.su2.schulweg'),
     lv('grade1', 'grade2', 'ni.su2.schulweg'),
+    // M15c (grades 3–4): bike safety and traffic rules (Radfahrausbildung).
+    lv('grade3', undefined, 'ni.su4.mobilitaet'),
   ],
   generate({ rng, level }) {
-    const l = clampLevel(level, 3);
-    const q = rng.pick(TRAFFIC_QUESTIONS.filter((x) => x.level === l));
+    const l = clampLevel(level, 4);
+    const q = l === 4 ? rng.pick(BIKE_QUESTIONS) : rng.pick(TRAFFIC_QUESTIONS.filter((x) => x.level === l));
     const { options, correctIndex } = arrange(rng, q.answer, q.distractors);
     return quiz(
       'knowledge.traffic',

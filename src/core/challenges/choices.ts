@@ -30,3 +30,28 @@ export function numberChoices(
   const correctChoiceId = choices.find((c) => c.value === correct)!.id;
   return { choices, correctChoiceId };
 }
+
+/**
+ * Choices for big numbers (grades 3–4): distractors are place-value mistakes (±10, ±100,
+ * ±1000, swapped digits), not ±1, which would be too easy to rule out. Ascending order.
+ */
+export function bigNumberChoices(rng: Rng, correct: number, count: number, min = 0, max = 999_999): { choices: Choice[]; correctChoiceId: string } {
+  const digits = String(correct).split('');
+  const swaps: number[] = [];
+  for (let i = 0; i + 1 < digits.length; i++) {
+    if (digits[i] === digits[i + 1]) continue;
+    const d = [...digits];
+    [d[i], d[i + 1]] = [d[i + 1]!, d[i]!];
+    if (d[0] !== '0') swaps.push(Number(d.join('')));
+  }
+  const step = correct >= 10_000 ? 1000 : correct >= 1000 ? 100 : 10;
+  const pool = rng.shuffle([...new Set([correct + step, correct - step, correct + step * 10, correct - step * 10, ...swaps, correct + 1, correct - 1])]);
+  const values = new Set<number>([correct]);
+  for (const v of pool) {
+    if (values.size >= count) break;
+    if (v >= min && v <= max && v !== correct) values.add(v);
+  }
+  const ordered = [...values].sort((a, b) => a - b);
+  const choices = ordered.map((value, i) => ({ id: `c${i}`, value, label: value.toLocaleString('de-DE') }));
+  return { choices, correctChoiceId: choices.find((c) => c.value === correct)!.id };
+}

@@ -229,3 +229,19 @@ the competency ids live in `src/content/curriculum/de-ni.ts`.
 | KC De Lesen | read-word, riddle, fill-word | |
 | KC De Rechtschreiben, Sprache untersuchen | missing-letters, article, plural, word-type, sentence-end, abc, compound | d/t (Auslautverhärtung), capital or small letter |
 | KC SU | animal-name, animal-baby, seasons, habitat, body, sequence, recycling, jobs, float, traffic, feelings, calendar (M13e) | healthy food (left out on purpose), simple plans/maps, past–present–future |
+
+## 8. Grades 3–4 plan (M15, owner 2026-11-07)
+
+Competences for the end of Jg. 4 from the stored KC texts (`sources/text/`). Where a topic
+continues from grade 2, existing types get new levels (`lv('grade3' …)`, `lv('grade4' …)`), so
+skill progress carries over. New concepts get new types.
+
+| Area | KC end of Jg. 4 | M15 |
+|---|---|---|
+| Ma Zahlen | Zahlen bis 1 000 000, Stellenwert, runden | place-value levels H/T, new `math.rounding` |
+| Ma Rechnen | Grundrechenaufgaben bis 1 000 000, alle 1×1 + Umkehraufgaben, Division | addition/subtraction levels to 1000+, times level (full 1×1), new `math.division` |
+| Ma Größen | mm…km, g/kg/t, ml/l, s/min/h; umwandeln; Uhrzeiten | new `math.units`, clock level (5 minutes), money level (Komma) |
+| Ma Raum und Form | Körper incl. Pyramide, Eigenschaften (Ecke, Kante, Fläche); Flächeninhalt, Umfang | new `math.solids`, new `math.area` |
+| Ma Daten | Tabellen und Diagramme lesen | new `math.chart` |
+| De (M15b) | Zeitformen, Satzglieder, Wortfamilien, Rechtschreibstrategien, Steigerung, Wörterbuch | `german.tense`, `.sentence-parts`, `.word-family`, `.spelling`, `.capital`, `.comparison`, `.reading`; `german.abc` levels |
+| SU (M15c) | Aggregatzustände, Stromkreis, Wasserkreislauf, Karten/Himmelsrichtungen, Deutschland, früher–heute, Gesellschaft, Körperfunktionen, Mobilität | `knowledge.states`, `.science`, `.compass`, `.germany`, `.past`, `.together`; levels for `.body`, `.traffic` |

@@ -10,6 +10,7 @@ import {
   SIZE_ITEMS,
 } from '../../../content/de/preschool';
 import { WORDS } from '../../../content/de/words';
+import { BODY_QUESTIONS } from '../../../content/de/wissen4';
 import { arrange, clampLevel, quizChoices, type QuizData } from '../knowledge/common';
 
 /**
@@ -209,14 +210,28 @@ export const knowledgeBody: ChallengeType<QuizData> = {
   id: 'knowledge.body',
   subject: 'knowledge',
   skills: ['knowledge.body'],
-  levels: 3,
+  levels: 4,
   levelInfo: [
     lv('kita', 'preschool', 'ni.su2.mensch'),
     lv('kita', 'grade1', 'ni.su2.mensch'),
     lv('preschool', 'grade2', 'ni.su2.mensch'),
+    // M15c (grades 3–4): what the organs do.
+    lv('grade3', undefined, 'ni.su4.natur'),
   ],
   generate({ rng, level }) {
-    const l = clampLevel(level, 3);
+    const l = clampLevel(level, 4);
+    if (l === 4) {
+      const question = rng.pick(BODY_QUESTIONS);
+      const { options, correctIndex } = arrange(rng, question.answer, question.distractors);
+      return quiz(
+        'knowledge.body',
+        level,
+        { options: options.map((o) => ({ label: o.label, emoji: o.emoji })), labels: 'always', speakOptions: true },
+        correctIndex,
+        { key: 'knowledge.body4.prompt', params: { q: question.id } },
+        { key: 'knowledge.body4.explain', params: { q: question.id } },
+      );
+    }
     if (l === 3) {
       const sense = rng.pick(SENSES);
       const part = BODY_PARTS.find((p) => p.id === sense.part)!;

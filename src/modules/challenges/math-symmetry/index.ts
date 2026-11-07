@@ -22,6 +22,8 @@ const LEVELS = [
   { rows: 3, cols: 2, colours: 1, options: 3 },
   { rows: 4, cols: 3, colours: 2, options: 3 },
   { rows: 4, cols: 3, colours: 3, options: 4 },
+  // M15 (grades 3–4): bigger figures.
+  { rows: 5, cols: 4, colours: 3, options: 4 },
 ] as const;
 
 function randomHalf(rng: Rng, rows: number, cols: number, colours: number): Half {
@@ -42,6 +44,7 @@ export const mathSymmetry: ChallengeType<SymmetryData> = {
     lv('grade1', 'grade1', 'ni.ma2.symmetrie'),
     lv('grade1', 'grade2', 'ni.ma2.symmetrie'),
     lv('grade2', 'grade2', 'ni.ma2.symmetrie'),
+    lv('grade3', 'grade4', 'ni.ma4.symmetrie'),
   ],
   generate({ rng, level }) {
     const cfg = LEVELS[clampLevel(level, LEVELS.length) - 1]!;

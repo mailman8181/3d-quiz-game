@@ -47,7 +47,38 @@ import {
   withArticle,
 } from './grammar';
 import { BINS, FEELING_SITUATIONS, FEELINGS, FLOAT_ITEMS, JOBS, MONTHS, TRAFFIC_QUESTIONS, WASTE_ITEMS, WEEKDAYS } from './wissen';
-import { ALL_CLOCK_TIMES, clockSpoken, type ClockMinute } from './clock';
+import {
+  ADJECTIVE_FORMS,
+  CAPITAL_NOUNS,
+  FAMILIES,
+  LOWER_WORDS,
+  PART_SENTENCES,
+  SPELLING,
+  TENSE_NAMES,
+  TENSES,
+  tenseSentence,
+  TEXTS,
+  VERBS4,
+  type Tense,
+} from './grammar4';
+import {
+  BIKE_QUESTIONS,
+  BODY_QUESTIONS,
+  DIRECTION_NAMES,
+  GERMANY_QUESTIONS,
+  MAP_PLACES,
+  PAST_QUESTIONS,
+  SCIENCE_QUESTIONS,
+  STATE_QUESTIONS,
+  TOGETHER_QUESTIONS,
+  type Direction,
+} from './wissen4';
+import type { QuizQuestion } from './wissen';
+import { ALL_CLOCK_TIMES, clockSpoken, DIGITAL_CLOCK_TIMES, type ClockMinute } from './clock';
+import { amount, CONVERSIONS } from './units';
+import { SOLID_PROPERTIES, SOLIDS } from './solids';
+import { divisionPairs } from '../../modules/challenges/math-division';
+import { CHART_FRUITS } from '../../modules/challenges/math-chart';
 import { timesPairs } from '../../modules/challenges/math-times';
 
 /** German names of countable objects: [singular, plural]. */
@@ -109,9 +140,23 @@ const positionVariants = () => POSITION_OBJECTS.flatMap((o) => POSITIONS.map((po
 const bondVariants = () => [
   ...range(3, 10).flatMap((total) => range(1, total - 1).map((known) => ({ total, known, answer: total - known }))),
   ...range(1, 9).map((t) => ({ total: 100, known: t * 10, answer: 100 - t * 10 })),
+  ...range(1, 9).map((t) => ({ total: 1000, known: t * 100, answer: 1000 - t * 100 })),
 ];
-const doubleNs = () => [...range(1, 10), 20, 30, 40, 50];
-const halfNs = () => [...range(1, 10).map((n) => n * 2), 40, 60, 80, 100];
+const doubleNs = () => [...range(1, 10), 20, 30, 40, 50, 100, 200, 300, 400, 500];
+const halfNs = () => [...range(1, 10).map((n) => n * 2), 40, 60, 80, 100, 200, 400, 600, 800, 1000];
+// Grades 3–4 math helpers (M15a).
+const conversion = (id: string | number | undefined) => CONVERSIONS.find((c) => c.id === id)!;
+const conversionVariants = () => CONVERSIONS.flatMap((c) => range(1, 9).map((n) => ({ conv: c.id, n })));
+const solid = (id: string | number | undefined) => SOLIDS.find((x) => x.id === id)!;
+const fruit = (id: string | number | undefined) => CHART_FRUITS.find((f) => f.id === id)!;
+const fruitPairs = () => CHART_FRUITS.flatMap((a) => CHART_FRUITS.filter((b) => b.id !== a.id).map((b) => ({ a: a.id, b: b.id })));
+const euroCents = (cents: number) => {
+  const e = Math.floor(cents / 100);
+  const c = cents % 100;
+  if (e === 0) return `${c} Cent`;
+  if (c === 0) return e === 1 ? 'ein Euro' : `${e} Euro`;
+  return `${e} Euro ${c}`;
+};
 const onesPhrase = (ones: number) => (ones === 0 ? 'keine Einer' : ones === 1 ? 'ein Einer' : `${ones} Einer`);
 const tensPhrase = (tens: number) => (tens === 1 ? 'ein Zehner' : `${tens} Zehner`);
 const chanceColours = () => Object.keys(de.chance.colours).map((colour) => ({ colour }));
@@ -138,6 +183,28 @@ const feelingWord = (id: string | number | undefined) => FEELINGS.find((f) => f.
 const situation = (id: string | number | undefined) => FEELING_SITUATIONS.find((s) => s.id === id);
 const cyclicVariants = (list: readonly string[], ask: 'after' | 'before') =>
   list.map((name, i) => ({ name, answer: list[(i + (ask === 'after' ? 1 : -1) + list.length) % list.length]! }));
+
+// Grades 3–4 German helpers (M15b).
+const verb4 = (inf: string | number | undefined) => VERBS4.find((x) => x.inf === inf)!;
+const partSentence = (id: string | number | undefined) => PART_SENTENCES.find((x) => x.id === id)!;
+const partText = (p: string) => p.replace(/\.$/, '');
+const spelling = (word: string | number | undefined) => SPELLING.find((x) => x.word === word)!;
+const spellingExplain = (word: string | number | undefined) => {
+  const item = spelling(word);
+  const helper = item.helper.replace(/-/g, ', ');
+  if (item.strategy === 'lengthen') return `Verlängere das Wort: ${helper}. Darum schreibt man ${item.word}.`;
+  if (item.strategy === 'syllable') return `Sprich in Silben: ${helper}. Darum schreibt man ${item.word}.`;
+  if (item.strategy === 'derive') return `Denk an ${helper}. Darum schreibt man ${item.word}.`;
+  return `${item.word} ist ein Merkwort. Das merkst du dir.`;
+};
+const TENSE_DATIVE: Record<Tense, string> = { present: 'im Präsens', past: 'im Präteritum', perfect: 'im Perfekt', future: 'im Futur' };
+
+// Grades 3–4 Wissen helpers (M15c).
+const bankTemplates = (key: string, bank: readonly QuizQuestion[]): Record<string, Template> => ({
+  [`${key}.prompt`]: { render: (p) => bank.find((x) => x.id === p.q)?.question ?? '', variants: () => bank.map((x) => ({ q: x.id })) },
+  [`${key}.explain`]: { render: (p) => bank.find((x) => x.id === p.q)?.explain ?? '', variants: () => bank.map((x) => ({ q: x.id })) },
+});
+const mapPlace = (id: string | number | undefined) => MAP_PLACES.find((x) => x.id === id)!;
 
 const colorShapePairs = () => COLORS.filter((c) => c.adj).flatMap((c) => SHAPES.map((s) => ({ color: c.id, shape: s.id })));
 
@@ -525,14 +592,8 @@ export const speechTemplates: Record<string, Template> = {
     render: (p) => `${capitalize(floatItem(p.item)?.name ?? '')} geht unter.`,
     variants: () => FLOAT_ITEMS.filter((i) => !i.floats).map((i) => ({ item: i.id })),
   },
-  'knowledge.traffic.prompt': {
-    render: (p) => TRAFFIC_QUESTIONS.find((q) => q.id === p.q)?.question ?? '',
-    variants: () => TRAFFIC_QUESTIONS.map((q) => ({ q: q.id })),
-  },
-  'knowledge.traffic.explain': {
-    render: (p) => TRAFFIC_QUESTIONS.find((q) => q.id === p.q)?.explain ?? '',
-    variants: () => TRAFFIC_QUESTIONS.map((q) => ({ q: q.id })),
-  },
+  // Traffic: grade 1–2 questions plus the grade 3–4 bike questions (M15c).
+  ...bankTemplates('knowledge.traffic', [...TRAFFIC_QUESTIONS, ...BIKE_QUESTIONS]),
   'knowledge.feelings.prompt-face': { render: () => 'Wie fühlt sich das Kind?', variants: none },
   'knowledge.feelings.explain-face': {
     render: (p) => `Das Kind ist ${feelingWord(p.feeling)}. Alle Gefühle sind in Ordnung.`,
@@ -557,6 +618,162 @@ export const speechTemplates: Record<string, Template> = {
   'knowledge.calendar.explain-before': {
     render: (p) => `Vor ${p.name} kommt ${p.answer}.`,
     variants: () => [...cyclicVariants(WEEKDAYS, 'before'), ...cyclicVariants(MONTHS, 'before')],
+  },
+  // ── Grades 3–4 math (M15a) ──
+  'math.calc.explain-big': { render: () => 'Schau, so ist es richtig.', variants: none },
+  'math.place-value.prompt-hundreds': { render: () => 'Welche Zahl ist das? Zähle Hunderter, Zehner und Einer.', variants: none },
+  'math.place-value.prompt-place': {
+    render: (p) => `Welche Ziffer steht an der ${Number(p.place) === 3 ? 'Tausenderstelle' : 'Hunderterstelle'}?`,
+    variants: () => [{ place: 2 }, { place: 3 }],
+  },
+  'math.place-value.explain-big': { render: () => 'Schau in die Stellenwerttafel.', variants: none },
+  'math.clock.explain-digital': {
+    render: (p) => `Es ist ${clockSpoken(Number(p.hour), Number(p.minute), true)}.`,
+    variants: () => DIGITAL_CLOCK_TIMES.filter((t) => t.minute > 0),
+  },
+  'math.money.explain-mixed': {
+    render: (p) => `Das sind ${euroCents(Number(p.n))}.`,
+    variants: () => range(1, 100).map((n) => ({ n: n * 10 })),
+  },
+  'math.neighbors.prompt-after-big': { render: () => 'Welche Zahl kommt danach?', variants: none },
+  'math.neighbors.prompt-before-big': { render: () => 'Welche Zahl kommt davor?', variants: none },
+  'math.neighbors.explain-big': { render: () => 'Schau, so geht die Zahlenreihe weiter.', variants: none },
+  'math.even-odd.explain-even-big': { render: () => 'Die letzte Ziffer ist gerade. Also ist die Zahl gerade.', variants: none },
+  'math.even-odd.explain-odd-big': { render: () => 'Die letzte Ziffer ist ungerade. Also ist die Zahl ungerade.', variants: none },
+  'math.division.prompt': { render: (p) => `Was ist ${p.a} geteilt durch ${p.b}?`, variants: divisionPairs },
+  'math.division.explain': {
+    render: (p) => `${p.a} geteilt durch ${p.b} ist ${p.q}.`,
+    variants: () => divisionPairs().map(({ a, b }) => ({ a, b, q: a / b })),
+  },
+  'math.division.prompt-rest': { render: () => 'Teile mit Rest! Wie viel ist das?', variants: none },
+  'math.division.explain-rest': { render: () => 'Schau: So oft passt die Zahl hinein, und das bleibt als Rest übrig.', variants: none },
+  'math.units.prompt': {
+    render: (p) => {
+      const c = conversion(p.conv);
+      return `Wie viele ${c.to.many} sind ${amount(Number(p.n), c.from)}?`;
+    },
+    variants: conversionVariants,
+  },
+  'math.units.explain': {
+    render: (p) => {
+      const c = conversion(p.conv);
+      return `${amount(Number(p.n), c.from)} sind ${Number(p.n) * c.factor} ${c.to.many}.`;
+    },
+    variants: conversionVariants,
+  },
+  'math.rounding.prompt': {
+    render: (p) => `Runde auf ${Number(p.to) === 1000 ? 'Tausender' : Number(p.to) === 100 ? 'Hunderter' : 'Zehner'}!`,
+    variants: () => [{ to: 10 }, { to: 100 }, { to: 1000 }],
+  },
+  'math.rounding.explain-up': { render: () => 'Ab der Mitte wird aufgerundet.', variants: none },
+  'math.rounding.explain-down': { render: () => 'Vor der Mitte wird abgerundet.', variants: none },
+  'math.area.prompt-area': { render: () => 'Wie viele Kästchen groß ist die Fläche?', variants: none },
+  'math.area.prompt-perimeter': { render: () => 'Wie lang ist der Rand? Zähle die Kästchenseiten rundherum.', variants: none },
+  'math.area.explain-area': { render: (p) => `Die Fläche ist ${p.n} Kästchen groß.`, variants: () => range(1, 30).map((n) => ({ n })) },
+  'math.area.explain-perimeter': { render: (p) => `Der Rand ist ${p.n} Kästchenseiten lang.`, variants: () => range(4, 40).map((n) => ({ n })) },
+  'math.solids.prompt-name': { render: () => 'Wie heißt dieser Körper?', variants: none },
+  'math.solids.explain-name': { render: (p) => `Dieser Körper heißt ${solid(p.solid).name}.`, variants: () => SOLIDS.map((x) => ({ solid: x.id })) },
+  'math.solids.prompt-count': {
+    render: (p) => `Wie viele ${SOLID_PROPERTIES[p.ask as keyof typeof SOLID_PROPERTIES]} hat ${solid(p.solid).withArticle}?`,
+    variants: () => SOLIDS.filter((x) => x.counts).flatMap((x) => (['corners', 'edges', 'faces'] as const).map((ask) => ({ solid: x.id, ask }))),
+  },
+  'math.solids.explain-count': {
+    render: (p) => {
+      const x = solid(p.solid);
+      const ask = p.ask as keyof typeof SOLID_PROPERTIES;
+      return `${capitalize(x.withArticle)} hat ${x.counts?.[ask] ?? 0} ${SOLID_PROPERTIES[ask]}.`;
+    },
+    variants: () => SOLIDS.filter((x) => x.counts).flatMap((x) => (['corners', 'edges', 'faces'] as const).map((ask) => ({ solid: x.id, ask }))),
+  },
+  'math.chart.prompt-most': { render: () => 'Welches Obst mögen die meisten Kinder?', variants: none },
+  'math.chart.explain-most': { render: (p) => `Die meisten Kinder mögen ${fruit(p.fruit).plural}.`, variants: () => CHART_FRUITS.map((f) => ({ fruit: f.id })) },
+  'math.chart.prompt-count': { render: (p) => `Wie viele Kinder mögen ${fruit(p.fruit).plural}?`, variants: () => CHART_FRUITS.map((f) => ({ fruit: f.id })) },
+  'math.chart.explain-count': {
+    render: (p) => `${p.n} Kinder mögen ${fruit(p.fruit).plural}.`,
+    variants: () => CHART_FRUITS.flatMap((f) => range(2, 9).map((n) => ({ fruit: f.id, n }))),
+  },
+  'math.chart.prompt-diff': { render: (p) => `Wie viele Kinder mehr mögen ${fruit(p.a).plural} als ${fruit(p.b).plural}?`, variants: fruitPairs },
+  'math.chart.explain-diff': {
+    render: (p) => `${p.n} ${Number(p.n) === 1 ? 'Kind mag' : 'Kinder mögen'} lieber ${fruit(p.a).plural} als ${fruit(p.b).plural}.`,
+    variants: () => fruitPairs().flatMap((x) => range(1, 7).map((n) => ({ ...x, n }))),
+  },
+  // ── Grades 3–4 German (M15b) ──
+  'german.tense.prompt-which': { render: () => 'Lies den Satz. In welcher Zeit steht er?', variants: none },
+  'german.tense.explain-simple': {
+    render: (p) => {
+      const t = p.tense as Tense;
+      return `${tenseSentence(verb4(p.verb), t)} Das ist ${t === 'future' ? 'die Zukunft' : t === 'present' ? 'die Gegenwart' : 'die Vergangenheit'}.`;
+    },
+    variants: () => VERBS4.flatMap((v) => (['present', 'past', 'future'] as const).map((tense) => ({ verb: v.inf, tense }))),
+  },
+  'german.tense.explain-term': {
+    render: (p) => `${tenseSentence(verb4(p.verb), p.tense as Tense)} Der Satz steht ${TENSE_DATIVE[p.tense as Tense]}.`,
+    variants: () => VERBS4.flatMap((v) => TENSES.map((tense) => ({ verb: v.inf, tense }))),
+  },
+  'german.tense.prompt-past': { render: () => 'Lies den Satz. Welches Wort passt für gestern?', variants: none },
+  'german.tense.explain-past': {
+    render: (p) => `Heute ${verb4(p.verb).present} ich. Gestern ${verb4(p.verb).past} ich.`,
+    variants: () => VERBS4.map((v) => ({ verb: v.inf })),
+  },
+  'german.sentence-parts.prompt-predicate': { render: () => 'Tippe auf das Prädikat. Frag: Was tut jemand?', variants: none },
+  'german.sentence-parts.prompt-subject': { render: () => 'Tippe auf das Subjekt. Frag: Wer oder was?', variants: none },
+  'german.sentence-parts.explain-predicate': {
+    render: (p) => `Das Prädikat ist: ${partText(partSentence(p.sentence).parts[partSentence(p.sentence).predicate]!)}.`,
+    variants: () => PART_SENTENCES.map((x) => ({ sentence: x.id })),
+  },
+  'german.sentence-parts.explain-subject': {
+    render: (p) => `Das Subjekt ist: ${partText(partSentence(p.sentence).parts[partSentence(p.sentence).subject]!)}.`,
+    variants: () => PART_SENTENCES.map((x) => ({ sentence: x.id })),
+  },
+  'german.word-family.prompt': {
+    render: (p) => `Welches Wort gehört zur Wortfamilie ${FAMILIES.find((f) => f.id === p.family)?.stem ?? ''}?`,
+    variants: () => FAMILIES.map((f) => ({ family: f.id })),
+  },
+  'german.word-family.explain': {
+    render: (p) => `${p.word} gehört zur Wortfamilie ${FAMILIES.find((f) => f.id === p.family)?.stem ?? ''}.`,
+    variants: () => FAMILIES.flatMap((f) => f.members.map((word) => ({ family: f.id, word }))),
+  },
+  'german.spelling.prompt': {
+    render: (p) => `Welches Wort ist richtig geschrieben? Hör genau: ${p.word}.`,
+    variants: () => SPELLING.map((x) => ({ word: x.word })),
+  },
+  'german.spelling.explain': { render: (p) => spellingExplain(p.word), variants: () => SPELLING.map((x) => ({ word: x.word })) },
+  'german.capital.prompt': { render: () => 'Welches Wort schreibt man groß?', variants: none },
+  'german.capital.explain': {
+    render: (p) => `${p.word} ist ein Nomen. Nomen schreibt man groß.`,
+    variants: () => CAPITAL_NOUNS.map((n) => ({ word: n.word })),
+  },
+  'german.comparison.prompt': { render: () => 'Lies genau. Welches Wort fehlt?', variants: none },
+  'german.comparison.explain': {
+    render: (p) => {
+      const a = ADJECTIVE_FORMS.find((x) => x.base === p.adj)!;
+      return `${a.base}, ${a.comp}, ${a.sup}.`;
+    },
+    variants: () => ADJECTIVE_FORMS.map((a) => ({ adj: a.base })),
+  },
+  'german.reading.prompt': { render: () => 'Lies den Text und beantworte die Frage.', variants: none },
+  'german.reading.explain': {
+    render: (p) => `Die Antwort steht im Text: ${TEXTS.find((t) => t.id === p.text)?.answer ?? ''}.`,
+    variants: () => TEXTS.map((t) => ({ text: t.id })),
+  },
+  // ── Grades 3–4 Wissen (M15c) ──
+  ...bankTemplates('knowledge.states', STATE_QUESTIONS),
+  ...bankTemplates('knowledge.science', SCIENCE_QUESTIONS),
+  ...bankTemplates('knowledge.germany', GERMANY_QUESTIONS),
+  ...bankTemplates('knowledge.past', PAST_QUESTIONS),
+  ...bankTemplates('knowledge.together', TOGETHER_QUESTIONS),
+  ...bankTemplates('knowledge.body4', BODY_QUESTIONS),
+  'knowledge.compass.prompt-place': {
+    render: (p) => `Was liegt im ${DIRECTION_NAMES[p.dir as Direction]?.name ?? ''} der Schule?`,
+    variants: () => (['north', 'east', 'south', 'west'] as const).map((dir) => ({ dir })),
+  },
+  'knowledge.compass.prompt-direction': {
+    render: (p) => `In welcher Himmelsrichtung liegt ${mapPlace(p.place).name}?`,
+    variants: () => MAP_PLACES.map((x) => ({ place: x.id })),
+  },
+  'knowledge.compass.explain': {
+    render: (p) => `${capitalize(mapPlace(p.place).name)} liegt im ${DIRECTION_NAMES[p.dir as Direction]?.name ?? ''}.`,
+    variants: () => MAP_PLACES.flatMap((x) => (['north', 'east', 'south', 'west'] as const).map((dir) => ({ place: x.id, dir }))),
   },
   'feedback.tryAgain': { render: () => 'Fast! Versuch es nochmal.', variants: none },
   'feedback.hint': { render: () => 'Ich helfe dir. Schau genau hin!', variants: none },
@@ -624,6 +841,19 @@ export const staticSpokenTexts: readonly string[] = [
   ...BODY_PARTS.map((b) => b.word),
   // Grade 1–2 math pack: clock answer cards.
   ...ALL_CLOCK_TIMES.map((t) => clockSpoken(t.hour, t.minute)),
+  ...DIGITAL_CLOCK_TIMES.map((t) => clockSpoken(t.hour, t.minute, true)),
+  ...SOLIDS.map((x) => x.name),
+  // Grades 3–4 German: speaker buttons on word cards.
+  ...Object.values(TENSE_NAMES).flatMap((t) => [t.simple, t.term]),
+  ...FAMILIES.flatMap((f) => [...f.members, ...f.lookAlikes]),
+  ...CAPITAL_NOUNS.map((n) => n.word.toLowerCase()),
+  ...LOWER_WORDS,
+  // Grades 3–4 Wissen: speaker buttons on answer cards.
+  ...[STATE_QUESTIONS, SCIENCE_QUESTIONS, GERMANY_QUESTIONS, PAST_QUESTIONS, TOGETHER_QUESTIONS, BODY_QUESTIONS, BIKE_QUESTIONS].flatMap((bank) =>
+    bank.flatMap((x) => [x.answer.label, ...x.distractors.map((d) => d.label)]),
+  ),
+  ...MAP_PLACES.map((x) => x.name),
+  ...Object.values(DIRECTION_NAMES).map((d) => d.name),
   // Grade 1–2 German pack: speaker buttons on word cards.
   ...VERBS,
   ...ADJECTIVES,

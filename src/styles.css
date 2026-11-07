@@ -1577,6 +1577,8 @@ button {
 
 /* ── Grade 1–2 math pack (M13c) ── */
 .quiz-text {
+  /* Texts with a question below keep their line break (german.reading). */
+  white-space: pre-line;
   margin: 4px 0 10px;
   font-size: 1.35rem;
   font-weight: 800;
@@ -2261,4 +2263,237 @@ button {
   0% { transform: translateY(0); }
   50% { transform: translateY(-14px); }
   100% { transform: translateY(0); }
+}
+
+/* ── Grades 3–4 math (M15a) ── */
+.hundred-plate {
+  width: 46px;
+  height: 46px;
+  background:
+    repeating-linear-gradient(90deg, #1d4fa8 0 1px, transparent 1px 4.6px),
+    repeating-linear-gradient(0deg, #1d4fa8 0 1px, transparent 1px 4.6px),
+    #3a86ff;
+  border: 1px solid #1d4fa8;
+}
+
+.place-table {
+  border-collapse: collapse;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.place-table th,
+.place-table td {
+  border: 3px solid var(--ink);
+  min-width: 42px;
+  padding: 4px 6px;
+  text-align: center;
+}
+
+.place-table .asked {
+  background: #ffd93d;
+}
+
+.rounding-area,
+.area-area,
+.solid-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 20px 34px;
+}
+
+.number-line {
+  position: relative;
+  width: 86%;
+  height: 6px;
+  margin-top: 6px;
+  background: var(--ink);
+  border-radius: 3px;
+}
+
+.number-line .tick {
+  position: absolute;
+  top: 12px;
+  transform: translateX(-50%);
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.number-line .tick::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -18px;
+  width: 4px;
+  height: 18px;
+  background: var(--ink);
+}
+
+.number-line .tick.middle {
+  color: #8a7f6b;
+}
+
+.number-line .marker {
+  position: absolute;
+  top: -11px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ff6b8b;
+  border: 3px solid var(--ink);
+  transform: translateX(-50%);
+}
+
+.number-line .arrow {
+  position: absolute;
+  top: -40px;
+  transform: translateX(-50%);
+  font-size: 1.4rem;
+}
+
+.number-line .arrow.up::after {
+  content: '➡️';
+}
+
+.number-line .arrow.down::after {
+  content: '⬅️';
+}
+
+.area-grid {
+  display: grid;
+  width: min(270px, 70vw);
+  border: 2px solid #c9d6e8;
+  background: #fff;
+}
+
+.area-cell {
+  aspect-ratio: 1;
+  border: 1px solid #c9d6e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.area-cell.on {
+  background: #8fd16a;
+}
+
+.area-grid.ask-perimeter.show .area-cell.bt { border-top: 4px solid #ff6b8b; }
+.area-grid.ask-perimeter.show .area-cell.br { border-right: 4px solid #ff6b8b; }
+.area-grid.ask-perimeter.show .area-cell.bb { border-bottom: 4px solid #ff6b8b; }
+.area-grid.ask-perimeter.show .area-cell.bl { border-left: 4px solid #ff6b8b; }
+
+.solid-svg {
+  width: min(170px, 46vw);
+}
+
+.chart-area {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 10px 8px;
+  margin-bottom: 10px;
+  min-height: 170px;
+}
+
+.chart-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.chart-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  line-height: 1;
+  font-size: 15px;
+}
+
+.chart-bar-wrap {
+  height: 140px;
+  width: 34px;
+  display: flex;
+  align-items: flex-end;
+  background: repeating-linear-gradient(0deg, #e5dcc4 0 1px, transparent 1px 28px);
+}
+
+.chart-bar {
+  width: 100%;
+  background: #3a86ff;
+  border: 3px solid var(--ink);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+}
+
+.chart-col.marked .chart-bar {
+  background: #ffd93d;
+}
+
+.chart-scale {
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 800;
+  margin-bottom: 26px;
+}
+
+.chart-label {
+  font-size: 22px;
+}
+
+/* ── Grades 3–4 Wissen (M15c): map with compass ── */
+.map-area {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.map-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  width: min(220px, 60vw);
+  padding: 6px;
+  background: #d9f2c8;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+}
+
+.map-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: min(36px, 9vw);
+  border-radius: 8px;
+}
+
+.map-cell.school {
+  background: #fff7d1;
+}
+
+.map-cell.marked {
+  outline: 4px solid #ffd93d;
+  background: #fff7d1;
+}
+
+.map-cell.compass {
+  position: relative;
+  font-size: min(26px, 7vw);
+}
+
+.compass-n {
+  position: absolute;
+  top: 0;
+  font-size: 0.8rem;
+  font-weight: 900;
 }

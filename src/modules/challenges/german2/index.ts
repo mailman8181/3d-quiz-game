@@ -262,14 +262,42 @@ export const germanAbc: ChallengeType<QuizData> = {
   id: 'german.abc',
   subject: 'german',
   skills: ['german.alphabet'],
-  levels: 3,
+  levels: 5,
   levelInfo: [
     lv('grade1', 'grade1', 'ni.de2.alphabet'),
     lv('grade1', 'grade2', 'ni.de2.alphabet'),
     lv('grade2', 'grade2', 'ni.de2.alphabet', 'ni.de2.woerter-ordnen'),
+    // M15b (grades 3–4): dictionary order by the 2nd, then the 3rd letter.
+    lv('grade3', 'grade3', 'ni.de4.woerterbuch'),
+    lv('grade4', undefined, 'ni.de4.woerterbuch'),
   ],
   generate({ rng, level }) {
-    const l = clampLevel(level, 3);
+    const l = clampLevel(level, 5);
+    if (l >= 4) {
+      // Same first letter (or first two letters): the next letter decides.
+      const prefix = l === 4 ? 1 : 2;
+      const groups = new Map<string, typeof NOUNS[number][]>();
+      for (const n of NOUNS) {
+        const key = n.word.slice(0, prefix).toLowerCase();
+        const next = n.word[prefix]?.toLowerCase();
+        if (!next) continue;
+        const g = groups.get(key) ?? [];
+        if (!g.some((x) => x.word[prefix]?.toLowerCase() === next)) g.push(n);
+        groups.set(key, g);
+      }
+      const usable = [...groups.values()].filter((g) => g.length >= 3);
+      const group = rng.pick(usable.length > 0 ? usable : [...groups.values()].filter((g) => g.length >= 2));
+      const picked = rng.shuffle(group).slice(0, 3);
+      const first = [...picked].sort((x, y) => x.word.localeCompare(y.word, 'de'))[0]!;
+      return quiz(
+        'german.abc',
+        level,
+        { options: picked.map((n) => ({ label: n.word })), labels: 'always', speakOptions: true },
+        picked.indexOf(first),
+        { key: 'german.abc.prompt-words' },
+        { key: 'german.abc.explain-words', params: { word: first.word } },
+      );
+    }
     if (l < 3) {
       const ask = l === 1 ? 'after' : rng.pick(['after', 'before'] as const);
       const i = ask === 'after' ? rng.int(0, 24) : rng.int(1, 25);

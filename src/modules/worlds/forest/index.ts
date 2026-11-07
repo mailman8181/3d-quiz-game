@@ -46,6 +46,13 @@ export const forestWorld: WorldTheme = {
       'math.clock',
       'math.symmetry',
       'math.chance',
+      // Grades 3–4 math (M15a)
+      'math.division',
+      'math.units',
+      'math.rounding',
+      'math.area',
+      'math.solids',
+      'math.chart',
       // Grade 1–2 German pack (M13d)
       'german.article',
       'german.plural',
@@ -56,6 +63,14 @@ export const forestWorld: WorldTheme = {
       'german.sentence-end',
       'german.abc',
       'german.compound',
+      // Grades 3–4 German (M15b)
+      'german.tense',
+      'german.sentence-parts',
+      'german.word-family',
+      'german.spelling',
+      'german.capital',
+      'german.comparison',
+      'german.reading',
       // Wissen pack (M13e)
       'knowledge.recycling',
       'knowledge.jobs',
@@ -63,6 +78,13 @@ export const forestWorld: WorldTheme = {
       'knowledge.traffic',
       'knowledge.feelings',
       'knowledge.calendar',
+      // Grades 3–4 Wissen (M15c)
+      'knowledge.states',
+      'knowledge.science',
+      'knowledge.compass',
+      'knowledge.germany',
+      'knowledge.past',
+      'knowledge.together',
     ],
   },
   colors: {
