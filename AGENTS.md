@@ -95,7 +95,11 @@ public/audio/de/ committed MP3 speech clips (generated)
 - **Tests:** unit tests next to the code (`*.test.ts`, Vitest). `src/modules/challenges/
   challenges.test.ts` property-tests every registered challenge type (many seeds × every level:
   valid, solvable, speech keys exist, `levelInfo` complete). E2E tests use `data-*` hooks
-  (e.g. `data-test-route-chest`) so they never depend on luck or timing.
+  (e.g. `data-test-route-chest`) so they never depend on luck or timing. E2E tests run
+  **fully parallel** (`fullyParallel` in `playwright.config.ts`): every test must stand alone
+  (own page, own `?seed=`, no shared state, no order within a file). The timing reporter
+  (`tests/e2e/timing-reporter.ts`) prints the slowest tests, time per file and worker load;
+  in CI it is in the job summary and the `e2e-timings` artifact.
 - Styling lives in `src/styles.css`; check new views at 360 px width.
 
 ## 6. Recipes

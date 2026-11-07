@@ -25,6 +25,14 @@ jobs:
       - run: npm run audio:check
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e
+      # Per-test durations (also in the job summary), kept to compare runs.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-timings
+          path: test-results/e2e-timings.json
+          if-no-files-found: ignore
+          retention-days: 30
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
