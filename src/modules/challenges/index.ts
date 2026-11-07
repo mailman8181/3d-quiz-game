@@ -17,6 +17,15 @@ import { mathFindNumber } from './math-find-number';
 import { mathPattern } from './math-pattern';
 import { mathSubtraction } from './math-subtraction';
 import { mathDice } from './math-dice';
+import {
+  germanCapital,
+  germanComparison,
+  germanReading,
+  germanSentenceParts,
+  germanSpelling,
+  germanTense,
+  germanWordFamily,
+} from './german4';
 import { mathDivision } from './math-division';
 import { mathUnits } from './math-units';
 import { mathRounding } from './math-rounding';
@@ -111,6 +120,13 @@ export const challengeTypes: readonly ChallengeType[] = [
   germanSentenceEnd,
   germanAbc,
   germanCompound,
+  germanTense,
+  germanSentenceParts,
+  germanWordFamily,
+  germanSpelling,
+  germanCapital,
+  germanComparison,
+  germanReading,
   knowledgeAnimalName,
   knowledgeAnimalBaby,
   knowledgeColors,

@@ -213,6 +213,19 @@ richtig.") with the numbers on screen.
 | Körper (new) | name the drawn solid (Würfel … Pyramide, Kegel), then Ecken/Kanten/Flächen |
 | Diagramme lesen (new) | pictogram → bar chart → "Wie viele Kinder mehr …?" |
 
+**Grades 3–4 German (M15b)** (KC Deutsch, Ende Jg. 4)
+
+| Type | Content |
+|---|---|
+| Zeitformen | "In welcher Zeit steht der Satz?" (Gegenwart/Vergangenheit/Zukunft → Präsens/Präteritum/Perfekt/Futur); "Heute spiele ich. Gestern ___ ich." incl. irregular verbs (ging, schwamm) |
+| Satzglieder | tap the predicate ("Was tut jemand?"), then the subject ("Wer oder was?"), also when it is not first ("Heute backt Papa …") |
+| Wortfamilien | "Welches Wort gehört zur Wortfamilie fahren?" with look-alikes (Farbe, Fahne) |
+| Rechtschreibung | choose the right spelling; the explanation names the strategy: Silben (Son-ne, Bie-ne, ck/tz), Verlängern (Hund – Hunde, Fuß – Füße), Ableiten (Bäume – Baum), Merkwörter (Zahn, Uhr) |
+| Groß oder klein | which word is a noun — concrete, then abstract (Freude, Mut), then with -ung/-heit/-keit/-nis/-schaft |
+| Steigerung | "groß – größer – ___" incl. irregular (gut – besser – am besten); wrong answers follow the regular rule (am großesten) |
+| Texte lesen | a short text and a question (who, what, why, when, how many) |
+| Das ABC (+ levels) | dictionary order by the 2nd, then the 3rd letter |
+
 Plus/Minus above 20 is spoken generically ("Rechne aus! Wie viel ist das?" / "Das Ergebnis ist 39.")
 with the equation on screen: one clip per sentence (ADR-0007) would need thousands of clips for every
 pair up to 100. Reading two-digit numbers is itself a grade-2 goal.
@@ -258,6 +271,7 @@ German challenges (planned next), more worlds/scenarios, multiplayer, teacher mo
 cloud sync, other languages, speech-recognition answers.
 
 ## Changelog
+- v1.30 (2026-11-07): M15b — grades 3–4 German: 7 new types, ABC to the 3rd letter (§6.5).
 - v1.29 (2026-11-07): Owner decision: content for 3. and 4. Klasse (M15, target widened to about age 10). Without it a child moving into 3. Klasse would find only 3 task types.
 - v1.28 (2026-11-07): M14d — Rätselpfad practice activity (§4b, ADR-0011), owner decisions: name, always open, 5/6/8 questions, optional topic step, no parents' switch.
 - v1.27 (2026-11-07): M14c — Hüpf-Abenteuer, the second activity (§4b).

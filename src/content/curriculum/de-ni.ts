@@ -93,6 +93,15 @@ const list: Competency[] = [
   { id: 'ni.de2.wortbildung', source: DE, until: 'grade2', subject: 'german', text: 'Zusammengesetzte Nomen bilden' },
   { id: 'ni.de2.wortschatz', source: DE, until: 'grade2', subject: 'german', text: 'Einen angemessenen Wortschatz verwenden' },
   { id: 'ni.de2.woerter-ordnen', source: DE, until: 'grade2', subject: 'german', text: 'Wörter sammeln und ordnen (Oberbegriffe)' },
+  // KC Deutsch 2017, Ende Schuljahrgang 4 (M15b)
+  { id: 'ni.de4.zeitformen', source: DE, until: 'grade4', subject: 'german', text: 'Zeitformen Präsens, Präteritum, Perfekt und Futur I untersuchen und nutzen' },
+  { id: 'ni.de4.satzglieder', source: DE, until: 'grade4', subject: 'german', text: 'Satzkern (Prädikat) und Satzglieder (Subjekt) als Grundelemente nutzen' },
+  { id: 'ni.de4.wortfamilien', source: DE, until: 'grade4', subject: 'german', text: 'Wortfamilien bilden, Wortstamm erkennen' },
+  { id: 'ni.de4.rechtschreibstrategien', source: DE, until: 'grade4', subject: 'german', text: 'Rechtschreibstrategien: Verlängern, Ableiten, Silben, Merkwörter' },
+  { id: 'ni.de4.grossschreibung', source: DE, until: 'grade4', subject: 'german', text: 'Großschreibung von Konkreta und Abstrakta (-ung, -heit, -keit, -nis, -schaft)' },
+  { id: 'ni.de4.wortarten', source: DE, until: 'grade4', subject: 'german', text: 'Funktion von Nomen, Verben und Adjektiven; Adjektive steigern' },
+  { id: 'ni.de4.lesen', source: DE, until: 'grade4', subject: 'german', text: 'Informationen auf Textebene verknüpfen (globale Kohärenz)' },
+  { id: 'ni.de4.woerterbuch', source: DE, until: 'grade4', subject: 'german', text: 'Wörter alphabetisch ordnen und nachschlagen (2. und 3. Buchstabe)' },
   // KC Sachunterricht 2017, Ende Schuljahrgang 2
   { id: 'ni.su2.tiere', source: SU, until: 'grade2', subject: 'knowledge', text: 'Typische Tiere und ihre Entwicklung kennen' },
   { id: 'ni.su2.zeit', source: SU, until: 'grade2', subject: 'knowledge', text: 'Zyklische Prozesse in der Zeit (Jahreszeiten)' },

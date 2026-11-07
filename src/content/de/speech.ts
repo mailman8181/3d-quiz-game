@@ -47,6 +47,20 @@ import {
   withArticle,
 } from './grammar';
 import { BINS, FEELING_SITUATIONS, FEELINGS, FLOAT_ITEMS, JOBS, MONTHS, TRAFFIC_QUESTIONS, WASTE_ITEMS, WEEKDAYS } from './wissen';
+import {
+  ADJECTIVE_FORMS,
+  CAPITAL_NOUNS,
+  FAMILIES,
+  LOWER_WORDS,
+  PART_SENTENCES,
+  SPELLING,
+  TENSE_NAMES,
+  TENSES,
+  tenseSentence,
+  TEXTS,
+  VERBS4,
+  type Tense,
+} from './grammar4';
 import { ALL_CLOCK_TIMES, clockSpoken, DIGITAL_CLOCK_TIMES, type ClockMinute } from './clock';
 import { amount, CONVERSIONS } from './units';
 import { SOLID_PROPERTIES, SOLIDS } from './solids';
@@ -156,6 +170,21 @@ const feelingWord = (id: string | number | undefined) => FEELINGS.find((f) => f.
 const situation = (id: string | number | undefined) => FEELING_SITUATIONS.find((s) => s.id === id);
 const cyclicVariants = (list: readonly string[], ask: 'after' | 'before') =>
   list.map((name, i) => ({ name, answer: list[(i + (ask === 'after' ? 1 : -1) + list.length) % list.length]! }));
+
+// Grades 3–4 German helpers (M15b).
+const verb4 = (inf: string | number | undefined) => VERBS4.find((x) => x.inf === inf)!;
+const partSentence = (id: string | number | undefined) => PART_SENTENCES.find((x) => x.id === id)!;
+const partText = (p: string) => p.replace(/\.$/, '');
+const spelling = (word: string | number | undefined) => SPELLING.find((x) => x.word === word)!;
+const spellingExplain = (word: string | number | undefined) => {
+  const item = spelling(word);
+  const helper = item.helper.replace(/-/g, ', ');
+  if (item.strategy === 'lengthen') return `Verlängere das Wort: ${helper}. Darum schreibt man ${item.word}.`;
+  if (item.strategy === 'syllable') return `Sprich in Silben: ${helper}. Darum schreibt man ${item.word}.`;
+  if (item.strategy === 'derive') return `Denk an ${helper}. Darum schreibt man ${item.word}.`;
+  return `${item.word} ist ein Merkwort. Das merkst du dir.`;
+};
+const TENSE_DATIVE: Record<Tense, string> = { present: 'im Präsens', past: 'im Präteritum', perfect: 'im Perfekt', future: 'im Futur' };
 
 const colorShapePairs = () => COLORS.filter((c) => c.adj).flatMap((c) => SHAPES.map((s) => ({ color: c.id, shape: s.id })));
 
@@ -654,6 +683,65 @@ export const speechTemplates: Record<string, Template> = {
     render: (p) => `${p.n} ${Number(p.n) === 1 ? 'Kind mag' : 'Kinder mögen'} lieber ${fruit(p.a).plural} als ${fruit(p.b).plural}.`,
     variants: () => fruitPairs().flatMap((x) => range(1, 7).map((n) => ({ ...x, n }))),
   },
+  // ── Grades 3–4 German (M15b) ──
+  'german.tense.prompt-which': { render: () => 'Lies den Satz. In welcher Zeit steht er?', variants: none },
+  'german.tense.explain-simple': {
+    render: (p) => {
+      const t = p.tense as Tense;
+      return `${tenseSentence(verb4(p.verb), t)} Das ist ${t === 'future' ? 'die Zukunft' : t === 'present' ? 'die Gegenwart' : 'die Vergangenheit'}.`;
+    },
+    variants: () => VERBS4.flatMap((v) => (['present', 'past', 'future'] as const).map((tense) => ({ verb: v.inf, tense }))),
+  },
+  'german.tense.explain-term': {
+    render: (p) => `${tenseSentence(verb4(p.verb), p.tense as Tense)} Der Satz steht ${TENSE_DATIVE[p.tense as Tense]}.`,
+    variants: () => VERBS4.flatMap((v) => TENSES.map((tense) => ({ verb: v.inf, tense }))),
+  },
+  'german.tense.prompt-past': { render: () => 'Lies den Satz. Welches Wort passt für gestern?', variants: none },
+  'german.tense.explain-past': {
+    render: (p) => `Heute ${verb4(p.verb).present} ich. Gestern ${verb4(p.verb).past} ich.`,
+    variants: () => VERBS4.map((v) => ({ verb: v.inf })),
+  },
+  'german.sentence-parts.prompt-predicate': { render: () => 'Tippe auf das Prädikat. Frag: Was tut jemand?', variants: none },
+  'german.sentence-parts.prompt-subject': { render: () => 'Tippe auf das Subjekt. Frag: Wer oder was?', variants: none },
+  'german.sentence-parts.explain-predicate': {
+    render: (p) => `Das Prädikat ist: ${partText(partSentence(p.sentence).parts[partSentence(p.sentence).predicate]!)}.`,
+    variants: () => PART_SENTENCES.map((x) => ({ sentence: x.id })),
+  },
+  'german.sentence-parts.explain-subject': {
+    render: (p) => `Das Subjekt ist: ${partText(partSentence(p.sentence).parts[partSentence(p.sentence).subject]!)}.`,
+    variants: () => PART_SENTENCES.map((x) => ({ sentence: x.id })),
+  },
+  'german.word-family.prompt': {
+    render: (p) => `Welches Wort gehört zur Wortfamilie ${FAMILIES.find((f) => f.id === p.family)?.stem ?? ''}?`,
+    variants: () => FAMILIES.map((f) => ({ family: f.id })),
+  },
+  'german.word-family.explain': {
+    render: (p) => `${p.word} gehört zur Wortfamilie ${FAMILIES.find((f) => f.id === p.family)?.stem ?? ''}.`,
+    variants: () => FAMILIES.flatMap((f) => f.members.map((word) => ({ family: f.id, word }))),
+  },
+  'german.spelling.prompt': {
+    render: (p) => `Welches Wort ist richtig geschrieben? Hör genau: ${p.word}.`,
+    variants: () => SPELLING.map((x) => ({ word: x.word })),
+  },
+  'german.spelling.explain': { render: (p) => spellingExplain(p.word), variants: () => SPELLING.map((x) => ({ word: x.word })) },
+  'german.capital.prompt': { render: () => 'Welches Wort schreibt man groß?', variants: none },
+  'german.capital.explain': {
+    render: (p) => `${p.word} ist ein Nomen. Nomen schreibt man groß.`,
+    variants: () => CAPITAL_NOUNS.map((n) => ({ word: n.word })),
+  },
+  'german.comparison.prompt': { render: () => 'Lies genau. Welches Wort fehlt?', variants: none },
+  'german.comparison.explain': {
+    render: (p) => {
+      const a = ADJECTIVE_FORMS.find((x) => x.base === p.adj)!;
+      return `${a.base}, ${a.comp}, ${a.sup}.`;
+    },
+    variants: () => ADJECTIVE_FORMS.map((a) => ({ adj: a.base })),
+  },
+  'german.reading.prompt': { render: () => 'Lies den Text und beantworte die Frage.', variants: none },
+  'german.reading.explain': {
+    render: (p) => `Die Antwort steht im Text: ${TEXTS.find((t) => t.id === p.text)?.answer ?? ''}.`,
+    variants: () => TEXTS.map((t) => ({ text: t.id })),
+  },
   'feedback.tryAgain': { render: () => 'Fast! Versuch es nochmal.', variants: none },
   'feedback.hint': { render: () => 'Ich helfe dir. Schau genau hin!', variants: none },
   'feedback.skipQuestion': { render: () => 'Möchtest du diese Aufgabe wirklich überspringen?', variants: none },
@@ -722,6 +810,11 @@ export const staticSpokenTexts: readonly string[] = [
   ...ALL_CLOCK_TIMES.map((t) => clockSpoken(t.hour, t.minute)),
   ...DIGITAL_CLOCK_TIMES.map((t) => clockSpoken(t.hour, t.minute, true)),
   ...SOLIDS.map((x) => x.name),
+  // Grades 3–4 German: speaker buttons on word cards.
+  ...Object.values(TENSE_NAMES).flatMap((t) => [t.simple, t.term]),
+  ...FAMILIES.flatMap((f) => [...f.members, ...f.lookAlikes]),
+  ...CAPITAL_NOUNS.map((n) => n.word.toLowerCase()),
+  ...LOWER_WORDS,
   // Grade 1–2 German pack: speaker buttons on word cards.
   ...VERBS,
   ...ADJECTIVES,

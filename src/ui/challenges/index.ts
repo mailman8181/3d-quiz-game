@@ -82,6 +82,14 @@ export const challengeViews: Record<string, ChallengeViewEntry> = {
   'german.sentence-end': { View: KnowledgeView as ChallengeView, ownsChoices: true },
   'german.abc': { View: KnowledgeView as ChallengeView, ownsChoices: true },
   'german.compound': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  // Grades 3–4 German (M15b)
+  'german.tense': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'german.sentence-parts': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'german.word-family': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'german.spelling': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'german.capital': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'german.comparison': { View: KnowledgeView as ChallengeView, ownsChoices: true },
+  'german.reading': { View: KnowledgeView as ChallengeView, ownsChoices: true },
   // Wissen pack (M13e)
   'knowledge.recycling': { View: KnowledgeView as ChallengeView, ownsChoices: true },
   'knowledge.jobs': { View: KnowledgeView as ChallengeView, ownsChoices: true },

@@ -63,6 +63,14 @@ export const forestWorld: WorldTheme = {
       'german.sentence-end',
       'german.abc',
       'german.compound',
+      // Grades 3–4 German (M15b)
+      'german.tense',
+      'german.sentence-parts',
+      'german.word-family',
+      'german.spelling',
+      'german.capital',
+      'german.comparison',
+      'german.reading',
       // Wissen pack (M13e)
       'knowledge.recycling',
       'knowledge.jobs',

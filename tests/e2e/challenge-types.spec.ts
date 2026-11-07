@@ -39,6 +39,9 @@ for (const type of [
   'math.solids',
   'math.chart',
   'math.division',
+  // Grades 3–4 German (M15b): quiz cards; two representatives.
+  'german.tense',
+  'german.reading',
 ]) {
   test(`${type}: open a chest and answer until finished`, async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== 'desktop', 'one viewport is enough per type');
