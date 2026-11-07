@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Educational 3D maze game for German-speaking children (5-7).",
+  "description": "Educational 3D maze game for German-speaking children (Kindergarten to grade 4).",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
