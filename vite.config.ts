@@ -58,6 +58,9 @@ export default defineConfig({
       },
     }),
   ],
+  // glTF binaries are assets; only the model contract tests import them (`?inline`), the app
+  // loads public/models/*.glb at runtime.
+  assetsInclude: ['**/*.glb'],
   build: {
     chunkSizeWarningLimit: 1000,
   },

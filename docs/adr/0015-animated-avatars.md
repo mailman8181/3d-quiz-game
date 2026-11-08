@@ -1,6 +1,6 @@
 # ADR-0015: Rigged glTF avatars with idle and walk loops, starting with the cat
 
-- **Status:** Proposed
+- **Status:** Proposed; extended to all avatar animals by ADR-0016
 - **Date:** 2026-11-07
 - **Deciders:** owner (agreed with Fabian: "a test of the animated cat"), proposal by Fabian
 

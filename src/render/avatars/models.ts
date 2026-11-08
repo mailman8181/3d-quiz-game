@@ -18,8 +18,12 @@ import type { AvatarAnimal } from '../../core/profile/profile';
  * - optional skeleton (skinned meshes) and animation clips named `Idle` and `Walk`
  *   (ADR-0015, played by `animation.ts`).
  */
-const MODEL_FILES: Partial<Record<AvatarAnimal, string>> = {
+export const MODEL_FILES: Partial<Record<AvatarAnimal, string>> = {
   cat: 'models/cat.glb',
+  bunny: 'models/bunny.glb',
+  bear: 'models/bear.glb',
+  frog: 'models/frog.glb',
+  penguin: 'models/penguin.glb',
 };
 
 const cache = new Map<AvatarAnimal, THREE.Object3D>();
