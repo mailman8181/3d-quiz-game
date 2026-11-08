@@ -1,23 +1,31 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { AVATAR_ANIMALS, type AvatarAnimal } from '../../core/profile/profile';
+import { LOST_ANIMALS, type LostAnimal } from '../../core/profile/lostAnimals';
+import { AVATAR_ANIMALS } from '../../core/profile/profile';
 import { MODEL_ANCHORS } from './accessories';
-import { getAnimator, IDLE_CLIP, OUTFIT_BONES, WALK_CLIP } from './animation';
+import { CHEER_CLIP, getAnimator, IDLE_CLIP, OUTFIT_BONES, setAnimalCheering, WALK_CLIP } from './animation';
 import { buildAnimal, modelMaterialSlot } from './animals';
-import { MODEL_FILES, registerAnimalModel } from './models';
+import { buildLostAnimal, FRIEND_SCALE, friendMaterialSlot } from './lostAnimals';
+import { MODEL_FILES, type ModelId, registerAnimalModel } from './models';
 
 /**
- * Contract tests for the shipped model files (public/models/*.glb, ADR-0014/0015): they run the
- * real files through GLTFLoader and buildAnimal, so a broken Blender export fails here, not on
- * a child's phone.
+ * Contract tests for the shipped model files (public/models and public/models/friends, ADR-0014..0017):
+ * they run the real files through GLTFLoader, buildAnimal and buildLostAnimal, so a broken
+ * Blender export fails here, not on a child's phone.
  */
 const MAX_BYTES = 400 * 1024;
 const MAX_TOTAL_BYTES = 1.5 * 1024 * 1024;
+const MAX_FRIENDS_TOTAL_BYTES = 2.2 * 1024 * 1024;
 const MAX_TRIANGLES = 12_000;
+const ALL_CLIPS = [CHEER_CLIP, IDLE_CLIP, WALK_CLIP].sort();
+
+/** Lost friends with their own model (kitten and bunny baby are the cat and bunny). */
+const FRIENDS = LOST_ANIMALS.filter((a) => a !== 'kitten' && a !== 'bunny-baby');
+const FRIEND_SLOTS = ['Body', 'Light', 'Accent', 'Dark', 'Pink', 'White', 'Orange', 'ShellDark', 'Fin'];
 
 /** The shipped files, inlined by Vite as data URLs (no Node APIs in src). */
-const FILES = import.meta.glob<string>('../../../public/models/*.glb', { query: '?inline', import: 'default', eager: true });
+const FILES = import.meta.glob<string>('../../../public/models/**/*.glb', { query: '?inline', import: 'default', eager: true });
 
 interface GltfJson {
   materials: { name: string }[];
@@ -37,11 +45,11 @@ function readGlb(file: string): { json: GltfJson; buffer: ArrayBuffer } {
   return { json, buffer: bytes.buffer };
 }
 
-const loaded = new Map<AvatarAnimal, { scene: THREE.Object3D; clips: THREE.AnimationClip[] }>();
+const loaded = new Map<ModelId, { scene: THREE.Object3D; clips: THREE.AnimationClip[] }>();
 
 beforeAll(async () => {
   const loader = new GLTFLoader();
-  for (const animal of AVATAR_ANIMALS) {
+  for (const animal of [...AVATAR_ANIMALS, ...FRIENDS]) {
     const file = MODEL_FILES[animal];
     if (!file) continue;
     const gltf = await loader.parseAsync(readGlb(file).buffer, '');
@@ -50,8 +58,33 @@ beforeAll(async () => {
 });
 
 afterEach(() => {
-  for (const animal of AVATAR_ANIMALS) registerAnimalModel(animal, null);
+  for (const animal of [...AVATAR_ANIMALS, ...FRIENDS]) registerAnimalModel(animal, null);
 });
+
+function checkRig(scene: THREE.Object3D, clips: THREE.AnimationClip[]): void {
+  let triangles = 0;
+  let skinned = 0;
+  scene.traverse((o) => {
+    if (o instanceof THREE.SkinnedMesh) {
+      skinned++;
+      triangles += (o.geometry.index?.count ?? 0) / 3;
+    }
+  });
+  expect(skinned).toBeGreaterThanOrEqual(4);
+  expect(triangles).toBeLessThan(MAX_TRIANGLES);
+  expect(clips.map((c) => c.name).sort()).toEqual(ALL_CLIPS);
+  for (const c of clips) expect(c.duration).toBeGreaterThan(0.3);
+  // GLTFLoader sanitizes node names ("Eye.L" → "EyeL"); the clips' tracks use the same names.
+  expect(scene.getObjectByName('EyeL')).toBeDefined();
+  expect(scene.getObjectByName('EyeR')).toBeDefined();
+  const boneNames = new Set<string>();
+  scene.traverse((o) => {
+    if (o instanceof THREE.Bone) boneNames.add(o.name);
+  });
+  for (const clip of clips) {
+    for (const track of clip.tracks) expect(boneNames, track.name).toContain(track.name.split('.')[0]);
+  }
+}
 
 describe('shipped avatar model files', () => {
   it('every avatar animal has a model file, within the size budget', () => {
@@ -86,31 +119,10 @@ describe('shipped avatar model files', () => {
     expect(box.max.z).toBeGreaterThan(0.25);
   });
 
-  it.each(AVATAR_ANIMALS)('%s: skinned, with Idle/Walk clips and the outfit bones', (animal) => {
+  it.each(AVATAR_ANIMALS)('%s: skinned, with Idle/Walk/Cheer clips and the outfit bones', (animal) => {
     const { scene, clips } = loaded.get(animal)!;
-    let triangles = 0;
-    let skinned = 0;
-    scene.traverse((o) => {
-      if (o instanceof THREE.SkinnedMesh) {
-        skinned++;
-        triangles += (o.geometry.index?.count ?? 0) / 3;
-      }
-    });
-    expect(skinned).toBeGreaterThanOrEqual(4);
-    expect(triangles).toBeLessThan(MAX_TRIANGLES);
-    expect(clips.map((c) => c.name).sort()).toEqual([IDLE_CLIP, WALK_CLIP]);
-    for (const c of clips) expect(c.duration).toBeGreaterThan(0.3);
+    checkRig(scene, clips);
     for (const bone of new Set(Object.values(OUTFIT_BONES))) expect(scene.getObjectByName(bone), bone).toBeDefined();
-    // GLTFLoader sanitizes node names ("Eye.L" → "EyeL"); the clips' tracks use the same names.
-    expect(scene.getObjectByName('EyeL')).toBeDefined();
-    expect(scene.getObjectByName('EyeR')).toBeDefined();
-    const boneNames = new Set<string>();
-    scene.traverse((o) => {
-      if (o instanceof THREE.Bone) boneNames.add(o.name);
-    });
-    for (const clip of clips) {
-      for (const track of clip.tracks) expect(boneNames, track.name).toContain(track.name.split('.')[0]);
-    }
   });
 
   it.each(AVATAR_ANIMALS)('%s: builds as an animated avatar with outfit on its bones', (animal) => {
@@ -136,5 +148,68 @@ describe('shipped avatar model files', () => {
         expect(o.material).toBeInstanceOf(THREE.MeshToonMaterial);
       }
     });
+  });
+});
+
+describe('shipped lost-friend model files', () => {
+  it('every friend except kitten and bunny baby has a model file, within the size budget', () => {
+    let total = 0;
+    for (const id of FRIENDS) {
+      const file = MODEL_FILES[id];
+      expect(file, id).toBe(`models/friends/${id}.glb`);
+      const size = readGlb(file!).buffer.byteLength;
+      expect(size, `${id} bytes`).toBeLessThan(MAX_BYTES);
+      total += size;
+    }
+    expect(total).toBeLessThan(MAX_FRIENDS_TOTAL_BYTES);
+    expect(MODEL_FILES.kitten).toBeUndefined();
+    expect(MODEL_FILES['bunny-baby']).toBeUndefined();
+  });
+
+  it.each(FRIENDS)('%s: self-contained, own colour materials <friend>_<Slot>', (id) => {
+    const { json } = readGlb(MODEL_FILES[id]!);
+    expect(json.images ?? []).toHaveLength(0);
+    expect(json.buffers.every((b) => b.uri === undefined)).toBe(true);
+    expect(json.extensionsRequired ?? []).toHaveLength(0);
+    for (const m of json.materials) {
+      expect(m.name.startsWith(`${id}_`), m.name).toBe(true);
+      expect(FRIEND_SLOTS, m.name).toContain(friendMaterialSlot(m.name));
+    }
+    expect(json.materials.map((m) => friendMaterialSlot(m.name))).toContain('Body');
+  });
+
+  it.each(FRIENDS)('%s: stands on y=0 (fish float), faces +z, fits the friend size', (id) => {
+    const box = new THREE.Box3().setFromObject(loaded.get(id)!.scene);
+    expect(box.min.y).toBeGreaterThan(-0.02);
+    expect(box.max.y).toBeGreaterThan(0.55);
+    expect(box.max.y).toBeLessThan(1.5);
+    expect(box.max.z).toBeGreaterThan(0.2);
+  });
+
+  it.each(FRIENDS)('%s: skinned, with Idle/Walk/Cheer clips', (id) => {
+    const { scene, clips } = loaded.get(id)!;
+    checkRig(scene, clips);
+  });
+
+  it.each(FRIENDS)('%s: builds as an animated friend in the file colours, and can cheer', (id) => {
+    const { scene, clips } = loaded.get(id)!;
+    registerAnimalModel(id as LostAnimal, scene, clips);
+    const g = buildLostAnimal(id as LostAnimal);
+    const a = getAnimator(g)!;
+    expect(a).not.toBeNull();
+    expect(a.idle!.isRunning()).toBe(true);
+    expect(g.children[0]!.scale.x).toBeCloseTo(FRIEND_SCALE, 5);
+    const fileColours = new Set<string>();
+    scene.traverse((o) => {
+      if (o instanceof THREE.Mesh) fileColours.add((o.material as THREE.MeshStandardMaterial).color.getHexString());
+    });
+    g.traverse((o) => {
+      if (o instanceof THREE.SkinnedMesh && !o.userData.isOutline) {
+        expect(o.material).toBeInstanceOf(THREE.MeshToonMaterial);
+        expect(fileColours).toContain((o.material as THREE.MeshToonMaterial).color.getHexString());
+      }
+    });
+    expect(setAnimalCheering(g, true)).toBe(true);
+    expect(a.cheer!.isRunning()).toBe(true);
   });
 });

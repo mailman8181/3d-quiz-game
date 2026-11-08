@@ -8,11 +8,12 @@ import * as THREE from 'three';
  * `tickAnimals(scene, dt)` and switch idle/walk with `setAnimalMoving`. Procedural animals and
  * static models have no animator; both functions ignore them.
  *
- * Only state loops (idle, walk) for now; one-off scene animations (cheer at the goal etc.)
- * are not part of this.
+ * `setAnimalCheering` switches to the `Cheer` loop (ADR-0017), used by the rescue scene at the
+ * maze goal; while cheering, `setAnimalMoving` only remembers the state for afterwards.
  */
 export const IDLE_CLIP = 'Idle';
 export const WALK_CLIP = 'Walk';
+export const CHEER_CLIP = 'Cheer';
 const FADE_SECONDS = 0.2;
 
 /** Bone each outfit slot follows (hats and glasses turn with the head). */
@@ -22,9 +23,11 @@ export interface AnimalAnimator {
   readonly mixer: THREE.AnimationMixer;
   readonly idle: THREE.AnimationAction | null;
   readonly walk: THREE.AnimationAction | null;
+  readonly cheer: THREE.AnimationAction | null;
   /** Bones named in OUTFIT_BONES, with the inverse of their rest pose in model space. */
   readonly outfitBones: ReadonlyMap<string, { bone: THREE.Object3D; restInverse: THREE.Matrix4 }>;
   moving: boolean;
+  cheering: boolean;
 }
 
 let instances = 0;
@@ -53,11 +56,13 @@ export function createAnimator(model: THREE.Object3D, clips: readonly THREE.Anim
   const mixer = new THREE.AnimationMixer(model);
   const idle = idleClip ? mixer.clipAction(idleClip) : null;
   const walk = walkClip ? mixer.clipAction(walkClip) : null;
+  const cheerClip = THREE.AnimationClip.findByName(clips as THREE.AnimationClip[], CHEER_CLIP);
+  const cheer = cheerClip ? mixer.clipAction(cheerClip) : null;
   if (idle && idleClip) {
     idle.play();
     idle.time = (instances++ * 0.83) % idleClip.duration;
   }
-  return { mixer, idle, walk, outfitBones, moving: false };
+  return { mixer, idle, walk, cheer, outfitBones, moving: false, cheering: false };
 }
 
 /**
@@ -108,11 +113,35 @@ export function setAnimalMoving(root: THREE.Object3D, moving: boolean): void {
   const a = findAnimator(root);
   if (!a || a.moving === moving) return;
   a.moving = moving;
+  if (a.cheering) return;
   const from = moving ? a.idle : a.walk;
   const to = moving ? a.walk : a.idle;
   if (!to) return;
   to.reset().play();
   if (from) from.crossFadeTo(to, FADE_SECONDS, false);
+}
+
+/**
+ * Starts (true) or ends (false) the `Cheer` loop with a cross-fade; ending returns to walk or
+ * idle. Returns false when the animal has no cheer clip (procedural or static), so the caller
+ * can animate it in code instead.
+ */
+export function setAnimalCheering(root: THREE.Object3D, cheering: boolean): boolean {
+  const a = findAnimator(root);
+  if (!a?.cheer) return false;
+  if (a.cheering === cheering) return true;
+  a.cheering = cheering;
+  const base = a.moving ? a.walk : a.idle;
+  if (cheering) {
+    a.cheer.reset().play();
+    if (base) base.crossFadeTo(a.cheer, FADE_SECONDS, false);
+  } else if (base) {
+    base.reset().play();
+    a.cheer.crossFadeTo(base, FADE_SECONDS, false);
+  } else {
+    a.cheer.stop();
+  }
+  return true;
 }
 
 /** Advances every animator under `root` (usually the view's scene) by `dt` seconds. */
