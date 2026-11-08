@@ -177,8 +177,16 @@ export function buildChick(): THREE.Group {
   return root;
 }
 
-/** Material names used in the model files (see models.ts) and their fixed toon colours. */
-const MODEL_COLOURS = { Dark: ANIMAL_PALETTE.dark, Pink: ANIMAL_PALETTE.pink, White: ANIMAL_PALETTE.white } as const;
+/**
+ * Material names used in the model files (see models.ts) and their fixed toon colours.
+ * `Orange` is the penguin's beak and feet (outlined, like the procedural beak).
+ */
+export const MODEL_COLOURS = {
+  Dark: ANIMAL_PALETTE.dark,
+  Pink: ANIMAL_PALETTE.pink,
+  White: ANIMAL_PALETTE.white,
+  Orange: ANIMAL_PALETTE.orange,
+} as const;
 /** Small face details: no outline, it would swallow them. */
 const NO_OUTLINE = new Set(['Dark', 'Pink', 'White']);
 

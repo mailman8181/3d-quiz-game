@@ -6,17 +6,36 @@ import { addOutlines, disposeObject, toonMaterial } from '../toon';
 import { attachOutfitToBones } from './animation';
 import { hasAnimalModel } from './models';
 
+interface Anchors {
+  headTop: number;
+  /** Scale for hats, relative to the procedural head (radius 0.27). */
+  headScale: number;
+  eyeY: number;
+  eyeX: number;
+  eyeZ: number;
+  neckY: number;
+}
+
+/**
+ * Anchors for the hand-made models (public/models/*.glb). Their heads are bigger and wider than
+ * the primitives, so hats sit a bit higher and are scaled up so they don't sink into the head.
+ * Cat, bunny, bear and penguin share the cat's head; the frog has a wide, flat head with the
+ * eyes on top, so its hats sit on the eye bulbs and its glasses on the bulbs' front.
+ */
+export const MODEL_ANCHORS: Readonly<Record<AvatarAnimal, Anchors>> = {
+  cat: { headTop: 1.11, headScale: 1.22, eyeY: 0.85, eyeX: 0.12, eyeZ: 0.34, neckY: 0.58 },
+  bunny: { headTop: 1.11, headScale: 1.22, eyeY: 0.85, eyeX: 0.12, eyeZ: 0.34, neckY: 0.58 },
+  bear: { headTop: 1.11, headScale: 1.22, eyeY: 0.86, eyeX: 0.125, eyeZ: 0.34, neckY: 0.58 },
+  penguin: { headTop: 1.11, headScale: 1.22, eyeY: 0.85, eyeX: 0.105, eyeZ: 0.34, neckY: 0.58 },
+  frog: { headTop: 1.05, headScale: 1.3, eyeY: 0.98, eyeX: 0.155, eyeZ: 0.2, neckY: 0.55 },
+};
+
 /** Where accessories sit on an animal built by `buildAnimal` (see animals.ts). */
-function anchors(animal: AvatarAnimal) {
-  // The hand-modelled cat (models/cat.glb) has a bigger, wider head and eyes than the
-  // primitives: hats sit a bit higher and are scaled up so they don't sink into the head.
-  if (animal === 'cat' && hasAnimalModel('cat')) {
-    return { headTop: 1.11, headScale: 1.22, eyeY: 0.85, eyeX: 0.12, eyeZ: 0.34, neckY: 0.58 };
-  }
+function anchors(animal: AvatarAnimal): Anchors {
+  if (hasAnimalModel(animal)) return MODEL_ANCHORS[animal];
   const frog = animal === 'frog';
   return {
     headTop: frog ? 1.08 : 1.03,
-    /** Scale for hats, relative to the procedural head (radius 0.27). */
     headScale: 1,
     eyeY: frog ? 1.0 : 0.82,
     eyeX: frog ? 0.13 : 0.1,
@@ -25,7 +44,7 @@ function anchors(animal: AvatarAnimal) {
   };
 }
 
-type Builder = (a: ReturnType<typeof anchors>) => THREE.Object3D;
+type Builder = (a: Anchors) => THREE.Object3D;
 
 const mesh = (geo: THREE.BufferGeometry, color: THREE.ColorRepresentation, pos: [number, number, number] = [0, 0, 0]) => {
   const m = new THREE.Mesh(geo, toonMaterial(color));
