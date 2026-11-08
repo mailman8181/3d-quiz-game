@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
+import type { LostAnimal } from '../../core/profile/lostAnimals';
 import type { AvatarAnimal } from '../../core/profile/profile';
 
 /**
@@ -15,28 +16,44 @@ import type { AvatarAnimal } from '../../core/profile/profile';
  * - stands on y=0, faces +z, about 1 unit tall (like the procedural animals);
  * - one mesh per colour, named by material: `Body` (tinted with the avatar colour),
  *   `Light` (belly/muzzle, a lighter shade of the avatar colour), `Dark`, `Pink`, `White`;
- * - optional skeleton (skinned meshes) and animation clips named `Idle` and `Walk`
- *   (ADR-0015, played by `animation.ts`).
+ * - optional skeleton (skinned meshes) and animation clips named `Idle`, `Walk` and `Cheer`
+ *   (ADR-0015/0017, played by `animation.ts`).
+ *
+ * Lost animal friends (ADR-0017) live in `models/friends/` and follow the same contract, except
+ * that their colours come from the file (materials `<friend>_<Slot>`, see `lostAnimals.ts`); they
+ * are modelled at avatar size and shown at 0.55. Kitten and bunny baby reuse the cat and bunny.
  */
-export const MODEL_FILES: Partial<Record<AvatarAnimal, string>> = {
+export type ModelId = AvatarAnimal | LostAnimal;
+
+export const MODEL_FILES: Partial<Record<ModelId, string>> = {
   cat: 'models/cat.glb',
   bunny: 'models/bunny.glb',
   bear: 'models/bear.glb',
   frog: 'models/frog.glb',
   penguin: 'models/penguin.glb',
+  chick: 'models/friends/chick.glb',
+  piglet: 'models/friends/piglet.glb',
+  puppy: 'models/friends/puppy.glb',
+  lamb: 'models/friends/lamb.glb',
+  turtle: 'models/friends/turtle.glb',
+  octopus: 'models/friends/octopus.glb',
+  crab: 'models/friends/crab.glb',
+  pufferfish: 'models/friends/pufferfish.glb',
+  'whale-baby': 'models/friends/whale-baby.glb',
+  clownfish: 'models/friends/clownfish.glb',
 };
 
-const cache = new Map<AvatarAnimal, THREE.Object3D>();
-const clipCache = new Map<AvatarAnimal, THREE.AnimationClip[]>();
+const cache = new Map<ModelId, THREE.Object3D>();
+const clipCache = new Map<ModelId, THREE.AnimationClip[]>();
 
 /** The model's animation clips (shared, read-only), empty for static or missing models. */
-export function animalModelClips(animal: AvatarAnimal): THREE.AnimationClip[] {
+export function animalModelClips(animal: ModelId): THREE.AnimationClip[] {
   return clipCache.get(animal) ?? [];
 }
-const pending = new Set<AvatarAnimal>();
-const listeners = new Map<AvatarAnimal, Set<() => void>>();
+const pending = new Set<ModelId>();
+const listeners = new Map<ModelId, Set<() => void>>();
 
-export function hasAnimalModel(animal: AvatarAnimal): boolean {
+export function hasAnimalModel(animal: ModelId): boolean {
   return cache.has(animal);
 }
 
@@ -47,7 +64,7 @@ export function hasAnimalModel(animal: AvatarAnimal): boolean {
  * marked `sharedGeometry` and `disposeObject` leaves the geometry alone (materials are
  * replaced per avatar and are freed as usual).
  */
-export function cloneAnimalModel(animal: AvatarAnimal): THREE.Object3D | null {
+export function cloneAnimalModel(animal: ModelId): THREE.Object3D | null {
   const src = cache.get(animal);
   if (!src) return null;
   const clone = cloneSkinned(src);
@@ -61,7 +78,7 @@ export function cloneAnimalModel(animal: AvatarAnimal): THREE.Object3D | null {
  * Calls `cb` once when the model for `animal` has finished loading. Returns false (and never
  * calls back) when no load is in progress for that animal.
  */
-export function onAnimalModelLoaded(animal: AvatarAnimal, cb: () => void): boolean {
+export function onAnimalModelLoaded(animal: ModelId, cb: () => void): boolean {
   if (!pending.has(animal)) return false;
   let set = listeners.get(animal);
   if (!set) listeners.set(animal, (set = new Set()));
@@ -69,7 +86,7 @@ export function onAnimalModelLoaded(animal: AvatarAnimal, cb: () => void): boole
   return true;
 }
 
-function settle(animal: AvatarAnimal, model: THREE.Object3D | null, clips: THREE.AnimationClip[] = []): void {
+function settle(animal: ModelId, model: THREE.Object3D | null, clips: THREE.AnimationClip[] = []): void {
   pending.delete(animal);
   const set = listeners.get(animal);
   listeners.delete(animal);
@@ -87,13 +104,13 @@ export function preloadAnimalModels(): Promise<void> {
   const loader = new GLTFLoader();
   const base = import.meta.env.BASE_URL ?? '/';
   const jobs = Object.entries(MODEL_FILES).map(async ([key, file]) => {
-    const animal = key as AvatarAnimal;
+    const animal = key as ModelId;
     pending.add(animal);
     try {
       const gltf = await loader.loadAsync(base + file);
       settle(animal, gltf.scene, gltf.animations);
     } catch (err) {
-      console.warn(`Avatar model ${file} could not be loaded, keeping the procedural animal.`, err);
+      console.warn(`Animal model ${file} could not be loaded, keeping the procedural animal.`, err);
       settle(animal, null);
     }
   });
@@ -102,11 +119,11 @@ export function preloadAnimalModels(): Promise<void> {
 }
 
 /** Test hooks: simulate a load in progress, its success (model) or failure (null). */
-export function markAnimalModelPending(animal: AvatarAnimal): void {
+export function markAnimalModelPending(animal: ModelId): void {
   pending.add(animal);
 }
 export function registerAnimalModel(
-  animal: AvatarAnimal,
+  animal: ModelId,
   model: THREE.Object3D | null,
   clips: THREE.AnimationClip[] = [],
 ): void {

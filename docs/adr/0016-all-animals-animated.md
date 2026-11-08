@@ -1,6 +1,6 @@
 # ADR-0016: All avatar animals as rigged glTF models
 
-- **Status:** Proposed
+- **Status:** Proposed; `Cheer` clips and the lost friends added by ADR-0017
 - **Date:** 2026-11-08
 - **Deciders:** owner (agreed with Fabian after the animated cat: "the other animals too"), proposal by Fabian
 

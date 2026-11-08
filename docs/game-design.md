@@ -29,7 +29,9 @@ below still apply to everyone; older children mainly get harder content, not a d
 
 ## 3. Story & world (v1)
 - **Scenario v1: "Tierfreunde retten"** — animal friends got lost in the maze garden.
-  Each maze has one lost animal at the goal. Reaching it rescues the animal.
+  Each maze has one lost animal at the goal. Reaching it rescues the animal: a short scene
+  (about 4 s, a tap skips it) shows the avatar and the friend cheering together with hearts
+  and stars, then the "Juhu!" dialog (ADR-0017).
 - Guide characters speak all instructions and cheer. Approved names: **Olli** (Eule,
   guide of world 1), **Ida** (Igel) and **Rick** (Waschbär / raccoon) for later worlds.
   Do not use the name "Fini".
@@ -74,7 +76,8 @@ rewards and adaptive levels.
 - The child plays a **comic animal**: Hase, Bär, Katze, Frosch, Pinguin (more later),
   in one of 6 colours. Rewards (hats, pets, trails) are added on top of the animal.
   All animals are hand-modelled and animated (idle and walk loops, ADR-0015/0016): bunny and
-  frog hop, bear and penguin waddle, the cat walks with its tail up.
+  frog hop, bear and penguin waddle, the cat walks with its tail up. The lost friends are
+  hand-modelled too, and every animal has a cheer animation for the rescue scene (ADR-0017).
 - **Local profiles from the start:** up to 6 children per device. Profile screen
   "Wer spielt?" shows each child's animal; the name is optional and typed by a parent.
   Deleting profiles will live in the parents area (behind the parent gate).
@@ -286,6 +289,7 @@ German challenges (planned next), more worlds/scenarios, multiplayer, teacher mo
 cloud sync, other languages, speech-recognition answers.
 
 ## Changelog
+- v1.34 (2026-11-08): Owner decision (with Fabian): rescue scene at the maze goal. Avatar and friend step side by side, turn to each other and cheer with hearts and stars (the pet joins), then the "Juhu!" dialog; about 4 s, a tap skips it, shorter and without camera move with reduced motion. All ten lost friends are now hand-modelled and animated, and every animal has a cheer animation (ADR-0017).
 - v1.33 (2026-11-08): Owner decision (with Fabian): all avatar animals animated like the cat. Bunny (ear flick and flop, hops with folded ears), bear (ear wiggle, sways, waddles), frog (croaks, hops), penguin (wing flaps, waddles with wings out); hats and glasses move with every head. Still no animated scenes (ADR-0016).
 - v1.32 (2026-11-07): Owner decision (with Fabian): animated cat as a test. The cat avatar breathes, looks around, blinks, flicks an ear and sways its tail while standing, and waddles with paws and tail while walking; hats and glasses move with its head. No animated scenes yet (ADR-0015).
 - v1.31 (2026-11-07): M15c — grades 3–4 Wissen: 6 new types, organs and bike rules as new levels (§6.5).

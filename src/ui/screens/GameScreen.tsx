@@ -90,6 +90,8 @@ function MazeRound({
   const sessionRef = useRef<MazeSession | null>(null);
   const viewRef = useRef<MazeView | null>(null);
   const [goalStars, setGoalStars] = useState<number | null>(null);
+  /** The goal cut-scene is playing (the dialog follows). */
+  const [rescuing, setRescuing] = useState(false);
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
   // Fixed for the round: seed (?seed=N for tests) and maze size from the child's level.
   const [seed] = useState(() => {
@@ -106,7 +108,7 @@ function MazeRound({
     count: spec.chests,
     seed,
     worldId,
-    holdPicker: goalStars !== null || wardrobeOpen,
+    holdPicker: goalStars !== null || rescuing || wardrobeOpen,
     onStars,
     onChallengeResult,
     onChooseReward,
@@ -191,7 +193,14 @@ function MazeRound({
           view.setPaused(true);
           flowRef.current.open(chestIndex(ev.chestId));
         } else if (ev.type === 'goalReached') {
-          setGoalStars(session.starsEarned);
+          // Cut-scene first (avatar and friend cheer, ADR-0017), then the "Juhu!" dialog.
+          // Fanfare, speech and saving the rescue happen right away.
+          const stars = session.starsEarned;
+          setRescuing(true);
+          void view.playRescueScene().then(() => {
+            setRescuing(false);
+            if (viewRef.current === view) setGoalStars(stars);
+          });
           playFanfare();
           // Did this maze unlock another world?
           const finished = (levelsRef.current[world.id] ?? 0) + 1;
@@ -239,7 +248,7 @@ function MazeRound({
 
   // The chest flow shows the question, the reward picker (held back during the goal dialog and
   // the wardrobe) and the break screen; the maze pauses while any dialog is open.
-  const blocked = flow.busy || wardrobeOpen || goalStars !== null;
+  const blocked = flow.busy || wardrobeOpen || rescuing || goalStars !== null;
   useEffect(() => {
     viewRef.current?.setPaused(blocked);
   }, [blocked]);

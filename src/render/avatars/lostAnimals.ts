@@ -1,8 +1,52 @@
 import * as THREE from 'three';
 import type { LostAnimal } from '../../core/profile/lostAnimals';
 import type { Avatar } from '../../core/profile/profile';
-import { addOutlines, toonMaterial } from '../toon';
+import { addOutlines, disposeObject, toonMaterial } from '../toon';
+import { createAnimator } from './animation';
 import { buildAnimal, buildChick } from './animals';
+import { animalModelClips, cloneAnimalModel, onAnimalModelLoaded } from './models';
+
+/** Friend models are made at avatar size and shown at this scale (ADR-0017). */
+export const FRIEND_SCALE = 0.55;
+/** Outline offset in model units; ~0.02 on screen after FRIEND_SCALE, like the procedural friends. */
+const FRIEND_OUTLINE = 0.035;
+
+/**
+ * Colour slot of a friend model's material. Friend materials are named `<friend>_<Slot>`
+ * (e.g. `turtle_ShellDark`; Blender may append `.001`), and carry their colour in the file.
+ */
+export function friendMaterialSlot(name: string): string {
+  const base = name.replace(/\.\d+$/, '');
+  return base.slice(base.lastIndexOf('_') + 1);
+}
+
+/** Small face details and dark spots get no outline (it would swallow them). */
+function friendSlotOutlined(slot: string): boolean {
+  return !(slot === 'Pink' || slot === 'White' || slot.endsWith('Dark'));
+}
+
+/** A lost friend from its glTF model (toon materials in the file's colours), or null. */
+function buildModelledFriend(id: LostAnimal): THREE.Group | null {
+  const model = cloneAnimalModel(id);
+  if (!model) return null;
+  model.traverse((o) => {
+    if (!(o instanceof THREE.Mesh)) return;
+    const src = (Array.isArray(o.material) ? o.material[0] : o.material) as THREE.MeshStandardMaterial | undefined;
+    const slot = friendMaterialSlot(src?.name ?? '');
+    o.material = toonMaterial(src?.color?.clone() ?? new THREE.Color('#ffffff'));
+    if (!friendSlotOutlined(slot)) o.userData.noOutline = true;
+  });
+  model.scale.setScalar(FRIEND_SCALE);
+  const root = new THREE.Group();
+  root.add(model);
+  const animator = createAnimator(model, animalModelClips(id));
+  if (animator) root.userData.animator = animator;
+  addOutlines(root, FRIEND_OUTLINE);
+  root.traverse((o) => {
+    o.castShadow = true;
+  });
+  return root;
+}
 
 type Part = [geo: THREE.BufferGeometry, color: string, pos: [number, number, number], scale?: [number, number, number]];
 
@@ -172,8 +216,30 @@ function whaleBaby(): THREE.Group {
   return g;
 }
 
-/** 3D model of a lost animal friend (standing on y=0, facing +z, ~0.6 tall). */
+/**
+ * 3D model of a lost animal friend (standing on y=0, facing +z, ~0.6 tall). Uses the friend's
+ * glTF model when loaded (animated: idle, walk, cheer); otherwise the procedural friend, which
+ * swaps its contents to the model in place once it arrives. Kitten and bunny baby are small
+ * avatar animals (cat and bunny models).
+ */
 export function buildLostAnimal(id: LostAnimal): THREE.Group {
+  if (id === 'kitten' || id === 'bunny-baby') return proceduralFriend(id);
+  const modelled = buildModelledFriend(id);
+  if (modelled) return modelled;
+  const root = proceduralFriend(id);
+  onAnimalModelLoaded(id, () => {
+    const next = buildModelledFriend(id);
+    if (!next) return;
+    const old = [...root.children];
+    root.clear();
+    for (const o of old) disposeObject(o);
+    root.add(...next.children);
+    if (next.userData.animator) root.userData.animator = next.userData.animator;
+  });
+  return root;
+}
+
+function proceduralFriend(id: LostAnimal): THREE.Group {
   switch (id) {
     case 'chick':
       return buildChick();

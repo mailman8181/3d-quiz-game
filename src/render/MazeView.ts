@@ -7,6 +7,7 @@ import type { Equipped } from '../core/rewards/rewards';
 import { setOutfit } from './avatars/accessories';
 import { setAnimalMoving, tickAnimals } from './avatars/animation';
 import { TrailEmitter } from './trails';
+import { CAMERA_CLOSE, prefersReducedMotion, RescueScene } from './rescueScene';
 import { createRng } from '../core/rng';
 import type { MazeSession, SessionEvent } from '../core/session/mazeSession';
 import type { WorldTheme } from '../modules/worlds/types';
@@ -79,6 +80,10 @@ export class MazeView {
   private previousTile: Tile | null = null;
   /** Smoothed point on the ground the camera looks at. */
   private focus: THREE.Vector3 | null = null;
+  /** Goal cut-scene (ADR-0017); stays set after it ends so the pair keeps its final poses. */
+  private rescue: RescueScene | null = null;
+  private rescueResolve: (() => void) | null = null;
+  private lastWall = performance.now();
   private readonly chestViews = new Map<string, { root: THREE.Group; lid: THREE.Object3D; beacon: THREE.Object3D }>();
 
   constructor(private readonly opts: MazeViewOptions) {
@@ -140,6 +145,7 @@ export class MazeView {
     window.addEventListener('blur', this.onBlur);
 
     this.publishTile();
+    delete container.dataset.rescueScene;
     this.setPet(opts.pet);
     this.renderer.setAnimationLoop(() => this.frame());
   }
@@ -156,6 +162,8 @@ export class MazeView {
     window.removeEventListener('keyup', this.onKeyUp);
     window.removeEventListener('blur', this.onBlur);
     this.trail.dispose();
+    this.rescue?.dispose();
+    this.endRescue();
     this.clearWayHint();
     this.hintGeo.dispose();
     for (const b of this.bubbles) (b.material as THREE.Material).dispose();
@@ -225,6 +233,44 @@ export class MazeView {
   setEquipped(equipped: Equipped): void {
     setOutfit(this.avatar, this.opts.avatar.animal, equipped);
     this.trail.setKind(equipped.trail);
+  }
+
+  /**
+   * Plays the cut-scene at the goal: avatar and friend step side by side and cheer together
+   * (ADR-0017). Resolves when it ends or is skipped by a tap / Space / Enter. Input is paused.
+   */
+  playRescueScene(): Promise<void> {
+    if (this.rescue) return Promise.resolve();
+    this.setPaused(true);
+    this.chick.position.y = 0;
+    this.rescue = new RescueScene({
+      scene: this.scene,
+      camera: this.camera,
+      goal: new THREE.Vector3(this.opts.session.maze.goal.x, 0, this.opts.session.maze.goal.y),
+      avatar: this.avatar,
+      friend: this.chick,
+      pet: this.petModel,
+      reduced: prefersReducedMotion(),
+    });
+    // Test hook / debugging: "playing" → "done".
+    this.opts.container.dataset.rescueScene = 'playing';
+    return new Promise((resolve) => {
+      this.rescueResolve = resolve;
+    });
+  }
+
+  /** Ends the cut-scene now (tap to skip). */
+  skipRescueScene(): void {
+    if (!this.rescue || this.rescue.done) return;
+    this.rescue.skip();
+    this.endRescue();
+  }
+
+  private endRescue(): void {
+    if (this.rescueResolve) this.opts.container.dataset.rescueScene = 'done';
+    const resolve = this.rescueResolve;
+    this.rescueResolve = null;
+    resolve?.();
   }
 
   /** Stops movement and input while a challenge dialog is open. */
@@ -394,6 +440,10 @@ export class MazeView {
   // ---------- input ----------
 
   private onPointerDown = (e: PointerEvent) => {
+    if (this.rescue) {
+      this.skipRescueScene();
+      return;
+    }
     this.pointerDown = { x: e.clientX, y: e.clientY };
   };
 
@@ -422,6 +472,11 @@ export class MazeView {
   };
 
   private onKeyDown = (e: KeyboardEvent) => {
+    if (this.rescue && !this.rescue.done && (e.code === 'Space' || e.code === 'Enter' || e.code === 'Escape')) {
+      e.preventDefault();
+      this.skipRescueScene();
+      return;
+    }
     if (!(e.code in KEY_DIRS)) return;
     e.preventDefault();
     if (this.paused) return;
@@ -448,12 +503,19 @@ export class MazeView {
 
   private frame(): void {
     const dt = Math.min(this.clock.getDelta(), 0.1);
+    // The cut-scene runs on wall-clock time, so it lasts the same on slow devices.
+    const now = performance.now();
+    const wallDt = Math.min((now - this.lastWall) / 1000, 0.25);
+    this.lastWall = now;
     this.elapsed += dt;
     this.updateMovement(dt);
-    this.updateCamera(dt);
+    if (this.rescue && !this.rescue.done && this.rescue.update(wallDt)) this.endRescue();
+    this.updateCamera(this.rescue ? wallDt : dt);
 
-    this.chick.position.y = Math.abs(Math.sin(this.elapsed * 4)) * 0.12;
-    this.chick.rotation.y = Math.sin(this.elapsed * 1.5) * 0.6;
+    if (!this.rescue) {
+      this.chick.position.y = Math.abs(Math.sin(this.elapsed * 4)) * 0.12;
+      this.chick.rotation.y = Math.sin(this.elapsed * 1.5) * 0.6;
+    }
     this.animateChests(dt);
     this.updateAmbient(dt);
     this.updateWayHint(dt);
@@ -517,7 +579,7 @@ export class MazeView {
 
   private updatePet(dt: number): void {
     const pet = this.petModel;
-    if (!pet) return;
+    if (!pet || this.rescue) return;
     const prev = this.previousTile;
     // Follow one tile behind; keep a little distance when the avatar stands still.
     const target = prev ? new THREE.Vector3(prev.x, 0, prev.y) : this.avatar.position.clone().add(new THREE.Vector3(0, 0, -0.45));
@@ -553,6 +615,18 @@ export class MazeView {
     // Steep, diorama-like view; portrait screens need more distance to show enough maze.
     const zoom = aspect < 0.8 ? 1.45 : aspect < 1.2 ? 1.2 : 1;
     const offset = new THREE.Vector3(0, 9 * zoom, 4.2 * zoom);
+    if (this.rescue) {
+      // Cut-scene: move in on the pair, a bit lower for a friendlier angle.
+      const b = this.rescue.cameraBlend;
+      const close = new THREE.Vector3(0, 9 * zoom * CAMERA_CLOSE * 0.8, 4.2 * zoom * CAMERA_CLOSE * 1.25);
+      offset.lerp(close, b);
+      const focus = this.rescue.focus;
+      if (this.focus === null) this.focus = focus.clone();
+      else this.focus.lerp(focus, Math.min(1, dt * 5));
+      this.camera.position.copy(this.focus).add(offset);
+      this.camera.lookAt(this.focus.x, 0.4 + 0.1 * b, this.focus.z);
+      return;
+    }
 
     // Rough size of the visible ground area around the focus point.
     const dist = offset.length();
