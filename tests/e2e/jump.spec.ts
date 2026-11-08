@@ -5,7 +5,7 @@ test.describe.configure({ timeout: 150_000 });
 
 const ANSWERS = '.number-button:not([disabled]), .compare-side:not([disabled]), .picture-button:not([disabled])';
 
-test('Hüpf-Abenteuer: walk, stumble over obstacles, answer chests, reach the flag', async ({ page }, testInfo) => {
+test('Hüpf-Abenteuer: walk, stumble over obstacles and crawlers, climb stairs, answer chests, reach the flag', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'keyboard walking; one viewport is enough');
   // 6 mazes: both activities are unlocked, whatever this child's random order is.
   await seedSave(page, {
@@ -18,6 +18,8 @@ test('Hüpf-Abenteuer: walk, stumble over obstacles, answer chests, reach the fl
   await page.locator('[data-activity="jump"]').click();
   const scene = page.getByTestId('jump');
   await expect(scene.locator('[data-chest-index]')).toHaveCount(3); // Kita: 3 chests
+  // The course is drawn in 3D (ADR-0018).
+  await expect(page.getByTestId('jump-canvas').locator('canvas')).toBeVisible();
 
   // A tap on the hop button is a jump (the avatar leaves the ground and lands again).
   await page.getByTestId('jump-hop').click();
@@ -40,7 +42,8 @@ test('Hüpf-Abenteuer: walk, stumble over obstacles, answer chests, reach the fl
   }
   await page.keyboard.up('ArrowRight');
   await expect(done).toBeVisible();
-  // Ground chests open by walking; gold ones float and need a hop, so at least the others.
+  // Chests on the ground and on stairs open by walking; gold ones sit in leaf blocks and need a
+  // hop from below, so at least the others.
   const high = await scene.locator('[data-chest-high="true"]').count();
   expect(answered).toBeGreaterThanOrEqual(3 - high);
   await expect(done).toContainText('Geschafft!');

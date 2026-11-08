@@ -2031,102 +2031,13 @@ button {
   position: relative;
   height: 100%;
   overflow: hidden;
-  background: linear-gradient(#bfe8ff 0%, #e6f7ff 60%, #7fcf5f 60%);
-  --ground: 30dvh;
+  background: #a8dcff;
 }
 
-.jump-scene {
+/* The 3D course (ADR-0018) fills the screen; HUD and controls float on top. */
+.jump-canvas {
   position: absolute;
   inset: 0;
-}
-
-.jump-ground {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: var(--ground);
-  background: linear-gradient(#7fcf5f 0 14px, #5aa83f 14px);
-  border-top: 4px solid #3f7d2a;
-}
-
-.jump-scene > span,
-.jump-scene > button {
-  position: absolute;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  line-height: 1;
-}
-
-.jump-obstacle {
-  font-size: calc(var(--u) * 0.8);
-  z-index: 2;
-}
-
-.jump-decor {
-  font-size: calc(var(--u) * 1.6);
-  opacity: 0.55;
-  z-index: 0;
-}
-
-.jump-sky {
-  font-size: calc(var(--u) * 1.2);
-  opacity: 0.8;
-}
-
-.jump-avatar,
-.jump-chest {
-  z-index: 3;
-}
-
-.jump-goal {
-  font-size: calc(var(--u) * 1.4);
-}
-
-.jump-chest {
-  padding: 0;
-  border: none;
-  background: none;
-  flex-direction: column;
-  align-items: center;
-}
-
-.jump-chest .memory-chest {
-  width: 100%;
-}
-
-.jump-chest.skipped .memory-chest {
-  opacity: 0.6;
-}
-
-.jump-chest.solved {
-  font-size: calc(var(--u) * 0.6);
-}
-
-.jump-cloud {
-  position: absolute;
-  bottom: -40%;
-  font-size: calc(var(--u) * 1.1);
-  z-index: -1;
-}
-
-.jump-avatar {
-  border: 3px solid var(--ink);
-  border-radius: 50%;
-  align-items: center !important;
-  font-size: calc(var(--u) * 0.5);
-  transition: transform 0.15s;
-}
-
-.jump-avatar.stumble {
-  transform: rotate(-18deg);
-}
-
-.jump-stars {
-  position: absolute;
-  top: -60%;
-  font-size: calc(var(--u) * 0.45);
 }
 
 .jump-controls {

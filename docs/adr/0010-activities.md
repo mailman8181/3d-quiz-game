@@ -1,6 +1,6 @@
 # ADR-0010: Activities — more ways to find chests, one shared chest pipeline
 
-- **Status:** Accepted (owner, 2026-11-07)
+- **Status:** Accepted (owner, 2026-11-07); Hüpf-Abenteuer drawn in 3D with new elements by ADR-0018
 - **Date:** 2026-11-07
 - **Deciders:** owner / agent
 

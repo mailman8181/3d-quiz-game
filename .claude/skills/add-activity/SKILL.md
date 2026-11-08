@@ -133,13 +133,22 @@ From the side scroller (M14c), the first moving activity:
 - The game loop is one `requestAnimationFrame` effect. It reads the latest flow, profile and
   callbacks through **refs** updated in an effect without deps, skips stepping while
   `flow.busy` (dialog open), and clamps `dt` (≤ 50 ms) so a background tab doesn't teleport the avatar.
-  React re-renders once per frame; that is fine for ~50 DOM elements.
+  With DOM rendering React re-rendered once per frame (fine for ~50 elements); with a 3D
+  view (ADR-0018) the loop calls `view.sync(state)` / `view.handleEvents(events)` and only
+  sets React state for real changes (goal reached), test attributes are set on a ref.
 - Input: hold buttons use pointer events with `setPointerCapture` and `touch-action: none`.
   A hop is a one-shot flag the loop consumes. Clear held input when a chest opens,
   otherwise the avatar keeps walking after the dialog.
-- Scale world units with `min(100vw / visibleUnits, N dvh)` so portrait phones get big
-  sprites without jumps leaving the sky. Background decoration (trees, clouds) makes the
-  scene feel alive at almost no cost.
+- 3D side view (`JumpView`): fit the camera to a fixed number of units across portrait
+  phones and a minimum height on wide screens (`cameraDistance`), keep the avatar at a third
+  of the screen, clamp at the course ends. Merge static background into a few meshes per
+  colour (`mergeGeometries`, indexed and non-indexed geometries must not be mixed) and let
+  frustum culling handle the course props. Build props from toon shapes in code while the
+  precache is nearly full.
+- Never-fail rules with more elements: a solid you walk into is climbed **onto** after a
+  moment (works for logs and stairs alike); "enemies" hide when bumped and tumble when
+  hopped on; one-way platforms only ever help. Keep "walking only right reaches the goal" as
+  a unit test over many seeds.
 
 **Unlocking and tests**
 - Once there are two or more activities, **which one opens after 3 mazes is random per

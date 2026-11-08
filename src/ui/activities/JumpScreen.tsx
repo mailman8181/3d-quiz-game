@@ -2,29 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import { playFanfare, playPling } from '../../audio/sfx';
 import { speech } from '../../audio/speech';
 import { de } from '../../content/de/strings';
-import {
-  CHEST_EMBLEMS,
-} from '../../core/activities/memory';
-import {
-  createCourse,
-  HIGH_CHEST_Y,
-  initialJump,
-  jumpLayout,
-  step,
-  type Course,
-  type JumpInput,
-  type JumpState,
-} from '../../core/activities/jump';
+import { createCourse, initialJump, jumpLayout, step, type Course, type JumpInput, type JumpState } from '../../core/activities/jump';
 import type { SubjectId } from '../../core/challenges/types';
 import type { StageId } from '../../core/learner/stage';
 import type { Profile } from '../../core/profile/profile';
 import { createRng, randomSeed } from '../../core/rng';
 import type { ChallengeOutcome } from '../../core/skills/skillModel';
+import type { LostAnimal } from '../../core/profile/lostAnimals';
 import { progressFor } from '../../modules/activities';
-import { animalIcons } from '../animalIcons';
+import { JumpView } from '../../render/JumpView';
 import { StarJar } from '../rewards/StarJar';
 import { useChestFlow, type ChestFlow } from './chestFlow';
-import { ChestFace } from './ChestFace';
 
 interface Props {
   profile: Profile;
@@ -37,12 +25,6 @@ interface Props {
   onChooseReward: (itemId: string | null) => void;
   onRoundCompleted: () => void;
 }
-
-/** World units visible across the screen (portrait phones see about 5). */
-const VISIBLE_UNITS = 5.5;
-/** Background decoration (no collision): trees and clouds every few units. */
-const DECOR = Array.from({ length: 30 }, (_, i) => ({ x: i * 2.7 + 0.6, icon: i % 3 === 0 ? '🌲' : '🌳', cloud: i % 2 === 0 }));
-const OBSTACLE_ICONS: Record<string, string> = { log: '🪵', stone: '🪨', mushroom: '🍄' };
 
 function seedFromUrl(): number | null {
   const v = new URLSearchParams(window.location.search).get('seed');
@@ -93,13 +75,15 @@ function JumpRound({
       flow.chests.map((c) => c.tier === 'gold'),
     ),
   );
-  const [view, setView] = useState<JumpState>(initialJump);
-  const [stumbling, setStumbling] = useState(false);
+  const [done, setDone] = useState(false);
   const [newGame, setNewGame] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const viewRef = useRef<JumpView | null>(null);
 
   // The game loop reads the latest values through refs (it runs outside React renders).
   const input = useRef<JumpInput>({ left: false, right: false, jump: false });
-  const state = useRef<JumpState>(initialJump());
+  const state = useRef<JumpState>(initialJump(course));
   const flowRef = useRef<ChestFlow>(flow);
   const profileRef = useRef(profile);
   const callbacks = useRef({ onRoundCompleted });
@@ -109,18 +93,47 @@ function JumpRound({
     callbacks.current = { onRoundCompleted };
   });
 
+  // The 3D view (ADR-0018): built once per round; the loop below feeds it the logic state.
+  useEffect(() => {
+    const container = canvasRef.current;
+    if (!container) return;
+    const p = profileRef.current;
+    const view = new JumpView({
+      container,
+      course,
+      avatar: p.avatar,
+      equipped: p.equipped,
+      pet: (p.pet as LostAnimal | null) ?? null,
+      chestTiers: flowRef.current.chests.map((c) => c.tier),
+      onTapBlock: () => speech().speak(de.activities.jump.highChest),
+    });
+    view.sync(state.current, 0);
+    viewRef.current = view;
+    return () => {
+      view.dispose();
+      viewRef.current = null;
+    };
+  }, [course]);
+  useEffect(() => {
+    viewRef.current?.setChestStates(flow.states);
+  }, [flow.states]);
+
   useEffect(() => {
     speech().speak(de.activities.intros.jump ?? '');
     let raf = 0;
     let last = performance.now();
-    let stumbleTimer = 0;
     const loop = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       if (!flowRef.current.busy && !state.current.done) {
+        const dir = (input.current.right ? 1 : 0) - (input.current.left ? 1 : 0);
         const r = step(course, state.current, input.current, dt);
         input.current.jump = false; // a tap is one hop
         state.current = r.state;
+        viewRef.current?.sync(r.state, dir);
+        viewRef.current?.handleEvents(r.events);
+        // Test hook / debugging: the avatar's position (no React render per frame).
+        mainRef.current?.setAttribute('data-avatar-x', r.state.x.toFixed(1));
         for (const ev of r.events) {
           if (ev.kind === 'chest' && flowRef.current.states[ev.index] !== 'solved') {
             playPling();
@@ -128,18 +141,17 @@ function JumpRound({
             flowRef.current.open(ev.index);
           } else if (ev.kind === 'stumble') {
             speech().speak(de.activities.jump.stumble);
-            setStumbling(true);
-            window.clearTimeout(stumbleTimer);
-            stumbleTimer = window.setTimeout(() => setStumbling(false), 900);
+          } else if (ev.kind === 'stomp') {
+            playPling();
           } else if (ev.kind === 'goal') {
             input.current = { left: false, right: false, jump: false };
             const p = profileRef.current;
             const after = { ...p, activityRounds: { ...p.activityRounds, jump: (p.activityRounds.jump ?? 0) + 1 } };
             setNewGame(progressFor(p, stage).unlocked.length < progressFor(after, stage).unlocked.length);
             callbacks.current.onRoundCompleted();
+            setDone(true);
           }
         }
-        setView(r.state);
       }
       raf = requestAnimationFrame(loop);
     };
@@ -160,14 +172,13 @@ function JumpRound({
     window.addEventListener('keyup', up);
     return () => {
       cancelAnimationFrame(raf);
-      window.clearTimeout(stumbleTimer);
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
       speech().stop();
     };
   }, [course, stage]);
 
-  const showEnd = view.done && !flow.busy;
+  const showEnd = done && !flow.busy;
   const endShown = useRef(false);
   useEffect(() => {
     if (showEnd && !endShown.current) {
@@ -188,17 +199,15 @@ function JumpRound({
     onPointerLeave: () => (input.current[key] = false),
   });
 
-  // Camera: keep the avatar at about a third of the screen.
-  const camera = Math.max(0, Math.min(course.length - VISIBLE_UNITS, view.x - VISIBLE_UNITS / 3));
-  // One world unit: the screen width / VISIBLE_UNITS, but never so big that jumps leave the sky.
-  const u = `min(calc(100vw / ${VISIBLE_UNITS}), 11dvh)`;
-  const at = (x: number, y: number) => ({
-    left: `calc(${u} * ${x - camera})`,
-    bottom: `calc(var(--ground) + ${u} * ${y})`,
-  });
-
   return (
-    <main className="screen jump-screen" data-testid="jump" data-avatar-x={view.x.toFixed(1)}>
+    <main className="screen jump-screen" data-testid="jump" data-avatar-x="1.0" ref={mainRef}>
+      <div className="jump-canvas" ref={canvasRef} data-testid="jump-canvas" />
+      {/* Test hooks: one marker per chest (the chests themselves are drawn in 3D). */}
+      <div hidden>
+        {course.chests.map((c) => (
+          <span key={c.index} data-chest-index={c.index} data-chest-x={c.x} data-chest-high={c.inBlock} data-chest-state={flow.states[c.index]} />
+        ))}
+      </div>
       <div className="hud">
         <button className="round-button" aria-label={de.game.home} onClick={onHome}>
           🏠
@@ -209,61 +218,6 @@ function JumpRound({
         <div className="hud-right">
           <StarJar jar={profile.jar} />
         </div>
-      </div>
-
-      <div className="jump-scene" style={{ ['--u' as string]: u }}>
-        <div className="jump-ground" />
-        {DECOR.filter((d) => d.x < course.length).map((d, i) => (
-          <span key={`d${i}`} className="jump-decor" aria-hidden style={at(d.x, 0)}>
-            {d.icon}
-          </span>
-        ))}
-        {DECOR.filter((d) => d.cloud && d.x < course.length).map((d, i) => (
-          <span key={`c${i}`} className="jump-sky" aria-hidden style={at(d.x + 1, 3.6 + (i % 2) * 0.6)}>
-            ☁️
-          </span>
-        ))}
-        {course.obstacles.map((o, i) => (
-          <span
-            key={i}
-            className="jump-obstacle"
-            aria-hidden
-            style={{ ...at(o.x, 0), width: `calc(${u} * ${o.width})`, height: `calc(${u} * ${o.height})` }}
-          >
-            {OBSTACLE_ICONS[o.kind]}
-          </span>
-        ))}
-        {course.chests.map((c) => {
-          const st = flow.states[c.index];
-          const chest = flow.chests[c.index]!;
-          return (
-            <button
-              key={c.index}
-              className={`jump-chest ${st ?? 'closed'} ${c.y >= HIGH_CHEST_Y ? 'high' : ''}`}
-              data-chest-index={c.index}
-              data-chest-x={c.x}
-              data-chest-high={c.y >= HIGH_CHEST_Y}
-              aria-label={de.activities.chest}
-              // Tapping a high chest explains what to do (pre-readers).
-              onClick={() => c.y >= HIGH_CHEST_Y && speech().speak(de.activities.jump.highChest)}
-              style={{ ...at(c.x, c.y), width: `calc(${u} * 0.9)` }}
-            >
-              {c.y >= HIGH_CHEST_Y && <span className="jump-cloud" aria-hidden>☁️</span>}
-              {st === 'solved' ? <span aria-hidden>✨</span> : <ChestFace tier={chest.tier} emblem={CHEST_EMBLEMS[c.index % CHEST_EMBLEMS.length]!} />}
-            </button>
-          );
-        })}
-        <span className="jump-goal" aria-hidden style={at(course.goalX, 0)}>
-          🚩
-        </span>
-        <span
-          className={`jump-avatar ${stumbling ? 'stumble' : ''}`}
-          aria-hidden
-          style={{ ...at(view.x, view.y), background: profile.avatar.color, width: `calc(${u} * 0.8)`, height: `calc(${u} * 0.8)` }}
-        >
-          {animalIcons[profile.avatar.animal]}
-          {stumbling && <span className="jump-stars">💫</span>}
-        </span>
       </div>
 
       <div className="jump-controls">
